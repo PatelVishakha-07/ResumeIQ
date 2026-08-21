@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sign in — ResumeIQ</title>
+<title>Create account — ResumeIQ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,560&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -21,6 +21,7 @@
           highlighter: '#F2C94C',
           correction: '#3B5BDB',
           correctiondark: '#2A44B8',
+          good: '#3C9A5F',
         },
         fontFamily: {
           display: ['"Fraunces"', 'serif'],
@@ -33,16 +34,18 @@
 </script>
 <style>
   html { -webkit-font-smoothing: antialiased; }
-  .mark-path { stroke-dasharray: 340; stroke-dashoffset: 340; animation: draw 1.4s 0.3s ease-out forwards; }
-  .mark-circle { stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 1.1s 0.7s ease-out forwards; }
-  .mark-check { stroke-dasharray: 40; stroke-dashoffset: 40; animation: draw 0.5s 1.4s ease-out forwards; }
+  .mark-path { stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 1.3s 0.3s ease-out forwards; }
+  .mark-circle { stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 1.1s 0.8s ease-out forwards; }
+  .mark-dot { opacity: 0; animation: pop 0.4s 1.5s ease-out forwards; }
   @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes pop { to { opacity: 1; } }
   .fade-up { opacity: 0; transform: translateY(8px); animation: fadeUp 0.6s ease-out forwards; }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
   @media (prefers-reduced-motion: reduce) {
-    .mark-path, .mark-circle, .mark-check, .fade-up { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; transform: none !important; }
+    .mark-path, .mark-circle, .mark-dot, .fade-up { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; transform: none !important; }
   }
   input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid #3B5BDB; outline-offset: 2px; }
+  .bar { transition: background-color .25s ease; }
 </style>
 </head>
 <body class="font-sans bg-paper">
@@ -54,14 +57,14 @@
     <div class="relative z-10">
       <p class="font-mono text-xs tracking-[0.25em] text-highlighter uppercase">ResumeIQ</p>
       <h1 class="font-display text-[2.15rem] sm:text-[2.65rem] leading-[1.08] mt-6 max-w-sm">
-        Every resume<br/>has a next draft.
+        Turn feedback<br/>into a stronger draft.
       </h1>
       <p class="font-sans text-sm text-graphitesoft mt-5 max-w-xs leading-relaxed">
-        Sign in to pick up where your last revision left off.
+        Create an account to get your first ATS score in minutes.
       </p>
     </div>
 
-    <!-- Signature illustration: annotated resume -->
+    <!-- Signature illustration: resume with upward score trend -->
     <div class="relative z-10 mt-12 hidden sm:block">
       <svg width="280" height="220" viewBox="0 0 280 220" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="18" y="10" width="180" height="200" rx="6" fill="#1D212B" stroke="#333844" stroke-width="1"/>
@@ -69,20 +72,19 @@
         <rect x="36" y="52" width="60" height="7" rx="2" fill="#2C303A"/>
         <rect x="36" y="80" width="144" height="6" rx="2" fill="#2C303A"/>
         <rect x="36" y="94" width="120" height="6" rx="2" fill="#2C303A"/>
-        <rect x="34" y="107" width="126" height="12" fill="#F2C94C" opacity="0.28"/>
-        <rect x="36" y="110" width="122" height="6" rx="2" fill="#3A3F4B"/>
-        <rect x="36" y="128" width="100" height="6" rx="2" fill="#2C303A"/>
-        <rect x="36" y="150" width="144" height="6" rx="2" fill="#2C303A"/>
-        <rect x="36" y="164" width="80" height="6" rx="2" fill="#2C303A"/>
+        <rect x="36" y="112" width="130" height="6" rx="2" fill="#2C303A"/>
+        <rect x="34" y="125" width="126" height="12" fill="#F2C94C" opacity="0.28"/>
+        <rect x="36" y="128" width="122" height="6" rx="2" fill="#3A3F4B"/>
+        <rect x="36" y="146" width="90" height="6" rx="2" fill="#2C303A"/>
 
-        <ellipse class="mark-circle" cx="88" cy="93" rx="58" ry="9" stroke="#F2C94C" stroke-width="1.6" fill="none"/>
-        <path class="mark-path" d="M210 60 C 230 60, 232 78, 214 82" stroke="#3B5BDB" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <circle cx="214" cy="82" r="2.5" fill="#3B5BDB"/>
+        <ellipse class="mark-circle" cx="88" cy="97" rx="58" ry="10" stroke="#F2C94C" stroke-width="1.6" fill="none"/>
 
-        <g transform="translate(206,140)">
-          <circle cx="18" cy="18" r="18" fill="#14171F" stroke="#3B5BDB" stroke-width="1.6"/>
-          <path class="mark-check" d="M10 18 L15.5 23.5 L26 12" stroke="#3B5BDB" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </g>
+        <!-- upward trend line -->
+        <path class="mark-path" d="M206 172 L222 158 L236 166 L256 138" stroke="#3B5BDB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle class="mark-dot" cx="206" cy="172" r="2.6" fill="#3B5BDB"/>
+        <circle class="mark-dot" cx="222" cy="158" r="2.6" fill="#3B5BDB"/>
+        <circle class="mark-dot" cx="236" cy="166" r="2.6" fill="#3B5BDB"/>
+        <circle class="mark-dot" cx="256" cy="138" r="3.2" fill="#F2C94C"/>
       </svg>
     </div>
 
@@ -94,10 +96,16 @@
   <!-- PAPER PANEL -->
   <div class="lg:col-span-3 flex items-center justify-center px-6 py-14 sm:px-10">
     <div class="w-full max-w-[380px] fade-up">
-      <h2 class="font-display text-3xl text-ink">Welcome back</h2>
-      <p class="text-graphite text-sm mt-2 mb-9">Sign in to continue improving your resume.</p>
+      <h2 class="font-display text-3xl text-ink">Create your account</h2>
+      <p class="text-graphite text-sm mt-2 mb-8">Free to start — no credit card needed.</p>
 
       <form class="space-y-5">
+        <div>
+          <label for="name" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">FULL NAME</label>
+          <input id="name" type="text" placeholder="Jordan Patel" autocomplete="name"
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+        </div>
+
         <div>
           <label for="email" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">EMAIL</label>
           <input id="email" type="email" placeholder="you@example.com" autocomplete="email"
@@ -109,21 +117,31 @@
             <label for="password" class="block text-xs font-medium tracking-wide text-graphite">PASSWORD</label>
             <button type="button" id="togglePw" class="text-xs text-graphite hover:text-correction transition-colors">Show</button>
           </div>
-          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password"
+          <input id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password"
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+          <div class="flex gap-1.5 mt-2.5" id="strengthBars">
+            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
+            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
+            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
+            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
+          </div>
+          <p id="strengthLabel" class="text-xs text-graphitesoft mt-1.5 font-mono">&nbsp;</p>
+        </div>
+
+        <div>
+          <label for="confirm" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">CONFIRM PASSWORD</label>
+          <input id="confirm" type="password" placeholder="Re-enter your password" autocomplete="new-password"
             class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
         </div>
 
-        <div class="flex items-center justify-between pt-1">
-          <label class="flex items-center gap-2 text-sm text-graphite cursor-pointer select-none">
-            <input type="checkbox" class="w-4 h-4 rounded-sm border-paperline text-correction focus:ring-correction accent-[#3B5BDB]" />
-            Remember me
-          </label>
-          <a href="#" class="text-sm text-correction hover:text-correctiondark">Forgot password?</a>
-        </div>
+        <label class="flex items-start gap-2.5 text-sm text-graphite cursor-pointer select-none pt-1">
+          <input type="checkbox" class="w-4 h-4 mt-0.5 rounded-sm border-paperline text-correction focus:ring-correction accent-[#3B5BDB]" />
+          <span>I agree to the <a href="#" class="text-correction hover:text-correctiondark">Terms</a> and <a href="#" class="text-correction hover:text-correctiondark">Privacy Policy</a></span>
+        </label>
 
         <button type="submit"
-          class="w-full bg-ink hover:bg-inksoft text-paper text-sm font-medium py-3 rounded-md transition-colors mt-2">
-          Sign in
+          class="w-full bg-ink hover:bg-inksoft text-paper text-sm font-medium py-3 rounded-md transition-colors mt-1">
+          Create account
         </button>
 
         <div class="flex items-center gap-3 py-1">
@@ -140,7 +158,7 @@
       </form>
 
       <p class="text-sm text-graphite mt-8">
-        New to ResumeIQ? <a href="{% url 'register' %}" class="text-correction hover:text-correctiondark font-medium">Create an account</a>
+        Already have an account? <a href="{% url 'login' %}" class="text-correction hover:text-correctiondark font-medium">Sign in</a>
       </p>
     </div>
   </div>
@@ -153,6 +171,26 @@
     const isPw = pwInput.type === 'password';
     pwInput.type = isPw ? 'text' : 'password';
     toggle.textContent = isPw ? 'Hide' : 'Show';
+  });
+
+  const bars = document.querySelectorAll('#strengthBars .bar');
+  const label = document.getElementById('strengthLabel');
+  const colors = ['#D64545', '#E0A23B', '#3B5BDB', '#3C9A5F'];
+  const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+
+  pwInput.addEventListener('input', () => {
+    const v = pwInput.value;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    bars.forEach((bar, i) => {
+      bar.style.backgroundColor = (v.length > 0 && i < score) ? colors[score - 1] : '';
+      if (!(v.length > 0 && i < score)) bar.classList.add('bg-paperline');
+      else bar.classList.remove('bg-paperline');
+    });
+    label.textContent = v.length > 0 ? labels[Math.max(score - 1, 0)] : '\u00A0';
   });
 </script>
 </body>
