@@ -1,0 +1,5 @@
+python manage.py startapp accounts
+python manage.py startapp accounts
+python manage.py makemigrations accounts
+
+create urls.py file inside accounts folder

@@ -85,11 +85,21 @@
       <h2 class="font-display text-3xl text-ink">Welcome back</h2>
       <p class="text-graphite text-sm mt-2 mb-9">Sign in to continue improving your resume.</p>
 
-      <form class="space-y-5">
+      <!-- To Show Error Message -->
+       {% if messages %}
+          <div class="mb-4">
+            {% for m in messages %}
+              <div class="alert alert-{{m.tags}}">  {{m}} </div>
+            {% endfor %}
+          </div>
+       {% endif %}
+
+      <form class="space-y-5" method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
         <div>
           <label for="email" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">EMAIL</label>
           <input id="email" type="email" placeholder="you@example.com" autocomplete="email"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="email" />
         </div>
 
         <div>
@@ -98,7 +108,7 @@
             <button type="button" id="togglePw" class="text-xs text-graphite hover:text-correction transition-colors">Show</button>
           </div>
           <input id="password" type="password" placeholder="••••••••" autocomplete="current-password"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="password" />
         </div>
 
         <div class="flex items-center justify-between pt-1">
