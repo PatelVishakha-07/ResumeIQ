@@ -2,4 +2,8 @@ python manage.py startapp accounts
 python manage.py startapp accounts
 python manage.py makemigrations accounts
 
+<<<<<<< HEAD
 create urls.py file inside accounts folder
+=======
+create urls.py file inside accounts folder
+>>>>>>> vishakha

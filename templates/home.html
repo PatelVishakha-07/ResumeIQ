@@ -51,8 +51,8 @@
       <span class="font-mono text-xs tracking-[0.25em] uppercase">ResumeIQ</span>
     </div>
     <nav class="flex items-center gap-6">
-      <a href="login.html" class="text-sm text-graphite hover:text-ink transition-colors hidden sm:inline">Sign in</a>
-      <a href="register.html" class="text-sm bg-ink hover:bg-inksoft text-paper px-4 py-2 rounded-md font-medium transition-colors">Create account</a>
+      <a href="{% url 'login' %}" class="text-sm text-graphite hover:text-ink transition-colors hidden sm:inline">Sign in</a>
+      <a href="{% url 'register' %}" class="text-sm bg-ink hover:bg-inksoft text-paper px-4 py-2 rounded-md font-medium transition-colors">Create account</a>
     </nav>
   </div>
 </header>
