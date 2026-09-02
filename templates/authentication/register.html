@@ -31,6 +31,8 @@
       },
     },
   }
+
+  
 </script>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -85,17 +87,27 @@
       <h2 class="font-display text-3xl text-ink">Create your account</h2>
       <p class="text-graphite text-sm mt-2 mb-8">Free to start — no credit card needed.</p>
 
-      <form class="space-y-5">
+      <!-- To Show Error Messages -->
+       {% if messages %}
+          <div class="mb-4">
+            {% for m in messages %}
+              <div class="alert alert-{{m.tags}}">  {{m}} </div>
+            {% endfor %}
+          </div>
+       {% endif %}
+
+      <form class="space-y-5" method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
         <div>
           <label for="name" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">FULL NAME</label>
           <input id="name" type="text" placeholder="Jordan Patel" autocomplete="name"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="name" />
         </div>
 
         <div>
           <label for="email" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">EMAIL</label>
           <input id="email" type="email" placeholder="you@example.com" autocomplete="email"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="email" />
         </div>
 
         <div>
@@ -104,7 +116,7 @@
             <button type="button" id="togglePw" class="text-xs text-graphite hover:text-correction transition-colors">Show</button>
           </div>
           <input id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="password" />
           <div class="flex gap-1.5 mt-2.5" id="strengthBars">
             <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
             <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
@@ -117,7 +129,7 @@
         <div>
           <label for="confirm" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">CONFIRM PASSWORD</label>
           <input id="confirm" type="password" placeholder="Re-enter your password" autocomplete="new-password"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" />
+            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="confirm_password" />
         </div>
 
         <label class="flex items-start gap-2.5 text-sm text-graphite cursor-pointer select-none pt-1">
