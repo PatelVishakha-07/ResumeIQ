@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'resumeiq',
         'USER': 'root',
-        'PASSWORD': '2002',
+        'PASSWORD': '2004',
         'HOST': 'localhost',
         'PORT': '3306'
     }

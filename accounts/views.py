@@ -30,7 +30,8 @@ def register_view(request):
         user = User(
             name = name,
             email = email,
-            password = make_password(password)
+            password = make_password(password),
+            role = "user",
         )
         user.save()
 
