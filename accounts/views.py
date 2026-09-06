@@ -79,7 +79,14 @@ def login_view(request):
         request.session["role"] = user.role
 
         messages.success(request, "Login Successfull")
-        return redirect("dashboard")
+        return redirect("home")
 
 
     return render(request, "authentication/login.html")
+
+
+#logout view
+def logout_view(request):
+    request.session.flush()
+    messages.success(request, "You have logged out.")
+    return redirect("home")

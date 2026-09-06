@@ -11,7 +11,7 @@ class User(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField( max_length=100, unique=True)
     password = models.CharField(max_length=255, null=True, blank=True)
-    role = models.CharField(max_length=10, choices=role_choices, default='admin')
+    role = models.CharField(max_length=10, choices=role_choices, default='user')
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -19,7 +19,7 @@ class User(models.Model):
     class Meta:
         db_table = 'user'
 
-    def __Str__(self):
+    def __str__(self):
         return self.email
 
     
