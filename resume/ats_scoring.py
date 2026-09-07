@@ -77,6 +77,8 @@ def score_sections(found_section):
     total = len(section_keywords)
     return round(len(found_section) / total*100, 2)
 
+bullet_re = re.compile(r'^[•\-*\u2022\u25CF]')
+
 def score_formatting(text, has_tables):
     score = 100.0
     word_count = len(text.split())
@@ -89,10 +91,10 @@ def score_formatting(text, has_tables):
     if has_tables:
         score -= 20
 
-    lines = [l.strip for l in text.splitlines() if l.strip()]
+    lines = [str(l).strip() for l in text.splitlines() if l and str(l).strip()]
 
     if lines:
-        bullet_lines = sum(1 for l in lines if re.match(r'^[•\-\*\u2022\u25CF]', l))
+        bullet_lines = sum(1 for l in lines if bullet_re.match(l))
         if bullet_lines / len(lines) < 0.05:
             score -= 10
 
@@ -145,3 +147,59 @@ def score_keyword_match(resume_text, jd_text):
 
     return match_pct, missing[:15]
 
+def baselinekeyword_score(text):
+    words = set(re.findall(r"[a-z]+", text.lower()))
+    hits = len(words & action_verbs)
+
+    return round(min(100.0, 40 + hits * 6), 2)
+
+#grammar and passive voice check
+passive_re = re.compile(r'\b(is|are|was|were|be|been|being)\s+\w+ed\b', re.IGNORECASE)  
+
+def detect_passive_voice(text):
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    flags = [s.strip() for s in sentences if passive_re.search(s)]
+
+    return flags[:10]
+
+def detect_grammar_issues(text):
+    issues = []
+    if re.search(r'\b(\w+)\s+\1\b', text, re.IGNORECASE):
+        issues.append('Possible repeated word detected.')    
+
+    long_sentences = [s for s in re.split(r'(?<=[.!?])\s+', text) if len(s.split()) > 40]
+
+    if long_sentences:
+        issues.append(f'{len(long_sentences)} sentence(s) longer than 40 words — consider shortening.')
+
+    if re.search(r' +',text):
+        issues.append('Inconsistent spacing detected (double spaces).')
+
+    return issues
+
+def compute_ats_score(resume_text, jd_text=None, has_tables = False):
+    found_sections, missing_sections = detect_section(resume_text)
+    section_score = score_sections(found_sections)
+    formatting_score = score_formatting(resume_text, has_tables)
+
+    if jd_text:
+        keyword_score, missing_keywords = score_keyword_match(resume_text, jd_text)
+        w_format, w_section, w_keyword = 0.25, 0.25, 0.50
+
+    else:
+        keyword_score = baselinekeyword_score(resume_text)
+        missing_keywords = []
+        w_format, w_section, w_keyword = 0.35, 0.35, 0.30
+
+    ats_score = round(formatting_score * w_format + section_score * w_section + keyword_score * w_keyword)
+
+    return {
+        'ats_score': ats_score,
+        'formatting_score': formatting_score,
+        'section_score': section_score,
+        'keyword_match': keyword_score,
+        'missing_keywords': missing_keywords,
+        'missing_sections': missing_sections,
+        'grammar_issues': detect_grammar_issues(resume_text),
+        'passive_voice_flags': detect_passive_voice(resume_text)
+    }
