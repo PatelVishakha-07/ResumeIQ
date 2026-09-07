@@ -113,7 +113,8 @@
           <span id="btnLabel">Get my ATS score</span>
           <svg id="btnSpinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#F5F3EE" stroke-width="1.6" opacity="0.3"/><path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="#F5F3EE" stroke-width="1.6" stroke-linecap="round"/></svg>
         </button>
-        <p class="text-xs text-graphitesoft text-center mt-3">No account needed to see your score.</p>
+        <p id="uploadError" class="hidden text-xs text-bad text-center mt-3"></p>
+        <p id="noAccountNote" class="text-xs text-graphitesoft text-center mt-3">No account needed to see your score.</p>
 
       </div>
     </div>
@@ -181,7 +182,7 @@
               </div>
               <div class="border border-paperline rounded-md p-4 bg-paper">
                 <p class="text-xs font-mono text-graphite uppercase mb-2">Missing keywords</p>
-                <p class="text-sm text-ink">stakeholder management, CI/CD, cross-functional, roadmap ownership, A/B testing</p>
+                <p id="missingKeywordsPreview" class="text-sm text-ink">stakeholder management, CI/CD, cross-functional, roadmap ownership, A/B testing</p>
               </div>
               <div class="border border-paperline rounded-md p-4 bg-paper">
                 <p class="text-xs font-mono text-graphite uppercase mb-2">3 bullet points to rewrite</p>
@@ -277,6 +278,7 @@
     dropZone.classList.remove('hidden');
     scoreBtn.disabled = true;
     results.classList.remove('show');
+    document.getElementById('uploadError').classList.add('hidden');
   });
 
   function verdictFor(score) {
@@ -285,59 +287,108 @@
     return ['Significant gaps', '#D64545'];
   }
 
-  scoreBtn.addEventListener('click', () => {
+  function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
+  }
+
+  const uploadError = document.getElementById('uploadError');
+  function showError(message) {
+    uploadError.textContent = message;
+    uploadError.classList.remove('hidden');
+  }
+  function clearError() {
+    uploadError.classList.add('hidden');
+    uploadError.textContent = '';
+  }
+
+  function renderScore(data) {
+    const score = Math.round(data.ats_score);
+    const keyword = Math.round(data.keyword_match);
+    const format = Math.round(data.formatting_score);
+    const section = Math.round(data.section_score);
+
+    const circumference = 2 * Math.PI * 100; // 628.3
+    const dialFill = document.getElementById('dialFill');
+    dialFill.style.strokeDasharray = circumference;
+    dialFill.style.strokeDashoffset = circumference; // start empty
+    requestAnimationFrame(() => {
+      dialFill.style.strokeDashoffset = circumference * (1 - score / 100);
+    });
+
+    const [verdictText, verdictColor] = verdictFor(score);
+    document.getElementById('scoreVerdict').textContent = verdictText;
+    document.getElementById('scoreVerdict').style.color = verdictColor;
+    dialFill.setAttribute('stroke', verdictColor);
+
+    // animate number
+    let current = 0;
+    const numEl = document.getElementById('scoreNum');
+    const step = () => {
+      current += Math.max(1, Math.round((score - current) / 6));
+      if (current >= score) { current = score; }
+      numEl.textContent = current;
+      if (current < score) requestAnimationFrame(step);
+    };
+    step();
+
+    document.getElementById('statKeyword').textContent = keyword + '%';
+    document.getElementById('statFormat').textContent = format + '%';
+    document.getElementById('statSection').textContent = section + '%';
+
+    const missingKeywordsPreview = document.getElementById('missingKeywordsPreview');
+    if (data.missing_keywords && data.missing_keywords.length) {
+      missingKeywordsPreview.textContent = data.missing_keywords.join(', ');
+    }
+
+    results.classList.add('show');
+    requestAnimationFrame(() => {
+      document.getElementById('barKeyword').style.width = keyword + '%';
+      document.getElementById('barFormat').style.width = format + '%';
+      document.getElementById('barSection').style.width = section + '%';
+    });
+
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  scoreBtn.addEventListener('click', async () => {
+    clearError();
+    const file = fileInput.files[0];
+    if (!file) {
+      showError('Please choose a resume file first.');
+      return;
+    }
+
     btnLabel.textContent = 'Analyzing…';
     btnSpinner.classList.remove('hidden');
     scoreBtn.disabled = true;
 
-    setTimeout(() => {
-      // Deterministic-ish mock score generation (client-side placeholder for real ATS engine)
-      const score = 58 + Math.floor(Math.random() * 30); // 58–87
-      const keyword = Math.max(30, score - 12 + Math.floor(Math.random() * 10));
-      const format = Math.min(98, score + 8);
-      const section = Math.min(95, score - 3 + Math.floor(Math.random() * 8));
+    const formData = new FormData();
+    formData.append('resume', file);
+    formData.append('jd', document.getElementById('jd').value || '');
 
-      const circumference = 2 * Math.PI * 100; // 628.3
-      const dialFill = document.getElementById('dialFill');
-      dialFill.style.strokeDasharray = circumference;
-      dialFill.style.strokeDashoffset = circumference; // start empty
-      requestAnimationFrame(() => {
-        dialFill.style.strokeDashoffset = circumference * (1 - score / 100);
+    try {
+      const response = await fetch('/resume/analyze/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: formData,
       });
 
-      const [verdictText, verdictColor] = verdictFor(score);
-      document.getElementById('scoreVerdict').textContent = verdictText;
-      document.getElementById('scoreVerdict').style.color = verdictColor;
-      dialFill.setAttribute('stroke', verdictColor);
+      const data = await response.json();
 
-      // animate number
-      let current = 0;
-      const numEl = document.getElementById('scoreNum');
-      const step = () => {
-        current += Math.max(1, Math.round((score - current) / 6));
-        if (current >= score) { current = score; }
-        numEl.textContent = current;
-        if (current < score) requestAnimationFrame(step);
-      };
-      step();
+      if (!response.ok) {
+        showError(data.error || 'Something went wrong while analyzing your resume.');
+        return;
+      }
 
-      document.getElementById('statKeyword').textContent = keyword + '%';
-      document.getElementById('statFormat').textContent = format + '%';
-      document.getElementById('statSection').textContent = section + '%';
-
-      results.classList.add('show');
-      requestAnimationFrame(() => {
-        document.getElementById('barKeyword').style.width = keyword + '%';
-        document.getElementById('barFormat').style.width = format + '%';
-        document.getElementById('barSection').style.width = section + '%';
-      });
-
+      renderScore(data);
       btnLabel.textContent = 'Re-check score';
+    } catch (err) {
+      showError("Couldn't reach the server. Please try again.");
+    } finally {
       btnSpinner.classList.add('hidden');
       scoreBtn.disabled = false;
-
-      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 1400);
+    }
   });
 </script>
 </body>
