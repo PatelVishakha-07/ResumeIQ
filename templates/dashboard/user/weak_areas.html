@@ -1,0 +1,15 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Weak Areas — ResumeIQ{% endblock %}
+{% block page_title %}Weak Areas{% endblock %}
+{% block page_desc %}Topics where you consistently underperform — prioritised in future practice sessions.{% endblock %}
+
+{% block content %}
+<div class="card">
+  <ul class="plain">
+    <li>System design — distributed caching <span class="badge bad">3 misses</span></li>
+    <li>Postgres indexing strategy <span class="badge bad">2 misses</span></li>
+    <li>Behavioural — conflict resolution <span class="badge warn">1 miss</span></li>
+  </ul>
+</div>
+{% endblock %}

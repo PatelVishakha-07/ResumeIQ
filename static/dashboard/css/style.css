@@ -1,0 +1,190 @@
+/* ===========================================================
+   ResumeIQ — shared stylesheet
+   Design system matched to the marketing site (home + auth
+   pages): cream paper, near-black ink, indigo + amber accent,
+   serif display headlines, monospace UI chrome.
+   Used by every page in both /user and /admin.
+=========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --ink:#14171A;          /* near-black — headings, buttons, sidebar panel */
+  --paper:#F5F3EC;        /* page background, warm off-white (matches home page) */
+  --paper-raised:#FFFFFF; /* card background */
+  --card-tint:#F1EEE4;    /* secondary card tint, e.g. dropzone */
+  --line:#DEDACC;         /* hairline borders */
+  --blue:#3852E3;         /* primary accent — links, active nav, primary data */
+  --blue-dim:#E8EAFB;
+  --amber:#C99A3E;        /* secondary accent — highlights, warnings */
+  --amber-dim:#F6ECDA;
+  --rust:#B5482F;         /* negative / issues */
+  --rust-dim:#F5E4DE;
+  --muted:#83806F;        /* warm muted gray for supporting text */
+  --white:#FFFFFF;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+}
+
+h1,h2,h3{
+  font-family:'Source Serif 4', serif;
+  margin:0;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+
+/* small-caps / mono UI chrome — brand mark, nav, labels, tags,
+   table headers — mirrors the monospace treatment used for
+   "RESUMEIQ", eyebrow labels and form labels on the marketing site */
+.mono-label{
+  font-family:'IBM Plex Mono', monospace;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+}
+
+/* ---------------------------------------------------------
+   Layout shell — identical on every page
+--------------------------------------------------------- */
+.app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:250px; flex-shrink:0; background:var(--ink); color:var(--paper);
+  display:flex; flex-direction:column; padding:28px 0;
+  border-right:1px solid rgba(255,255,255,0.06);
+}
+
+.brand{padding:0 24px 24px; border-bottom:1px solid rgba(255,255,255,0.12); margin-bottom:16px; display:flex; align-items:center; gap:10px;}
+.brand .mark-icon{width:22px; height:22px; flex-shrink:0; border:1.5px solid var(--paper); border-radius:4px; display:flex; align-items:center; justify-content:center;}
+.brand .mark-icon::after{content:""; width:10px; height:2px; background:var(--paper); box-shadow:0 4px 0 var(--paper), 0 -4px 0 var(--paper);}
+.brand .mark{font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase;}
+.brand .sub{font-family:'Inter',sans-serif; font-size:11.5px; color:#A9A692; margin-top:3px; letter-spacing:0.01em;}
+.brand-text{display:flex; flex-direction:column;}
+
+/* switcher between the two sections, rendered by layout.js / sidebar.html */
+.role-switch{display:flex; margin:0 24px 20px; background:rgba(255,255,255,0.07); border-radius:8px; padding:3px;}
+.role-switch a{flex:1; text-align:center; text-decoration:none; color:#B4B1A0; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; padding:8px 0; border-radius:6px;}
+.role-switch a.active{background:var(--paper); color:var(--ink);}
+
+.navgroup{padding:0 14px; margin-bottom:6px;}
+.navlabel{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.1em; color:#8B8874; padding:10px 10px 6px;}
+.navitem{border-radius:7px; margin-bottom:2px;}
+.navitem a{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:7px; font-size:13.5px; color:#D7D4C4; text-decoration:none;}
+.navitem a:hover{background:rgba(255,255,255,0.06);}
+.navitem.active a{background:var(--blue); color:#fff;}
+.navitem .dot{width:5px; height:5px; border-radius:50%; background:currentColor; opacity:0.6; flex-shrink:0;}
+
+.main{flex:1; padding:32px 40px 60px; max-width:1180px;}
+
+.topbar{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px;}
+.topbar h1{font-size:27px;}
+.topbar .desc{color:var(--muted); font-size:14px; margin-top:6px; max-width:520px;}
+.who{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+.who .avatar{width:32px;height:32px;border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Source Serif 4',serif; font-weight:600;}
+
+/* ---------------------------------------------------------
+   Shared components — used across every page
+--------------------------------------------------------- */
+.grid{display:grid; gap:18px;}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-2{grid-template-columns:1.3fr 1fr;}
+.grid.cols-2b{grid-template-columns:1fr 1fr;}
+
+.card{background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; padding:20px;}
+.card h3{font-size:16px; margin-bottom:4px;}
+.card .hint{font-size:12.5px; color:var(--muted); margin-bottom:14px;}
+.card-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2px;}
+
+/* emphasis card — thick ink border, used for hero / primary actions,
+   mirrors the bordered upload card on the home page */
+.card.emphasis{border:2px solid var(--ink); border-radius:16px;}
+
+.eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--blue); margin-bottom:10px; display:block;}
+
+.badge{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:0.03em; padding:3px 9px; border-radius:20px;}
+.badge.good{background:var(--blue-dim); color:var(--blue);}
+.badge.warn{background:var(--amber-dim); color:var(--amber);}
+.badge.bad{background:var(--rust-dim); color:var(--rust);}
+
+.score-row{display:flex; align-items:center; gap:20px;}
+.ring{position:relative; width:96px; height:96px; flex-shrink:0;}
+.ring svg{transform:rotate(-90deg);}
+.ring .num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Source Serif 4',serif; font-size:22px; font-weight:600;}
+.score-meta{font-size:13px; color:var(--muted); line-height:1.5;}
+
+.bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
+.bar-row .label{width:150px; flex-shrink:0; color:var(--ink);}
+.bar-track{flex:1; height:8px; background:var(--line); border-radius:6px; overflow:hidden;}
+.bar-fill{height:100%; border-radius:6px; background:var(--blue);}
+.bar-row .val{width:38px; text-align:right; color:var(--muted); font-variant-numeric:tabular-nums; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+
+ul.plain{list-style:none; margin:0; padding:0;}
+ul.plain li{padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px; display:flex; justify-content:space-between; gap:10px;}
+ul.plain li:last-child{border-bottom:none;}
+
+.tag{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:3px 8px; border-radius:20px; background:var(--amber-dim); color:var(--amber); margin-right:6px;}
+.tag.missing{background:var(--rust-dim); color:var(--rust);}
+
+.before-after{display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:13px;}
+.ba-block{padding:12px; border-radius:8px;}
+.ba-block.before{background:var(--rust-dim);}
+.ba-block.after{background:var(--blue-dim);}
+.ba-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; opacity:0.8;}
+
+.btn{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:10px 18px; border-radius:8px; border:1px solid var(--ink); background:var(--ink); color:#fff; cursor:pointer;}
+.btn.ghost{background:none; color:var(--ink); border:1px solid var(--line);}
+.btn.sm{padding:7px 13px; font-size:12.5px;}
+.btn-row{display:flex; gap:10px; flex-wrap:wrap;}
+
+input[type=text], input[type=file], select, textarea{
+  width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:7px; font-family:'Inter',sans-serif; font-size:13.5px; background:#fff; color:var(--ink);
+}
+label.field{font-family:'IBM Plex Mono',monospace; display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; color:var(--muted);}
+.field-group{margin-bottom:14px;}
+.row-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+/* underline-style inputs — mirrors the auth form on the login page */
+.field-underline input, .field-underline textarea{
+  border:none; border-bottom:1px solid var(--line); border-radius:0; padding:8px 2px; background:transparent;
+}
+.field-underline input:focus, .field-underline textarea:focus{outline:none; border-bottom-color:var(--ink);}
+
+/* dropzone — mirrors the "Drag & drop your resume here" card on the home page */
+.dropzone{
+  border:1.5px dashed var(--line); border-radius:10px; padding:44px 20px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:6px; background:var(--card-tint);
+}
+.dropzone .upload-icon{width:26px; height:26px; margin-bottom:6px; color:var(--blue);}
+.dropzone .dz-title{font-weight:600; font-size:14.5px;}
+.dropzone .dz-sub{font-size:12.5px; color:var(--muted);}
+.dropzone .dz-sub a{color:var(--blue); text-decoration:underline;}
+
+table{width:100%; border-collapse:collapse; font-size:13.5px;}
+th{font-family:'IBM Plex Mono',monospace; text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line);}
+td{padding:10px 10px; border-bottom:1px solid var(--line);}
+tr:last-child td{border-bottom:none;}
+.status-pill{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:20px;}
+.status-pill.active{background:var(--blue-dim); color:var(--blue);}
+.status-pill.inactive{background:var(--line); color:var(--muted);}
+
+.trend{display:flex; align-items:flex-end; gap:6px; height:70px; margin-top:6px;}
+.trend .col{flex:1; background:var(--blue); border-radius:3px 3px 0 0; opacity:0.8;}
+.trend .col.now{opacity:1; background:var(--ink);}
+
+.quote{font-family:'Source Serif 4',serif; font-style:italic; font-size:14px; color:var(--ink); line-height:1.5;}
+
+.divider{height:1px; background:var(--line); margin:18px 0;}
+
+@media (max-width: 900px){
+  .app{flex-direction:column;}
+  .sidebar{width:100%; flex-direction:row; flex-wrap:wrap; overflow-x:auto; padding:16px;}
+  .grid.cols-3, .grid.cols-2, .grid.cols-2b{grid-template-columns:1fr;}
+  .main{padding:20px;}
+}
