@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Version History — ResumeIQ{% endblock %}
+{% block page_title %}Resume Version History{% endblock %}
+{% block page_desc %}Every uploaded version, with score trend across revisions.{% endblock %}
+
+{% block content %}
+<div class="card">
+  <table>
+    <tr><th>Version</th><th>Uploaded</th><th>ATS Score</th><th>JD Match</th><th></th></tr>
+    <tr><td>v5</td><td>2 days ago</td><td>79</td><td>54%</td><td><a href="#">View</a></td></tr>
+    <tr><td>v4</td><td>1 week ago</td><td>70</td><td>—</td><td><a href="#">View</a></td></tr>
+    <tr><td>v3</td><td>3 weeks ago</td><td>56</td><td>—</td><td><a href="#">View</a></td></tr>
+    <tr><td>v2</td><td>5 weeks ago</td><td>48</td><td>—</td><td><a href="#">View</a></td></tr>
+    <tr><td>v1</td><td>7 weeks ago</td><td>38</td><td>—</td><td><a href="#">View</a></td></tr>
+  </table>
+</div>
+{% endblock %}

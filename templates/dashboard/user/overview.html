@@ -1,0 +1,63 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Overview — ResumeIQ{% endblock %}
+{% block page_title %}Welcome back, Aisha{% endblock %}
+{% block page_desc %}Here's where your resume and interview readiness stand today.{% endblock %}
+
+{% block content %}
+<div class="grid cols-3" style="margin-bottom:18px;">
+  <div class="card">
+    <div class="card-head"><h3>ATS Compatibility</h3><span class="badge good">Improving</span></div>
+    <div class="score-row">
+      <div class="ring">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="#D9D4C4" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="#2F6F4E" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="55"/></svg>
+        <div class="num">79</div>
+      </div>
+      <div class="score-meta">Up 12 points since v1.<br>3 formatting issues remain.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>JD Match</h3><span class="badge warn">6 gaps</span></div>
+    <div class="score-row">
+      <div class="ring">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="#D9D4C4" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="#C98A3E" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="121"/></svg>
+        <div class="num">54%</div>
+      </div>
+      <div class="score-meta">Against "Backend Engineer, Series B startup".<br>6 keywords missing.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Interview Readiness</h3><span class="badge good">On track</span></div>
+    <div class="score-row">
+      <div class="ring">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="#D9D4C4" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="#2F6F4E" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="87"/></svg>
+        <div class="num">67</div>
+      </div>
+      <div class="score-meta">Based on 4 practice tests.<br>Weakest: system design.</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid cols-2">
+  <div class="card">
+    <h3>Score trend across resume versions</h3>
+    <div class="hint">ATS score by version, most recent on the right</div>
+    <div class="trend">
+      <div class="col" style="height:38%"></div>
+      <div class="col" style="height:48%"></div>
+      <div class="col" style="height:56%"></div>
+      <div class="col" style="height:70%"></div>
+      <div class="col now" style="height:88%"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Suggested next step</h3>
+    <p class="quote">"Your Experience section still has 4 bullet points without measurable outcomes — rewriting these is the fastest way to raise your score."</p>
+    <div class="divider"></div>
+    <div class="btn-row">
+      <a class="btn sm" href="{% url 'dashboard:user_bullet_rewriter' %}" style="text-decoration:none;">Open Bullet Rewriter</a>
+      <button class="btn ghost sm">Dismiss</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

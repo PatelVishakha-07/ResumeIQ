@@ -1,0 +1,14 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Feedback — ResumeIQ{% endblock %}
+{% block page_title %}Feedback{% endblock %}
+{% block page_desc %}Tell us what's working and what isn't.{% endblock %}
+
+{% block content %}
+<div class="card emphasis" style="max-width:520px;">
+  <span class="eyebrow">We read every note</span>
+  <div class="field-group field-underline"><label class="field">Category</label><select><option>Bug report</option><option>Feature request</option><option selected>General feedback</option></select></div>
+  <div class="field-group field-underline"><label class="field">Your message</label><textarea rows="4" placeholder="Share your thoughts..."></textarea></div>
+  <button class="btn">Submit feedback</button>
+</div>
+{% endblock %}

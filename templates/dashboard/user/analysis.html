@@ -1,0 +1,36 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Resume Analysis — ResumeIQ{% endblock %}
+{% block page_title %}Resume Analysis{% endblock %}
+{% block page_desc %}ATS score, grammar/tone, quantification, and section-completeness checks for v5.{% endblock %}
+
+{% block content %}
+<div class="grid cols-2b" style="margin-bottom:18px;">
+  <div class="card">
+    <h3>Section completeness</h3>
+    <div class="bar-row"><div class="label">Summary</div><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><div class="val">90%</div></div>
+    <div class="bar-row"><div class="label">Experience</div><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div><div class="val">74%</div></div>
+    <div class="bar-row"><div class="label">Skills</div><div class="bar-track"><div class="bar-fill" style="width:96%"></div></div><div class="val">96%</div></div>
+    <div class="bar-row"><div class="label">Education</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="val">100%</div></div>
+    <div class="bar-row"><div class="label">Projects</div><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div><div class="val">58%</div></div>
+  </div>
+  <div class="card">
+    <h3>Grammar &amp; tone</h3>
+    <ul class="plain">
+      <li>Passive voice <span class="badge warn">5 instances</span></li>
+      <li>Weak phrasing <span class="badge warn">3 instances</span></li>
+      <li>Spelling &amp; grammar <span class="badge good">Clean</span></li>
+      <li>Tense consistency <span class="badge good">Clean</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Improvement suggestions</h3>
+  <ul class="plain">
+    <li>Quantify impact in "Led migration to microservices" <span class="badge bad">No metric</span></li>
+    <li>Projects section missing a live link or repo <span class="badge warn">Missing</span></li>
+    <li>Summary reads generic — tie it to target role <span class="badge warn">Suggested</span></li>
+  </ul>
+</div>
+{% endblock %}
