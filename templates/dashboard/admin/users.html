@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Manage Users — ResumeIQ Admin{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+{% block page_desc %}Create, activate, deactivate, or remove job-seeker accounts.{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="field-group" style="max-width:320px;"><input type="text" placeholder="Search users..."></div>
+  <table>
+    <tr><th>Name</th><th>Email</th><th>Resumes</th><th>Status</th><th></th></tr>
+    <tr><td>Aisha Rahman</td><td>aisha@mail.edu</td><td>5</td><td><span class="status-pill active">Active</span></td><td><a href="#">Deactivate</a></td></tr>
+    <tr><td>Marcus Lee</td><td>marcus@mail.edu</td><td>2</td><td><span class="status-pill active">Active</span></td><td><a href="#">Deactivate</a></td></tr>
+    <tr><td>Priya Nair</td><td>priya@mail.edu</td><td>3</td><td><span class="status-pill inactive">Inactive</span></td><td><a href="#">Activate</a></td></tr>
+  </table>
+  <div class="btn-row" style="margin-top:14px;"><button class="btn sm">+ Add user</button></div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Admin / Staff Roles — ResumeIQ Admin{% endblock %}
+{% block page_title %}Admin / Staff Access Roles{% endblock %}
+{% block page_desc %}Assign or revoke administrative permissions for other T&amp;P staff members.{% endblock %}
+
+{% block content %}
+<div class="card">
+  <table>
+    <tr><th>Staff member</th><th>Role</th><th>Permissions</th><th></th></tr>
+    <tr><td>Dr. Sana Iqbal</td><td>T&amp;P Head</td><td>Full access</td><td><a href="#">Edit</a></td></tr>
+    <tr><td>Rahul Verma</td><td>Coordinator</td><td>Reports, Users</td><td><a href="#">Edit</a></td></tr>
+  </table>
+  <div class="btn-row" style="margin-top:14px;"><button class="btn sm">+ Invite staff member</button></div>
+</div>
+{% endblock %}
