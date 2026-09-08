@@ -1,0 +1,34 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Dashboard & Analytics — ResumeIQ Admin{% endblock %}
+{% block page_title %}Platform overview{% endblock %}
+{% block page_desc %}Usage and performance metrics across all Job Seeker accounts.{% endblock %}
+
+{% block content %}
+<div class="grid cols-3" style="margin-bottom:18px;">
+  <div class="card"><h3>Active users</h3><div style="font-family:'Source Serif 4',serif;font-size:32px;margin-top:6px;">1,284</div><div class="hint">+96 this month</div></div>
+  <div class="card"><h3>Resumes analysed</h3><div style="font-family:'Source Serif 4',serif;font-size:32px;margin-top:6px;">3,910</div><div class="hint">Avg. ATS score 68</div></div>
+  <div class="card"><h3>Tests completed</h3><div style="font-family:'Source Serif 4',serif;font-size:32px;margin-top:6px;">2,207</div><div class="hint">Avg. score 71 / 100</div></div>
+</div>
+
+<div class="grid cols-2">
+  <div class="card">
+    <h3>Average ATS score by batch</h3>
+    <div class="trend">
+      <div class="col" style="height:52%"></div>
+      <div class="col" style="height:58%"></div>
+      <div class="col" style="height:65%"></div>
+      <div class="col" style="height:60%"></div>
+      <div class="col now" style="height:72%"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Most common weak areas platform-wide</h3>
+    <ul class="plain">
+      <li>Un-quantified bullet points <span class="badge bad">41%</span></li>
+      <li>Missing Projects section <span class="badge warn">27%</span></li>
+      <li>Weak summary section <span class="badge warn">19%</span></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

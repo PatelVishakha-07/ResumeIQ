@@ -1,0 +1,25 @@
+<nav class="sidebar">
+  <div class="brand">
+    <div class="mark-icon"></div>
+    <div class="brand-text">
+      <div class="mark">ResumeIQ</div>
+      <div class="sub">{{ nav.brand_sub }}</div>
+    </div>
+  </div>
+
+  <div class="role-switch">
+    <a href="{% url 'dashboard:user_overview' %}" class="{% if role == 'user' %}active{% endif %}">Job Seeker</a>
+    <a href="{% url 'dashboard:admin_overview' %}" class="{% if role == 'admin' %}active{% endif %}">Admin</a>
+  </div>
+
+  {% for group in nav.groups %}
+  <div class="navgroup">
+    <div class="navlabel">{{ group.label }}</div>
+    {% for item in group.items %}
+    <div class="navitem {% if item.url_name == active_url_name %}active{% endif %}">
+      <a href="{% url item.url_name %}"><span class="dot"></span>{{ item.label }}</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</nav>
