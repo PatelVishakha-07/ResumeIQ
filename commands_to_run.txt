@@ -1,4 +1,10 @@
 python manage.py startapp accounts
-python manage.py startapp accounts
 python manage.py makemigrations accounts
+
 python manage.py migrate
+
+
+create urls.py file inside accounts folder
+
+pip install openai pymupdf python-docx python-dotenv
+
