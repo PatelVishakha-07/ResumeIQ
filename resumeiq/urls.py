@@ -7,10 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home_view, name = 'home'),
     path('accounts/', include("accounts.urls")),
-
     path('resume/', include('resume.urls')),
-
-    path("dashboard/", dashboard_redirect, name ="dashboard"),
     path('dashboard/', include("dashboard.urls")),
 
 ]
