@@ -81,7 +81,7 @@ def login_view(request):
         request.session["role"] = user.role
 
         messages.success(request, "Login Successfull")
-        return redirect("home")
+        return redirect("dashboard")
 
 
     return render(request, "authentication/login.html")

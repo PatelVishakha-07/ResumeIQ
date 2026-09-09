@@ -1,0 +1,66 @@
+<aside class="sidebar">
+  <div class="brand">
+    <div class="mark-icon"></div>
+    <div class="brand-text">
+      <div class="mark">ResumeIQ</div>
+      <div class="sub">{% if nav.role == 'admin' %}Admin{% else %}Job seeker{% endif %} workspace</div>
+    </div>
+  </div>
+
+  {% if nav.role == 'admin' %}
+
+    <div class="navgroup">
+      <div class="navlabel">Admin</div>
+
+      <div class="navitem {% if request.resolver_match.url_name == 'admin_overview' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Platform overview</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Users</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'admin_resumes' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Resumes</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'admin_job_descriptions' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Job descriptions</a>
+      </div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navlabel">Account</div>
+      <div class="navitem {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Settings</a>
+      </div>
+    </div>
+
+  {% else %}
+
+    <div class="navgroup">
+      <div class="navlabel">Workspace</div>
+
+      <div class="navitem {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Overview</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'my_resumes' %}active{% endif %}">
+        <a href=""><span class="dot"></span>My resumes</a>
+      </div>
+      <div class="navitem">
+        <a href=""><span class="dot"></span>Check ATS score</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'jd_match' %}active{% endif %}">
+        <a href=""><span class="dot"></span>JD match</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'interview_prep' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Interview prep</a>
+      </div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navlabel">Account</div>
+      <div class="navitem {% if request.resolver_match.url_name == 'account_settings' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Settings</a>
+      </div>
+    </div>
+
+  {% endif %}
+</aside>

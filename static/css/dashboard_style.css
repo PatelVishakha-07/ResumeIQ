@@ -1,11 +1,3 @@
-/* ===========================================================
-   ResumeIQ — shared stylesheet
-   Design system matched to the marketing site (home + auth
-   pages): cream paper, near-black ink, indigo + amber accent,
-   serif display headlines, monospace UI chrome.
-   Used by every page in both /user and /admin.
-=========================================================== */
-
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root{
@@ -40,9 +32,6 @@ h1,h2,h3{
   letter-spacing:-0.01em;
 }
 
-/* small-caps / mono UI chrome — brand mark, nav, labels, tags,
-   table headers — mirrors the monospace treatment used for
-   "RESUMEIQ", eyebrow labels and form labels on the marketing site */
 .mono-label{
   font-family:'IBM Plex Mono', monospace;
   text-transform:uppercase;

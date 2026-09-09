@@ -44,8 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'resume',
-
-    'dashboard'
+    'dashboard',
 
 ]
 
@@ -86,11 +85,11 @@ WSGI_APPLICATION = 'resumeiq.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'resumeiq',
-        'USER': 'root',
-        'PASSWORD': '2002',
-        'HOST': 'localhost',
-        'PORT': '3306'
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD': os.getenv("PASSWORD"),
+        'HOST': os.getenv("HOST"),
+        'PORT': os.getenv("PORT"),
     }
 }
 
@@ -132,6 +131,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Uploaded resume files (Resume.file_path in the data dictionary)
 MEDIA_URL = 'media/'
