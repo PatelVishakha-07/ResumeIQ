@@ -23,6 +23,7 @@ min_text_length = 30
 
 @require_http_methods(['POST'])
 def analyze_resume(request):
+    
     upload = request.FILES.get('resume')
     jd_text = (request.POST.get('jd') or '' ).strip()
 
@@ -42,8 +43,10 @@ def analyze_resume(request):
     raw_bytes = upload.read()
 
     try:
+        
         resume_text, has_tables = extract_text(raw_bytes, file_type)
     except Exception:
+        
         return JsonResponse({"error": "We couldn't read that file. Try re-saving it and uploading again."}, status=422)
 
     if not resume_text or len(resume_text.strip()) < min_text_length:
@@ -51,6 +54,7 @@ def analyze_resume(request):
 
     result = compute_ats_score(resume_text, jd_text or None, has_tables=has_tables)
     saved = False
+    
 
     user_id = request.session.get('user_id')
     if user_id:
@@ -97,6 +101,8 @@ def analyze_resume(request):
                 )
 
             saved = True
+
+    
 
     return JsonResponse({
         'ats_score': result['ats_score'],
