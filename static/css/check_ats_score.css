@@ -1,0 +1,350 @@
+/* check_ats_score.css
+   Page-specific styles for dashboard_view/ats_score_generator.html.
+   Loaded after dashboard_style.css, so :root tokens (--ink, --blue, --line,
+   etc.) are already available — this file just aliases the two extra names
+   the page markup uses (--primary, --text) onto that existing palette. */
+
+:root {
+  --primary: var(--blue);
+  --text: var(--ink);
+  --success: #2F6F4E; /* matches the green used for "good" rings on overview.html */
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }
+
+.ats-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---------------------------------------------------------
+   Card shell — mirrors .card / .card.emphasis from dashboard_style.css
+--------------------------------------------------------- */
+.ats-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.upload-card {
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+}
+
+.ats-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.upload-title {
+  font-family: 'Source Serif 4', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+
+.upload-description {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 20px;
+  max-width: 46em;
+}
+
+.ats-hint {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------
+   Upload area / dropzone / selected file
+--------------------------------------------------------- */
+.upload-area { margin-bottom: 20px; }
+
+.dropzone {
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+  padding: 44px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  background: var(--card-tint);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.upload-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.dz-title { font-weight: 600; font-size: 14.5px; color: var(--text); }
+.dz-sub { font-size: 12.5px; color: var(--muted); }
+.dz-sub a { color: var(--primary); text-decoration: underline; }
+.file-types {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+}
+
+.selected-file {
+  display: none; /* JS sets to 'flex' once a file is chosen */
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--card-tint);
+  margin-top: 12px;
+}
+
+.file-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.file-icon { color: var(--primary); flex-shrink: 0; display: flex; }
+.file-details { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.file-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+.file-status { font-size: 11.5px; color: var(--success); }
+.remove-file {
+  font-size: 12.5px;
+  color: var(--rust);
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+.remove-file:hover { text-decoration: underline; }
+
+/* ---------------------------------------------------------
+   Job description field
+--------------------------------------------------------- */
+.jd-section { margin-bottom: 22px; }
+
+.field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.optional-label {
+  font-family: 'Inter', sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--card-tint);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+#jd { resize: vertical; min-height: 96px; }
+
+/* ---------------------------------------------------------
+   Action row / analyze button
+--------------------------------------------------------- */
+.action-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.security-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.security-note span { color: var(--success); font-weight: 700; }
+
+#uploadError { color: var(--rust); font-size: 12.5px; margin: 0; }
+
+#scoreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 8px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  margin-left: auto;
+}
+#scoreBtn:hover:not(:disabled) { opacity: 0.88; }
+#scoreBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------------------------------------------------------
+   Results
+--------------------------------------------------------- */
+.results-header { margin-bottom: 18px; }
+.results-title {
+  font-family: 'Source Serif 4', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+.results-subtitle { font-size: 13.5px; color: var(--muted); margin: 6px 0 0; }
+
+.score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.score-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.score-ring { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
+.score-ring svg { transform: rotate(-90deg); width: 96px; height: 96px; }
+.score-ring .num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Source Serif 4', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.score-meta { font-size: 13px; color: var(--muted); line-height: 1.5; }
+#scoreVerdict { font-weight: 600; font-size: 14.5px; margin-bottom: 4px; color: var(--text); }
+.score-description { color: var(--muted); }
+
+.saved-badge {
+  display: none; /* JS sets to 'inline-flex' once saved */
+  align-items: center;
+  gap: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  margin-top: 10px;
+  width: fit-content;
+}
+
+.breakdown-list { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+.breakdown-item { display: flex; flex-direction: column; }
+.breakdown-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.breakdown-label { font-size: 13px; color: var(--text); font-weight: 500; }
+.breakdown-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+/* .bar-track / .bar-fill are already defined in dashboard_style.css — just
+   add a smooth transition for the animated width change on this page. */
+.bar-fill { transition: width 0.8s ease; }
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.insight-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.insight-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--rust-dim);
+  color: var(--rust);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.insight-card h3 { font-size: 15.5px; }
+
+.tags-container { display: flex; flex-wrap: wrap; gap: 7px; }
+/* .tag / .tag.missing already defined in dashboard_style.css */
+
+.example-card { margin-top: 18px; }
+.example-header { margin-bottom: 4px; }
+.example-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 8px;
+  display: block;
+}
+.example-title {
+  font-family: 'Source Serif 4', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+.example-description { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; }
+/* .before-after / .ba-block / .ba-label / .quote already defined in dashboard_style.css */
+
+/* ---------------------------------------------------------
+   Responsive
+--------------------------------------------------------- */
+@media (max-width: 900px) {
+  .score-grid, .insights-grid { grid-template-columns: 1fr; }
+  .action-area { flex-direction: column; align-items: stretch; }
+  #scoreBtn { margin-left: 0; justify-content: center; }
+  .file-name { max-width: 60vw; }
+}
