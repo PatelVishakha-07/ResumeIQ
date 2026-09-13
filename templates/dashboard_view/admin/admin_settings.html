@@ -1,0 +1,35 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}Settings — ResumeIQ Admin{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block page_desc %}Manage your admin account.{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+<div class="messages" style="margin-bottom:16px;">
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+    <a href="{% url 'admin_update_profile' %}" style="text-decoration:none; color:inherit;">
+        <div class="navitem" style="padding:16px 0; border-bottom:1px solid #eee;">
+            <strong>Update Profile</strong>
+            <div class="desc" style="margin-top:4px;">Change your display name.</div>
+        </div>
+    </a>
+
+    <a href="{% url 'admin_change_password' %}" style="text-decoration:none; color:inherit;">
+        <div class="navitem" style="padding:16px 0;">
+            <strong>Change Password</strong>
+            <div class="desc" style="margin-top:4px;">Update your account password.</div>
+        </div>
+    </a>
+</div>
+
+{% endblock %}

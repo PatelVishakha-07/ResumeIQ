@@ -38,7 +38,7 @@ Create, activate, deactivate, or remove job-seeker accounts.
 
             {% for user in users %}
 
-            <tr class="user-row">
+            <tr class="user-row" data-href="{% url 'user_detail' user.user_id %}">
 
                 <td>{{ user.name }}</td>
 
@@ -59,7 +59,8 @@ Create, activate, deactivate, or remove job-seeker accounts.
                 </td>
 
                 <td>
-                    <a href="{% url 'toggle_user_status' user.user_id %}">
+                    <a href="{% url 'toggle_user_status' user.user_id %}" class="row-action-link">
+
                         {% if user.status %}
                             Deactivate
                         {% else %}
@@ -67,6 +68,8 @@ Create, activate, deactivate, or remove job-seeker accounts.
                         {% endif %}
                     </a>
                 </td>
+
+             
 
             </tr>
 
@@ -91,13 +94,13 @@ Create, activate, deactivate, or remove job-seeker accounts.
 
     </table>
 
-    <div class="btn-row" style="margin-top:14px;">
+    {% comment %} <div class="btn-row" style="margin-top:14px;">
         <button class="btn sm">+ Add user</button>
-    </div>
+    </div> {% endcomment %}
 
 </div>
 
-{% comment %} -------Search script {% endcomment %}
+{% comment %} -------Search , row click script {% endcomment %}
 <script>
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -105,6 +108,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("userSearch");
     const userRows = document.querySelectorAll(".user-row");
     const noSearchResults = document.getElementById("noSearchResults");
+
+    // Row click navigates to user detail, unless the click was on the action link
+    userRows.forEach(function (row) {
+        row.style.cursor = "pointer";
+        row.addEventListener("click", function (event) {
+            if (event.target.closest(".row-action-link")) {
+                return; // let the Activate/Deactivate link behave normally
+            }
+            window.location.href = row.dataset.href;
+        });
+    });
 
     searchInput.addEventListener("input", function () {
 

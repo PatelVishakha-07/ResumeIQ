@@ -29,7 +29,7 @@
     <div class="navgroup">
       <div class="navlabel">Account</div>
       <div class="navitem {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Settings</a>
+          <a href="{% url 'admin_settings' %}"><span class="dot"></span>Settings</a>
       </div>
     </div>
 
