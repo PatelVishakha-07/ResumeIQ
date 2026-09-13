@@ -39,19 +39,22 @@
       <div class="navlabel">Workspace</div>
 
       <div class="navitem {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Overview</a>
+        <a href="{% url 'dashboard' %}"><span class="dot"></span>Overview</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'my_resumes' %}active{% endif %}">
+      <div class="navitem {% if request.resolver_match.url_name == 'resume_history' %}active{% endif %}">
         <a href="{% url 'resume_history' %}"><span class="dot"></span>My resumes</a>
       </div>
-      <div class="navitem">
+      <div class="navitem {% if request.resolver_match.url_name == 'ats_score_generator' %}active{% endif %}">
         <a href="{% url 'ats_score_generator' %}"><span class="dot"></span>Check ATS score</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'jd_match' %}active{% endif %}">
+      <div class="navitem {% if request.resolver_match.url_name == 'roadmap_generator' %}active{% endif %}">
         <a href="{% url 'roadmap_generator' %}"><span class="dot"></span>Generate Roadmap</a>
       </div>
       <div class="navitem {% if request.resolver_match.url_name == 'interview_prep' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Interview prep</a>
+        <a href="{% url 'interview_prep' %}"><span class="dot"></span>Interview prep</a>
+      </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'take_test' %}active{% endif %}">
+        <a href=""><span class="dot"></span>Take Test</a>
       </div>
     </div>
 
