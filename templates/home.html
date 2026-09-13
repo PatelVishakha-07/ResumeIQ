@@ -44,7 +44,10 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css">
+{% load static %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
 
   <style>
     #results {
