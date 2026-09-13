@@ -1,34 +1,248 @@
 {% extends "dashboard_view/base.html" %}
+{% load static %}
 
 {% block title %}Dashboard & Analytics — ResumeIQ Admin{% endblock %}
+
 {% block page_title %}Platform overview{% endblock %}
-{% block page_desc %}Usage and performance metrics across all Job Seeker accounts.{% endblock %}
+
+{% block page_desc %}
+Usage and performance metrics across all Job Seeker accounts.
+{% endblock %}
 
 {% block content %}
-<div class="grid cols-3" style="margin-bottom:18px;">
-  <div class="card"><h3>Active users</h3><div style="font-family:'Source Serif 4',serif;font-size:32px;margin-top:6px;">1,284</div><div class="hint">+96 this month</div></div>
-  <div class="card"><h3>Resumes analysed</h3><div style="font-family:'Source Serif 4',serif;font-size:32px;margin-top:6px;">3,910</div><div class="hint">Avg. ATS score 68</div></div>
-  <div class="card"><h3>Tests completed</h3><div style="font-family:'Source Serif 4',serif;font-size:32px;margin-top:6px;">2,207</div><div class="hint">Avg. score 71 / 100</div></div>
+
+<link rel="stylesheet" href="{% static 'css/dashboard_style.css' %}">
+
+<div class="overview-dashboard">
+
+   
+    <div class="overview-stats">
+
+        <!-- Active Users -->
+        <div class="overview-stat-card">
+            <div class="overview-stat-header">
+                <span>Active users</span>
+                <span class="overview-stat-icon">♧</span>
+            </div>
+
+            <div class="overview-stat-number">
+                {{ active_users_count }}
+            </div>
+
+            <div class="overview-stat-positive">
+                +9% this month
+            </div>
+        </div>
+
+
+        <!-- Resumes Analysed -->
+        <div class="overview-stat-card">
+            <div class="overview-stat-header">
+                <span>Resumes analysed</span>
+                <span class="overview-stat-icon">⌕</span>
+            </div>
+
+            <div class="overview-stat-number">
+                {{ resumes_analysed_count }}
+            </div>
+
+            <div class="overview-stat-description">
+                Avg ATS 68
+            </div>
+        </div>
+
+
+        <!-- Tests Completed -->
+        <div class="overview-stat-card">
+            <div class="overview-stat-header">
+                <span>Tests completed</span>
+                <span class="overview-stat-icon">☷</span>
+            </div>
+
+            <div class="overview-stat-number">
+                2,207
+            </div>
+
+            <div class="overview-stat-description">
+                Avg score 71/100
+            </div>
+        </div>
+
+
+        <!-- Open Feedback -->
+        <div class="overview-stat-card">
+            <div class="overview-stat-header">
+                <span>Open feedback</span>
+                <span class="overview-stat-icon">▢</span>
+            </div>
+
+            <div class="overview-stat-number">
+                18
+            </div>
+
+            <div class="overview-stat-warning">
+                6 unreviewed
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         CHART + WEAK AREAS
+    ========================== -->
+    <div class="overview-main-grid">
+
+        <!-- Weekly Resume Chart -->
+        <div class="overview-panel">
+
+            <h3 class="overview-panel-title">
+                Resumes analysed per week
+            </h3>
+
+            <div class="overview-chart">
+
+                <div class="overview-bar-column">
+                    <div class="overview-bar" style="height: 48%;"></div>
+                    <span>W1</span>
+                </div>
+
+                <div class="overview-bar-column">
+                    <div class="overview-bar" style="height: 63%;"></div>
+                    <span>W2</span>
+                </div>
+
+                <div class="overview-bar-column">
+                    <div class="overview-bar" style="height: 56%;"></div>
+                    <span>W3</span>
+                </div>
+
+                <div class="overview-bar-column">
+                    <div class="overview-bar" style="height: 78%;"></div>
+                    <span>W4</span>
+                </div>
+
+                <div class="overview-bar-column">
+                    <div class="overview-bar" style="height: 68%;"></div>
+                    <span>W5</span>
+                </div>
+
+                <div class="overview-bar-column overview-bar-active">
+                    <div class="overview-bar" style="height: 96%;"></div>
+                    <span>W6</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Top Weak Areas -->
+        <div class="overview-panel">
+
+            <h3 class="overview-panel-title">
+                Top weak areas
+            </h3>
+
+
+            <!-- Weak Area 1 -->
+            <div class="overview-weak-item">
+
+                <div class="overview-weak-header">
+                    <span>Un-quantified bullets</span>
+                    <span>41%</span>
+                </div>
+
+                <div class="overview-progress">
+                    <div
+                        class="overview-progress-fill"
+                        style="width: 41%;">
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Weak Area 2 -->
+            <div class="overview-weak-item">
+
+                <div class="overview-weak-header">
+                    <span>Missing projects</span>
+                    <span>27%</span>
+                </div>
+
+                <div class="overview-progress">
+                    <div
+                        class="overview-progress-fill"
+                        style="width: 27%;">
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Weak Area 3 -->
+            <div class="overview-weak-item">
+
+                <div class="overview-weak-header">
+                    <span>Weak summary</span>
+                    <span>19%</span>
+                </div>
+
+                <div class="overview-progress">
+                    <div
+                        class="overview-progress-fill"
+                        style="width: 19%;">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% comment %} recent Activity {% endcomment %}
+
+    <div class="overview-panel overview-activity">
+
+    <h3 class="overview-panel-title">
+        Recent activity
+    </h3>
+
+    {% for item in activity_items %}
+    <div class="overview-activity-row">
+
+        <div class="overview-activity-left">
+
+            <span class="overview-activity-icon">
+                {{ item.icon }}
+            </span>
+
+            <span>
+                <strong>{{ item.text_bold }}</strong>
+                {{ item.text_rest }}
+            </span>
+
+        </div>
+
+        <span class="overview-activity-time">
+            {{ item.time_ago }}
+        </span>
+
+    </div>
+    {% empty %}
+    <div class="overview-activity-row">
+        <span>No recent activity yet.</span>
+    </div>
+    {% endfor %}
+
 </div>
 
-<div class="grid cols-2">
-  <div class="card">
-    <h3>Average ATS score by batch</h3>
-    <div class="trend">
-      <div class="col" style="height:52%"></div>
-      <div class="col" style="height:58%"></div>
-      <div class="col" style="height:65%"></div>
-      <div class="col" style="height:60%"></div>
-      <div class="col now" style="height:72%"></div>
-    </div>
-  </div>
-  <div class="card">
-    <h3>Most common weak areas platform-wide</h3>
-    <ul class="plain">
-      <li>Un-quantified bullet points <span class="badge bad">41%</span></li>
-      <li>Missing Projects section <span class="badge warn">27%</span></li>
-      <li>Weak summary section <span class="badge warn">19%</span></li>
-    </ul>
-  </div>
+
+   
+   
+
 </div>
+
 {% endblock %}
