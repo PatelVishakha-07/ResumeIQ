@@ -1,7 +1,5 @@
 from django.shortcuts import redirect, render,get_object_or_404
 from accounts.models import User
-from django.shortcuts import redirect, render
-from accounts.models import User 
 from resume.models import Resume, ResumeAnalysis, ResumeVersion, JDMatchResult
 from django.template.loader import render_to_string
 from django.http import HttpResponse, JsonResponse
@@ -373,3 +371,4 @@ def generate_roadmap(request):
     fallback["source"] = "fallback"
 
     return JsonResponse(fallback)
+
