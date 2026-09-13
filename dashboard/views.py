@@ -39,19 +39,27 @@ def dashboard_redirect(request):
 
 # Admin URL
 def adminOverview(request):
+    admin_id = request.session.get("user_id")
+    admin_user = User.objects.get(user_id=admin_id)
     return render(request,"dashboard_view/admin/overview.html",
                   {
                       'nav':{
-                          'role':'admin'
+                          'role':'admin',
+                          "avatar_initial": admin_user.name[0].upper(),
+                          "avatar_name": admin_user.name,
                       }
                   })
 def manageUsers(request):
+    admin_id = request.session.get("user_id")
+    admin_user = User.objects.get(user_id=admin_id)
     users = User.objects.filter(role = 'user').order_by('-created_at')
     return render(request,"dashboard_view/admin/manageUser.html",
         {
             'users':users,
             'nav': {
-                'role': 'admin'
+                'role': 'admin',
+                "avatar_initial": admin_user.name[0].upper(),
+                "avatar_name": admin_user.name,
             }
         })
 
@@ -64,6 +72,9 @@ def toggleUserStatus(request, user_id):
     return redirect('manageUser')
 
 def userDetail(request, user_id):
+    admin_id = request.session.get("user_id")
+    admin_user = User.objects.get(user_id=admin_id)
+
     detail_user = get_object_or_404(User, user_id=user_id)
     
     resumes = Resume.objects.filter(user=detail_user).order_by('-updated_at')
@@ -93,6 +104,8 @@ def userDetail(request, user_id):
     context = {
         "nav":{
             "role":"admin",
+            "avatar_initial": admin_user.name[0].upper(),
+            "avatar_name": admin_user.name,
         },
         "detail_user": detail_user,
         "resume_summaries": resume_summaries,
@@ -101,18 +114,26 @@ def userDetail(request, user_id):
     return render(request, "dashboard_view/admin/user_detail.html", context)
 
 def manageStaffRole(request):
+    admin_id = request.session.get("user_id")
+    admin_user = User.objects.get(user_id=admin_id)
     return render(request,"dashboard_view/admin/staff_roles.html",
         {
             'nav': {
                 'role': 'admin',
+                "avatar_initial": admin_user.name[0].upper(),
+                "avatar_name": admin_user.name,
                 
             }
         })
 def feedback(request):
+    admin_id = request.session.get("user_id")
+    admin_user = User.objects.get(user_id=admin_id)
     return render(request,"dashboard_view/admin/feedback.html",
         {
             'nav': {
-                'role': 'admin'
+                'role': 'admin',
+                "avatar_initial": admin_user.name[0].upper(),
+                "avatar_name": admin_user.name,
             }
         })
 

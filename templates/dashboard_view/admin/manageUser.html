@@ -109,12 +109,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const userRows = document.querySelectorAll(".user-row");
     const noSearchResults = document.getElementById("noSearchResults");
 
-    // Row click navigates to user detail, unless the click was on the action link
+    // Row click navigates to user detail
     userRows.forEach(function (row) {
         row.style.cursor = "pointer";
         row.addEventListener("click", function (event) {
             if (event.target.closest(".row-action-link")) {
-                return; // let the Activate/Deactivate link behave normally
+                return; 
             }
             window.location.href = row.dataset.href;
         });
@@ -132,11 +132,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const email = row.cells[1].textContent.toLowerCase();
             const status = row.cells[3].textContent.toLowerCase();
 
-            if (
-                name.includes(searchText) ||
-                email.includes(searchText) ||
-                status.includes(searchText)
-            ) {
+            if (name.includes(searchText) || email.includes(searchText) || status.includes(searchText)) 
+            {
                 row.style.display = "";
                 visibleUsers++;
             } else {
