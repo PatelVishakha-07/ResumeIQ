@@ -85,11 +85,11 @@ WSGI_APPLICATION = 'resumeiq.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'resumeiq',
-        'USER': 'root',
-        'PASSWORD': '2004',
-        'HOST': 'localhost',
-        'PORT': '3306'
+        'NAME': os.getenv('NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST'),
+        'PORT': os.getenv('PORT')
     }
 }
 

@@ -48,7 +48,7 @@
         <a href="{% url 'ats_score_generator' %}"><span class="dot"></span>Check ATS score</a>
       </div>
       <div class="navitem {% if request.resolver_match.url_name == 'jd_match' %}active{% endif %}">
-        <a href=""><span class="dot"></span>JD match</a>
+        <a href="{% url 'roadmap_generator' %}"><span class="dot"></span>Generate Roadmap</a>
       </div>
       <div class="navitem {% if request.resolver_match.url_name == 'interview_prep' %}active{% endif %}">
         <a href=""><span class="dot"></span>Interview prep</a>

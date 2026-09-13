@@ -1,0 +1,110 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}Report — Version {{ version.version_number }} — ResumeIQ{% endblock %}
+{% block page_title %}Version {{ version.version_number }} report{% endblock %}
+{% block page_desc %}{{ file_name }} · analyzed {{ analyzed_at|date:"M j, Y, g:i A"|default:"—" }}{% endblock %}
+
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/resume_report.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="report-toolbar">
+  <a class="btn ghost sm" href="{% url 'resume_history' %}" style="text-decoration:none;">← Back to history</a>
+  <a class="btn sm" href="{% url 'resume_report_download' version.version_id %}" style="text-decoration:none;">Download report (PDF)</a>
+</div>
+
+<div class="card" style="margin-bottom:18px;">
+  <div class="card-head"><h3>Overall ATS score</h3></div>
+  <div class="score-hero">
+    <div class="ring-big">
+      <svg width="120" height="120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#D9D4C4" stroke-width="10"/>
+        {% if ats_score != None %}
+        <circle cx="60" cy="60" r="52" fill="none"
+          stroke="{% if score_band == 'good' %}#2F6F4E{% elif score_band == 'warn' %}#C98A3E{% else %}#B23A2E{% endif %}"
+          stroke-width="10" stroke-linecap="round" stroke-dasharray="327"
+          stroke-dashoffset="{{ ats_score_dashoffset }}"
+          transform="rotate(-90 60 60)"/>
+        {% endif %}
+      </svg>
+      <div class="num">{{ ats_score|default:"—" }}</div>
+    </div>
+    <div>
+      <p style="margin:0 0 6px;color:#4A4636;">
+        {% if score_band == 'good' %}Strong ATS compatibility — most systems should parse this cleanly.
+        {% elif score_band == 'warn' %}A few fixable issues are holding this score back.
+        {% else %}Several structural or content issues are likely hurting this resume's ATS visibility.
+        {% endif %}
+      </p>
+      <div class="breakdown-grid">
+        <div class="breakdown-item">
+          <div class="label">FORMATTING</div>
+          <div class="value">{{ formatting_score|default:"—" }}</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="label">SECTION COMPLETENESS</div>
+          <div class="value">{{ section_score|default:"—" }}</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="label">KEYWORD MATCH</div>
+          <div class="value">{{ keyword_match|default:"—" }}{% if keyword_match != None %}%{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid cols-2" style="gap:18px;">
+
+  <div class="card">
+    <div class="card-head"><h3>Missing sections</h3></div>
+    {% if missing_sections %}
+      <div class="tag-row">
+        {% for s in missing_sections %}
+          <span class="tag missing">{{ s|title }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-note">No missing sections detected — nice work.</p>
+    {% endif %}
+
+    {% if jd_match %}
+      <div class="card-head" style="margin-top:20px;"><h3>Missing keywords ({{ jd_match.match_percentage }}% match)</h3></div>
+      {% if missing_keywords %}
+        <div class="tag-row">
+          {% for k in missing_keywords %}
+            <span class="tag keyword">{{ k }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-note">No missing keywords against the pasted job description.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Grammar &amp; tone issues</h3></div>
+    {% if grammar_issues %}
+      <ul class="issue-list">
+        {% for issue in grammar_issues %}<li>{{ issue }}</li>{% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-note">No grammar or tone issues flagged.</p>
+    {% endif %}
+
+    <div class="card-head" style="margin-top:20px;"><h3>Passive voice</h3></div>
+    {% if passive_voice_flags %}
+      {% for sentence in passive_voice_flags %}
+        <div class="passive-quote">{{ sentence }}</div>
+      {% endfor %}
+    {% else %}
+      <p class="empty-note">No passive-voice sentences flagged.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
