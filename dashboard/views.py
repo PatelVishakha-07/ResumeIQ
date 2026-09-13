@@ -1,5 +1,14 @@
 from django.shortcuts import redirect, render,get_object_or_404
 from accounts.models import User
+from django.shortcuts import redirect, render
+from accounts.models import User 
+from resume.models import Resume, ResumeAnalysis, ResumeVersion
+import os
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.contrib.auth.hashers import check_password, make_password
+from django.contrib import messages
+
 from resume.models import Resume, ResumeAnalysis, ResumeVersion, JDMatchResult
 from django.template.loader import render_to_string
 from django.http import HttpResponse, JsonResponse
@@ -41,7 +50,9 @@ def dashboard_redirect(request):
 def adminOverview(request):
     return render(request,"dashboard_view/admin/overview.html",
                   {
-                      'nav':{ 'role':'admin'}
+                      'nav':{
+                          'role':'admin'
+                      }
                   })
 def manageUsers(request):
     users = User.objects.filter(role = 'user').order_by('-created_at')
@@ -61,12 +72,52 @@ def toggleUserStatus(request, user_id):
 
     return redirect('manageUser')
 
+def userDetail(request, user_id):
+    detail_user = get_object_or_404(User, user_id=user_id)
+    
+    resumes = Resume.objects.filter(user=detail_user).order_by('-updated_at')
+
+    resume_summaries = []
+    for resume in resumes:
+        latest_version = resume.resumeversion_set.order_by('-version_number').first()
+
+        latest_analysis = None
+        if latest_version:
+            latest_analysis = latest_version.resumeanalysis_set.order_by('-analyzed_at').first()
+
+        resume_summaries.append({
+            "resume": resume,
+            "filename":os.path.basename(resume.file_path),
+            "latest_version": latest_version,
+            "latest_analysis": latest_analysis,
+        })
+
+    # Static placeholder until the WeakArea model/table is wired up
+    weak_areas = [
+        {"topic": "System Design", "performance_score": 45.00, "last_updated": "2025-01-22"},
+        {"topic": "Data Structures", "performance_score": 58.00, "last_updated": "2025-01-20"},
+        {"topic": "SQL Queries", "performance_score": 62.00, "last_updated": "2025-01-18"},
+    ]
+
+    context = {
+        "nav":{
+            "role":"admin",
+            # "avatar_initial": request.user.name[0].upper(),
+            # "avatar_name": request.user.name,
+
+        },
+        "detail_user": detail_user,
+        "resume_summaries": resume_summaries,
+        "weak_areas": weak_areas,
+    }
+    return render(request, "dashboard_view/admin/user_detail.html", context)
 
 def manageStaffRole(request):
     return render(request,"dashboard_view/admin/staff_roles.html",
         {
             'nav': {
-                'role': 'admin'
+                'role': 'admin',
+                
             }
         })
 def feedback(request):
@@ -77,19 +128,106 @@ def feedback(request):
             }
         })
 
+def adminSettings(request):
+    admin_id = request.session.get("user_id")
+    if not admin_id:
+        messages.error(request, "Please sign in to continue.")
+        return redirect("login")
+
+    admin_user = User.objects.get(user_id=admin_id)
+
+    context = {
+        "nav": {
+            "role": "admin",
+            "avatar_initial": admin_user.name[0].upper(),
+            "avatar_name": admin_user.name,
+        },
+        "admin_user": admin_user,
+    }
+    return render(request, "dashboard_view/admin/admin_settings.html", context)
+
+
+def adminUpdateProfile(request):
+    admin_id = request.session.get("user_id")
+    if not admin_id:
+        messages.error(request, "Please sign in to continue.")
+        return redirect("login")
+
+    admin_user = User.objects.get(user_id=admin_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+
+        if not name:
+            messages.error(request, "Name cannot be empty.")
+            return redirect("admin_update_profile")
+
+        admin_user.name = name
+        admin_user.save()
+
+        request.session["name"] = admin_user.name
+        messages.success(request, "Profile updated successfully.")
+        return redirect("admin_settings")
+
+    context = {
+        "nav": {
+            "role": "admin",
+            "avatar_initial": admin_user.name[0].upper(),
+            "avatar_name": admin_user.name,
+        },
+        "admin_user": admin_user,
+    }
+    return render(request, "dashboard_view/admin/admin_update_profile.html", context)
+
+
+def adminChangePassword(request):
+    admin_id = request.session.get("user_id")
+    if not admin_id:
+        messages.error(request, "Please sign in to continue.")
+        return redirect("login")
+
+    admin_user = User.objects.get(user_id=admin_id)
+
+    if request.method == "POST":
+        current_password = request.POST.get("current_password", "")
+        new_password = request.POST.get("new_password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+
+        if not admin_user.password:
+            messages.error(request, "This account has no password set. Please use social login.")
+            return redirect("admin_change_password")
+
+        #check current password matches
+        if not check_password(current_password, admin_user.password):
+            messages.error(request, "Current password is incorrect.")
+            return redirect("admin_change_password")
+
+        if len(new_password) < 8:
+            messages.error(request, "New password must be at least 8 characters.")
+            return redirect("admin_change_password")
+
+        if new_password != confirm_password:
+            messages.error(request, "New password and confirmation do not match.")
+            return redirect("admin_change_password")
+
+        admin_user.password = make_password(new_password)
+        admin_user.save()
+
+        messages.success(request, "Password changed successfully.")
+        return redirect("admin_settings")
+
+    context = {
+        "nav": {
+            "role": "admin",
+            "avatar_initial": admin_user.name[0].upper(),
+            "avatar_name": admin_user.name,
+        },
+    }
+    return render(request, "dashboard_view/admin/admin_change_password.html", context)
+
+
 
 #User Views
-
-def get_logged_in_user_view(request):
-    user_id = request.session.get("user_id")
-
-    if not user_id:
-        return None
-
-    try:
-        return User.objects.get(user_id = user_id)
-    except User.DoesNotExist:
-        return None
 
 def ats_score_generator_view(request):
     return render(request, "dashboard_view/user/ats_score_generator.html")
@@ -165,6 +303,7 @@ def resume_history_view(request):
     }
 
     return render(request, "dashboard_view/user/resume_history.html", context)
+
 
 #functions to view report of the resume of particular user
 def resume_report_view(request, version_id):
