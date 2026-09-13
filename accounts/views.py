@@ -32,7 +32,6 @@ def register_view(request):
             email = email,
             password = make_password(password),
             role="user"
-
         )
         user.save()
 
