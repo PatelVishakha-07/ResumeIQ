@@ -12,17 +12,17 @@
     <div class="navgroup">
       <div class="navlabel">Admin</div>
 
-      <div class="navitem {% if request.resolver_match.url_name == 'admin_overview' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Platform overview</a>
+      <div class="navitem {% if request.resolver_match.url_name == 'adminOverview' %}active{% endif %}">
+        <a href="{% url 'adminOverview'%}"><span class="dot"></span>Platform overview</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Users</a>
+      <div class="navitem {% if request.resolver_match.url_name == 'manageUser' %}active{% endif %}">
+        <a href="{% url 'manageUser'%}"><span class="dot"></span>Manage Users</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'admin_resumes' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Resumes</a>
+      <div class="navitem {% if request.resolver_match.url_name == 'manageStaffRole' %}active{% endif %}">
+        <a href="{% url 'manageStaffRole' %}"><span class="dot"></span>Admin/Staff Roles</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'admin_job_descriptions' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Job descriptions</a>
+      <div class="navitem {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}">
+        <a href="{% url 'feedback' %}"><span class="dot"></span>User Feedback</a>
       </div>
     </div>
 
