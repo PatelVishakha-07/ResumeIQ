@@ -1,0 +1,36 @@
+  .report-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+
+  .score-hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;}
+  .ring-big{position:relative;width:120px;height:120px;flex-shrink:0;}
+  .ring-big .num{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Source Serif 4', serif;font-weight:700;font-size:30px;color:#14171F;
+  }
+
+  .breakdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px;}
+  .breakdown-item{border:1px solid #E3DFD3;border-radius:10px;padding:14px 16px;}
+  .breakdown-item .label{font-size:12.5px;color:#8A8676;margin-bottom:6px;}
+  .breakdown-item .value{font-family:'Source Serif 4', serif;font-size:22px;font-weight:700;}
+  .breakdown-item .value.good{color:#2F6F4E;}
+  .breakdown-item .value.warn{color:#C98A3E;}
+  .breakdown-item .value.bad{color:#B23A2E;}
+
+  .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .tag{display:inline-block;padding:5px 11px;border-radius:999px;font-size:12.5px;}
+  .tag.missing{background:#F5E4E1;color:#B23A2E;}
+  .tag.keyword{background:#F6ECDD;color:#C98A3E;}
+
+  .issue-list{margin:10px 0 0;padding-left:18px;color:#4A4636;}
+  .issue-list li{margin-bottom:8px;line-height:1.5;}
+
+  .passive-quote{
+    border-left:3px solid #D9D4C4;padding:8px 14px;margin-bottom:10px;
+    font-style:italic;color:#4A4636;background:#FAF8F2;border-radius:0 6px 6px 0;
+  }
+
+  .empty-note{color:#8A8676;font-size:13.5px;}
+
+  @media (max-width: 720px){
+    .breakdown-grid{grid-template-columns:1fr;}
+    .score-hero{grid-template-columns:1fr;text-align:center;}
+  }
