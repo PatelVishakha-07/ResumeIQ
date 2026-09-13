@@ -8,3 +8,5 @@ create urls.py file inside accounts folder
 
 pip install openai pymupdf python-docx python-dotenv
 
+pip install xhtml2pdf
+pip install openai

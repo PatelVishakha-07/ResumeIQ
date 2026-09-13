@@ -84,8 +84,8 @@
       </div>
 
       <div class="row-actions">
-        <a class="btn sm" href="" style="text-decoration:none;">View report</a>
-        <a class="btn ghost sm" href="" style="text-decoration:none;">Export</a>
+        <a class="btn sm" href="{% url 'view_resume_report' r.version_id %}" style="text-decoration:none;">View report</a>
+        <a class="btn ghost sm" href="{% url 'resume_report_download' r.version_id %}" style="text-decoration:none;">Export</a>
       </div>
     </div>
     {% endfor %}

@@ -1,0 +1,189 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}Roadmap Generator — ResumeIQ{% endblock %}
+{% block page_title %}Roadmap generator{% endblock %}
+{% block page_desc %}Paste a job description, or just tell us a topic, language, or role — we'll map out how to learn it.{% endblock %}
+
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/roadmap_generator.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="card" id="inputCard">
+  <div class="card-head"><h3>What do you want a roadmap for?</h3></div>
+
+  <textarea
+    id="roadmapInput"
+    class="roadmap-textarea"
+    rows="5"
+    placeholder="Paste a full job description, or just type something like &quot;React&quot;, &quot;Data Structures &amp; Algorithms&quot;, &quot;AWS Solutions Architect&quot;, or &quot;Backend Engineer, Series B startup&quot;..."
+  ></textarea>
+
+  <div class="example-row">
+    <span class="example-label">Try:</span>
+    <button type="button" class="chip" data-fill="React">React</button>
+    <button type="button" class="chip" data-fill="Data Structures &amp; Algorithms">Data Structures &amp; Algorithms</button>
+    <button type="button" class="chip" data-fill="AWS Solutions Architect">AWS Solutions Architect</button>
+    <button type="button" class="chip" data-fill="Python Backend Development">Python Backend Development</button>
+    <button type="button" class="chip" data-fill="System Design">System Design</button>
+  </div>
+
+  <div class="input-footer">
+    <div>
+      <p class="hint">Works with a pasted job description, a specific technology, or a broader topic.</p>
+      <p id="roadmapError"></p>
+    </div>
+    <button type="button" id="generateBtn" class="btn sm" disabled>
+      <span id="generateBtnLabel">Generate roadmap</span>
+      <svg class="spin" width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#fff" stroke-width="1.6" opacity="0.3"/><path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<div id="roadmapResult" class="roadmap-result">
+  <!-- populated by JS via a real call to /roadmap/generate/ -->
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  const input = document.getElementById('roadmapInput');
+  const generateBtn = document.getElementById('generateBtn');
+  const generateBtnLabel = document.getElementById('generateBtnLabel');
+  const generateSpinner = generateBtn.querySelector('.spin');
+  const result = document.getElementById('roadmapResult');
+  const errorEl = document.getElementById('roadmapError');
+
+  let lastQueryText = '';
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      input.value = chip.dataset.fill;
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    });
+  });
+
+  input.addEventListener('input', () => {
+    generateBtn.disabled = input.value.trim().length < 2;
+  });
+
+  function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
+  }
+
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+  }
+
+  function clearError() {
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+  }
+
+  function setLoading(isLoading) {
+    generateBtn.disabled = isLoading || input.value.trim().length < 2;
+    generateBtnLabel.textContent = isLoading ? 'Generating…' : 'Generate roadmap';
+    generateSpinner.style.display = isLoading ? 'inline-block' : 'none';
+  }
+
+  function renderRoadmap(queryLabel, stages, source) {
+    const stagesHtml = stages.map((s, i) => `
+      <div class="stage">
+        <div class="stage-marker">
+          <div class="stage-dot">${i + 1}</div>
+          ${i < stages.length - 1 ? '<div class="stage-line"></div>' : ''}
+        </div>
+        <div class="stage-card">
+          <div class="stage-head">
+            <h4>${s.title}</h4>
+            <span class="stage-duration">${s.duration}</span>
+          </div>
+          <p class="stage-desc">${s.desc}</p>
+          <div class="tag-row">
+            ${s.topics.map(t => `<span class="tag topic">${t}</span>`).join('')}
+          </div>
+          <span class="level-badge">${s.level}</span>
+        </div>
+      </div>
+    `).join('');
+
+    result.innerHTML = `
+      <div class="card" style="margin-top:18px;">
+        <div class="card-head">
+          <h3>Roadmap for &ldquo;${queryLabel}&rdquo;</h3>
+        </div>
+        <p class="hint" style="margin-bottom:18px;">
+          ${stages.length} stages, tailored to what you entered.
+          ${source === 'fallback' ? ' (Showing a general starter structure — the AI generator was unavailable.)' : ''}
+        </p>
+        <div class="stage-timeline">${stagesHtml}</div>
+        <div class="input-footer no-print" style="margin-top:8px;">
+          <p class="hint">Regenerate anytime as you narrow your focus, or download this roadmap as a PDF.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn ghost sm" id="downloadPdfBtn">Download PDF</button>
+            <button type="button" class="btn ghost sm" id="regenerateBtn">Regenerate</button>
+            <button type="button" class="btn sm">Save to my roadmaps</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('regenerateBtn').addEventListener('click', () => {
+      runGenerate(lastQueryText);
+    });
+
+    document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+      window.print();
+    });
+
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function runGenerate(text) {
+    lastQueryText = text;
+    clearError();
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append('query', text);
+
+    try {
+      const response = await fetch('{% url "generate_roadmap" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        showError(data.error || 'Something went wrong generating that roadmap.');
+        return;
+      }
+
+      const label = data.query_label || (text.length > 60 ? text.slice(0, 60) + '…' : text);
+      renderRoadmap(label, data.stages, data.source);
+    } catch (err) {
+      showError("Couldn't reach the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  generateBtn.addEventListener('click', () => {
+    const text = input.value.trim();
+    if (!text) return;
+    runGenerate(text);
+  });
+
+});
+</script>
+{% endblock %}
