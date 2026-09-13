@@ -1,0 +1,79 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}{{ detail_user.name }} — ResumeIQ Admin{% endblock %}
+{% block page_title %}{{ detail_user.name }}{% endblock %}
+{% block page_desc %}User details and resume analysis history{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <p><strong>Email:</strong> {{ detail_user.email }}</p>
+    {% comment %} <p><strong>Role:</strong> {{ detail_user.role }}</p> {% endcomment %}
+    <p>
+        <strong>Status:</strong>
+        {% if detail_user.status %}
+            <span class="status-pill active">Active</span>
+        {% else %}
+            <span class="status-pill inactive">Inactive</span>
+        {% endif %}
+    </p>
+    <p><strong>Joined:</strong> {{ detail_user.created_at }}</p>
+
+    <div class="btn-row" style="margin-top:14px;">
+        <a href="{% url 'toggle_user_status' detail_user.user_id %}" class="btn sm">
+            {% if detail_user.status %}Deactivate{% else %}Activate{% endif %}
+        </a>
+    </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <h3>Resumes &amp; ATS Scores</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Uploaded</th>
+                <th>Latest Version</th>
+                <th>ATS Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in resume_summaries %}
+            <tr>
+                <td>{{ item.filename }}</td>
+                <td>{{ item.resume.updated_at }}</td>
+                <td>
+                    {% if item.latest_version %}v{{ item.latest_version.version_number }}{% else %}—{% endif %}
+                </td>
+                <td>
+                    {% if item.latest_analysis %}{{ item.latest_analysis.ats_score }}{% else %}Not analyzed{% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align:center;">No resumes uploaded.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <h3>Weak Areas</h3>
+    <table>
+        <thead>
+            <tr><th>Topic</th><th>Performance Score</th><th>Last Updated</th></tr>
+        </thead>
+        <tbody>
+            {% for w in weak_areas %}
+            <tr>
+                <td>{{ w.topic }}</td>
+                <td>{{ w.performance_score }}</td>
+                <td>{{ w.last_updated }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" style="text-align:center;">No weak areas tracked yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
