@@ -1,8 +1,5 @@
 from django.shortcuts import redirect, render,get_object_or_404
-from accounts.models import User
-from django.shortcuts import redirect, render
 from accounts.models import User 
-from resume.models import Resume, ResumeAnalysis, ResumeVersion
 import os
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
