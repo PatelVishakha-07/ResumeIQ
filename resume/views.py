@@ -73,24 +73,24 @@ def analyze_resume(request):
                 parsed_text = resume_text
             )
 
-            next_version_number = (ResumeVersion.objects.filter(resume=resume).count()) + 1
+            next_version_number = (ResumeVersion.objects.filter(versions=resume).count()) + 1
 
             version = ResumeVersion.objects.create(
-                resume = resume,
+                versions = resume,
                 version_number = next_version_number,
                 content_snapshot = resume_text
             )
 
             ResumeAnalysis.objects.create(
-                version = version,
+                analyses = version,
                 ats_score = result['ats_score'],
                 grammar_issues = result['grammar_issues'],
                 passive_voice_flags = result['passive_voice_flags'],
-                missing_sections = result['missing_sections']
+                missing_section = result['missing_sections']
             )
 
             if jd_text:
-                jd = JobDescription.objects.create(user=user, jd_text=jd_text)
+                jd = JobDescription.objects.create(job_descriptions=user, jd_text=jd_text)
                 JDMatchResult.objects.create(
                     user=user,
                     version=version,
@@ -113,3 +113,4 @@ def analyze_resume(request):
         'missing_keywords': result['missing_keywords'],
         'saved': saved
     })
+

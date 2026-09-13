@@ -1,0 +1,1076 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}ATS Score Checker — ResumeIQ{% endblock %}
+{% block page_title %}ATS Score Checker{% endblock %}
+{% block page_desc %}
+Analyze your resume, identify ATS issues, and improve your chances of getting shortlisted.
+{% endblock %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/check_ats_score.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="ats-wrapper">
+
+    <div class="ats-card upload-card" id="uploadCard">
+
+        <span class="ats-eyebrow">
+            Resume Analysis
+        </span>
+
+        <h3 class="upload-title">
+            Check your ATS score
+        </h3>
+
+        <p class="upload-description">
+            Upload your resume and let ResumeIQ analyze its ATS compatibility,
+            formatting, section completeness, and job-specific keywords.
+        </p>
+
+
+        <!-- Upload -->
+
+        <div class="upload-area">
+
+            <div class="dropzone" id="dropZone">
+
+                <svg class="upload-icon"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+
+                    <path
+                        d="M12 15V4M12 4L7 9M12 4L17 9"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+
+                    <path
+                        d="M4 15V17.5C4 18.8807 5.11929 20 6.5 20H17.5C18.8807 20 20 18.8807 20 17.5V15"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+
+                </svg>
+
+                <div class="dz-title">
+                    Drag &amp; drop your resume here
+                </div>
+
+                <div class="dz-sub">
+                    or
+                    <a href="#" id="browseLink">browse a file</a>
+                </div>
+
+                <div class="file-types">
+                    PDF, DOCX or DOC • Maximum 5MB
+                </div>
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept=".pdf,.docx,.doc"
+                    style="display:none;"
+                >
+
+            </div>
+
+
+            <!-- Selected File -->
+
+            <div
+                class="selected-file"
+                id="fileRow"
+            >
+
+                <div class="file-info">
+
+                    <div class="file-icon">
+
+                        <svg
+                            width="19"
+                            height="19"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <path
+                                d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            />
+
+                            <path
+                                d="M15 2v5h5"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div class="file-details">
+
+                        <span
+                            id="fileName"
+                            class="file-name"
+                        >
+                            resume.pdf
+                        </span>
+
+                        <div class="file-status">
+                            ✓ Resume ready for analysis
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <a
+                    href="#"
+                    id="removeFile"
+                    class="remove-file"
+                >
+                    Remove
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- Job Description -->
+
+        <div class="jd-section">
+
+            <label
+                class="field-label"
+                for="jd"
+            >
+                <span>Job description</span>
+
+                <span class="optional-label">
+                    Optional
+                </span>
+            </label>
+
+            <textarea
+                id="jd"
+                rows="4"
+                placeholder="Paste the job description here to compare your resume with the role..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- Action -->
+
+        <div class="action-area">
+
+            <div>
+
+                <div class="security-note">
+                    <span>✓</span>
+                    Your API key stays securely on the server
+                </div>
+
+                <p
+                    id="uploadError"
+                    style="display:none;"
+                ></p>
+
+            </div>
+
+
+            <button type="button" id="scoreBtn" disabled>
+
+                <span id="btnLabel"> Analyze my resume </span>
+
+                <svg id="btnSpinner" style="display:none;" class="spin" width="14" height="14" viewBox="0 0 16 16" fill="none" >
+
+                    <circle cx="8" cy="8" r="6.5" stroke="#fff" stroke-width="1.6" opacity="0.3"/>
+                    <path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" />
+
+                </svg>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================
+         RESULTS
+         ========================= -->
+
+    <div
+        id="results"
+        style="display:none;"
+    >
+
+        <div class="results-header">
+
+            <h3 class="results-title">
+                Resume analysis results
+            </h3>
+
+            <p class="results-subtitle">
+                Here's how your resume performed against ATS screening criteria.
+            </p>
+
+        </div>
+
+
+        <!-- SCORE + BREAKDOWN -->
+
+        <div class="score-grid">
+
+
+            <!-- Overall Score -->
+
+            <div class="ats-card score-card">
+
+                <h3>
+                    Overall ATS score
+                </h3>
+
+                <div class="score-content">
+
+                    <div class="score-ring">
+
+                        <svg
+                            viewBox="0 0 96 96"
+                        >
+
+                            <circle
+                                cx="48"
+                                cy="48"
+                                r="40"
+                                fill="none"
+                                stroke="#edf0f5"
+                                stroke-width="8"
+                            />
+
+                            <circle
+                                id="ringFill"
+                                cx="48"
+                                cy="48"
+                                r="40"
+                                fill="none"
+                                stroke="var(--primary)"
+                                stroke-width="8"
+                                stroke-linecap="round"
+                                stroke-dasharray="251.33"
+                                stroke-dashoffset="251.33"
+                            />
+
+                        </svg>
+
+                        <div
+                            class="num"
+                            id="scoreNum"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-meta">
+
+                        <div
+                            id="scoreVerdict"
+                            style="color:var(--text);"
+                        >
+                            —
+                        </div>
+
+                        <div class="score-description">
+
+                            Your score is based on formatting,
+                            section completeness,
+                            keyword relevance
+                            <span id="keywordMetaSuffix">
+                                and action-verb usage
+                            </span>.
+
+                        </div>
+
+                        <span
+                            id="savedBadge"
+                            class="saved-badge"
+                            style="display:none;"
+                        >
+                            ✓ Saved to your resume history
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Score Breakdown -->
+
+            <div class="ats-card score-card">
+
+                <h3>
+                    Score breakdown
+                </h3>
+
+                <div class="breakdown-list">
+
+
+                    <!-- Keyword -->
+
+                    <div class="breakdown-item">
+
+                        <div class="breakdown-top">
+
+                            <span class="breakdown-label">
+                                Keyword match
+                            </span>
+
+                            <span
+                                class="breakdown-value"
+                                id="valKeyword"
+                            >
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="bar-track">
+
+                            <div
+                                class="bar-fill"
+                                id="barKeyword"
+                                style="
+                                    width:0%;
+                                    background:var(--primary);
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Formatting -->
+
+                    <div class="breakdown-item">
+
+                        <div class="breakdown-top">
+
+                            <span class="breakdown-label">
+                                Formatting
+                            </span>
+
+                            <span
+                                class="breakdown-value"
+                                id="valFormat"
+                            >
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="bar-track">
+
+                            <div
+                                class="bar-fill"
+                                id="barFormat"
+                                style="
+                                    width:0%;
+                                    background:#c99a3e;
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Sections -->
+
+                    <div class="breakdown-item">
+
+                        <div class="breakdown-top">
+
+                            <span class="breakdown-label">
+                                Section completeness
+                            </span>
+
+                            <span
+                                class="breakdown-value"
+                                id="valSection"
+                            >
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="bar-track">
+
+                            <div
+                                class="bar-fill"
+                                id="barSection"
+                                style="
+                                    width:0%;
+                                    background:#b5482f;
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             INSIGHTS
+             ========================= -->
+
+        <div class="insights-grid">
+
+
+            <!-- Missing Sections -->
+
+            <div
+                class="ats-card insight-card"
+                id="missingSectionsCard"
+            >
+
+                <div class="insight-heading">
+
+                    <div class="insight-icon">
+                        !
+                    </div>
+
+                    <h3>
+                        Missing sections
+                    </h3>
+
+                </div>
+
+                <p class="ats-hint">
+                    Standard resume sections that an ATS may expect
+                    but were not detected in your resume.
+                </p>
+
+                <div
+                    id="missingSectionsTags"
+                    class="tags-container"
+                ></div>
+
+            </div>
+
+
+
+            <!-- Missing Keywords -->
+
+            <div
+                class="ats-card insight-card"
+                id="missingKeywordsCard"
+                style="display:none;"
+            >
+
+                <div class="insight-heading">
+
+                    <div class="insight-icon">
+                        #
+                    </div>
+
+                    <h3>
+                        Missing keywords
+                    </h3>
+
+                </div>
+
+                <p class="ats-hint">
+                    Important terms from the job description
+                    that are missing from your resume.
+                </p>
+
+                <div
+                    id="missingKeywordsTags"
+                    class="tags-container"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             EXAMPLE
+             ========================= -->
+
+        <div class="ats-card example-card">
+
+            <div class="example-header">
+
+                <div>
+
+                    <div class="example-label">
+                        Resume improvement
+                    </div>
+
+                    <h3 class="example-title">
+                        What a stronger bullet looks like
+                    </h3>
+
+                    <p class="example-description">
+                        Strong resume bullets use action verbs,
+                        measurable results, and relevant keywords.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="before-after">
+
+
+                <!-- Before -->
+
+                <div class="ba-block before">
+
+                    <div class="ba-label">
+                        Before
+                    </div>
+
+                    <div class="quote">
+                        Responsible for managing a team
+                        and helping improve processes.
+                    </div>
+
+                </div>
+
+
+                <!-- After -->
+
+                <div class="ba-block after">
+
+                    <div class="ba-label">
+                        Improved version
+                    </div>
+
+                    <div class="quote">
+                        Led a team of 6 engineers and streamlined
+                        the deployment process, reducing release
+                        time by 40%.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+(function () {
+
+    const dropZone = document.getElementById('dropZone');
+
+    const fileInput = document.getElementById('fileInput');
+
+    const fileRow = document.getElementById('fileRow');
+
+    const fileName = document.getElementById('fileName');
+
+    const removeFile = document.getElementById('removeFile');
+
+    const browseLink = document.getElementById('browseLink');
+
+    const scoreBtn = document.getElementById('scoreBtn');
+
+    const btnLabel = document.getElementById('btnLabel');
+
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    const uploadError = document.getElementById('uploadError');
+
+    const results = document.getElementById('results');
+
+    const jdInput = document.getElementById('jd');
+
+
+    /* =========================
+       ERROR HANDLING
+       ========================= */
+
+    function showError(message) {
+
+        uploadError.textContent = message;
+        uploadError.style.display = 'block';
+
+    }
+
+
+    function clearError() {
+
+        uploadError.style.display = 'none';
+        uploadError.textContent = '';
+
+    }
+
+
+    /* =========================
+       FILE BROWSER
+       ========================= */
+
+    browseLink.addEventListener(
+        'click',
+        function (e) 
+        {
+            e.preventDefault();
+            fileInput.click();
+        }
+    );
+
+
+    dropZone.addEventListener(
+        'click',
+        function () {
+
+            fileInput.click();
+
+        }
+    );
+
+
+    /* =========================
+       DRAG & DROP
+       ========================= */
+
+    dropZone.addEventListener(
+        'dragover',
+        function (e) {
+
+            e.preventDefault();
+
+            dropZone.style.borderColor = 'var(--primary)';
+
+            dropZone.style.background = '#f7f8ff';
+
+        }
+    );
+
+
+    dropZone.addEventListener(
+        'dragleave',
+        function () {
+
+            dropZone.style.borderColor = '#cbd2e1';
+
+            dropZone.style.background = '#fafbfe';
+
+        }
+    );
+
+
+    dropZone.addEventListener(
+        'drop',
+        function (e) {
+
+            e.preventDefault();
+
+            dropZone.style.borderColor = '#cbd2e1';
+
+            dropZone.style.background = '#fafbfe';
+
+            if (e.dataTransfer.files.length) {
+
+                fileInput.files =
+                    e.dataTransfer.files;
+
+                handleFileSelected();
+
+            }
+
+        }
+    );
+
+
+    fileInput.addEventListener(
+        'change',
+        handleFileSelected
+    );
+
+
+    /* =========================
+       FILE VALIDATION
+       ========================= */
+
+    function handleFileSelected() {
+
+        const file = fileInput.files[0];
+
+        if (!file) return;
+
+
+        const allowedTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword'
+        ];
+
+
+        const maxSize = 5 * 1024 * 1024;
+
+
+        if (file.size > maxSize) 
+        {
+            showError( 'File size must be less than 5MB.' );
+            fileInput.value = '';
+            return;
+        }
+
+
+        const extension = file.name.split('.').pop().toLowerCase();
+
+
+        if ( !['pdf', 'docx', 'doc'].includes(extension) ) 
+        {
+            showError( 'Please upload a PDF, DOCX, or DOC file.' );
+            fileInput.value = '';
+            return;
+
+        }
+
+
+        fileName.textContent = file.name;
+
+        dropZone.style.display = 'none';
+
+        fileRow.style.display = 'flex';
+
+        scoreBtn.disabled = false;
+
+        clearError();
+
+    }
+
+
+    /* =========================
+       REMOVE FILE
+       ========================= */
+
+    removeFile.addEventListener(
+        'click',
+        function (e) {
+
+            e.preventDefault();
+
+            fileInput.value = '';
+
+            fileRow.style.display = 'none';
+
+            dropZone.style.display = 'flex';
+
+            scoreBtn.disabled = true;
+
+            results.style.display = 'none';
+
+            clearError();
+
+        }
+    );
+
+
+    /* =========================
+       CSRF COOKIE
+       ========================= */
+
+    function getCookie(name) {
+
+        const match =
+            document.cookie.match(
+                '(^|;)\\s*' +
+                name +
+                '\\s*=\\s*([^;]+)'
+            );
+
+        return match
+            ? decodeURIComponent(match.pop())
+            : '';
+
+    }
+
+
+    /* =========================
+       SCORE VERDICT
+       ========================= */
+
+    function verdictFor(score) {
+
+        if (score >= 80) {
+
+            return [
+                'Strong ATS match',
+                '#16835c'
+            ];
+
+        }
+
+        if (score >= 60) {
+
+            return [
+                'Needs a few improvements',
+                '#b47a16'
+            ];
+
+        }
+
+        return [
+            'Significant improvements needed',
+            '#b5482f'
+        ];
+
+    }
+
+
+    /* =========================
+       RENDER TAGS
+       ========================= */
+
+    function renderTags(container, items, cls) 
+    {
+        container.innerHTML = '';
+
+        if ( !items || !items.length )
+        {
+            container.innerHTML = '<p class="ats-hint" style="margin:0;">None — nice work!</p>';
+            return;
+        }
+
+
+        items.forEach(function (item) 
+        {
+            const span = document.createElement('span');
+            span.className = 'tag' + (cls ? ' ' + cls : '');
+            span.textContent = item;
+            container.appendChild( span );
+        });
+
+    }
+
+
+    /* =========================
+       RENDER SCORE
+       ========================= */
+
+    function renderScore(data) {
+        const score = Math.round(data.ats_score);
+        const keyword = Math.round(data.keyword_match);
+        const format = Math.round(data.formatting_score);
+        const section = Math.round(data.section_score);
+        const circumference = 251.33;
+
+        /* Ring */
+        const ringFill = document.getElementById( 'ringFill' );
+        ringFill.style.strokeDashoffset = circumference;
+
+        requestAnimationFrame(
+            function () {
+                ringFill.style.transition = 'stroke-dashoffset .8s ease';
+                ringFill.style.strokeDashoffset = circumference * (1 - score / 100);
+            }
+        );
+
+        /* Verdict */
+        const verdict = verdictFor(score);
+        const verdictEl = document.getElementById( 'scoreVerdict' );
+
+        verdictEl.textContent = verdict[0];
+        verdictEl.style.color = verdict[1];
+        ringFill.setAttribute( 'stroke', verdict[1] );
+
+
+        /* Number animation */
+        let current = 0;
+        const numEl = document.getElementById( 'scoreNum' );
+
+        (function animateScore() {
+
+            current += Math.max( 1, Math.round( (score - current) / 6 ) );
+            if (current >= score) {
+                current = score; 
+            }
+
+            numEl.textContent = current;
+
+            if (current < score) {
+                requestAnimationFrame( animateScore );
+            }
+
+        })();
+
+
+        /* Breakdown values */
+        document.getElementById( 'valKeyword' ).textContent = keyword + '%';
+        document.getElementById( 'valFormat' ).textContent = format + '%';
+        document.getElementById( 'valSection' ).textContent = section + '%';
+
+        /* Breakdown bars */
+        requestAnimationFrame(
+            function () {
+                document.getElementById(
+                    'barKeyword'
+                ).style.width =
+                    keyword + '%';
+
+                document.getElementById(
+                    'barFormat'
+                ).style.width =
+                    format + '%';
+
+                document.getElementById(
+                    'barSection'
+                ).style.width =
+                    section + '%';
+            }
+        );
+
+        /* Missing sections */
+        renderTags(
+            document.getElementById('missingSectionsTags' ),
+            data.missing_sections, 'missing'
+        );
+
+
+        /* Job description */
+        const jdWasProvided = jdInput.value.trim().length > 0;
+
+        document.getElementById(
+            'keywordMetaSuffix'
+        ).textContent =
+            jdWasProvided
+                ? ', and keyword match against the job description'
+                : ', and action-verb usage';
+
+        /* Missing keywords */
+        const keywordCard = document.getElementById( 'missingKeywordsCard');
+
+        if (jdWasProvided) {
+            keywordCard.style.display = 'block';
+            renderTags(
+                document.getElementById('missingKeywordsTags' ),
+                data.missing_keywords, 'missing'
+            );
+
+        } else {
+            keywordCard.style.display = 'none';
+        }
+
+        /* Saved badge */
+        document.getElementById( 'savedBadge' ).style.display = data.saved ? 'inline-flex' : 'none';
+
+        /* Show results */
+        results.style.display = 'block';
+        results.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+    }
+
+
+    /* =========================
+       ANALYZE BUTTON
+       ========================= */
+
+    scoreBtn.addEventListener('click',
+        async function () {
+            clearError();
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showError('Please choose a resume file first.' );
+                return;
+            }
+
+            btnLabel.textContent = 'Analyzing resume...';
+            btnSpinner.style.display = 'inline-block';
+            scoreBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('resume', file );
+            formData.append('jd', jdInput.value || '' );
+
+            try {
+                const response = await fetch('/resume/analyze/',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken':
+                                    getCookie(
+                                        'csrftoken'
+                                    )
+                            },
+                            body: formData
+                        }
+                    );
+
+
+                const data = await response.json();
+
+
+                if (!response.ok) {
+                    showError( data.error || 'Something went wrong while analyzing your resume.' );
+                    return;
+
+                }
+
+                renderScore(data);
+                btnLabel.textContent = 'Re-check score';
+
+
+            } catch (error) {
+                showError( "Couldn't reach the server. Please try again." );
+
+            } finally {
+
+                btnSpinner.style.display = 'none';
+
+                scoreBtn.disabled = false;
+
+            }
+
+        }
+    );
+
+})();
+
+</script>
+
+{% endblock %}
