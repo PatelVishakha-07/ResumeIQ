@@ -6,7 +6,7 @@
 {% block page_title %}Platform overview{% endblock %}
 
 {% block page_desc %}
-Usage and performance metrics across all Job Seeker accounts.
+Usage and performance metrics across all ResumeIQ accounts.
 {% endblock %}
 
 {% block content %}
@@ -15,7 +15,7 @@ Usage and performance metrics across all Job Seeker accounts.
 
 <div class="overview-dashboard">
 
-   
+
     <div class="overview-stats">
 
         <!-- Active Users -->
@@ -93,7 +93,7 @@ Usage and performance metrics across all Job Seeker accounts.
     ========================== -->
     <div class="overview-main-grid">
 
-        <!-- Weekly Resume Chart -->
+        {% comment %} <!-- Weekly Resume Chart -->
         <div class="overview-panel">
 
             <h3 class="overview-panel-title">
@@ -134,7 +134,7 @@ Usage and performance metrics across all Job Seeker accounts.
 
             </div>
 
-        </div>
+        </div> {% endcomment %}
 
 
         <!-- Top Weak Areas -->
@@ -202,46 +202,897 @@ Usage and performance metrics across all Job Seeker accounts.
 
     </div>
 
+
+    <!-- =====================================================
+         NEW RESUMEIQ ANALYTICS
+         Existing dashboard features are NOT removed.
+    ====================================================== -->
+
+    <div class="overview-extra-grid">
+
+
+        <!-- =================================================
+             ATS SCORE DISTRIBUTION
+        ================================================== -->
+
+        <div class="overview-panel rq-analytics-panel">
+
+            <div class="rq-panel-heading">
+
+                <div>
+
+                    <h3 class="overview-panel-title">
+                        ATS Score Distribution
+                    </h3>
+
+                    <p class="rq-panel-subtitle">
+                        How users are performing in ATS analysis.
+                    </p>
+
+                </div>
+
+                <div class="rq-panel-icon rq-blue">
+                    ▥
+                </div>
+
+            </div>
+
+
+            <div class="rq-distribution">
+
+
+                <!-- 80 - 100 -->
+
+                <div class="rq-distribution-row">
+
+                    <div class="rq-distribution-label">
+                        80 – 100
+                    </div>
+
+                    <div class="rq-distribution-track">
+
+                        <div
+                            class="rq-distribution-fill rq-green-fill"
+                            style="width: 28%;">
+                        </div>
+
+                    </div>
+
+                    <div class="rq-distribution-value">
+                        28%
+                    </div>
+
+                    <div class="rq-distribution-count">
+                        (348)
+                    </div>
+
+                </div>
+
+
+                <!-- 60 - 79 -->
+
+                <div class="rq-distribution-row">
+
+                    <div class="rq-distribution-label">
+                        60 – 79
+                    </div>
+
+                    <div class="rq-distribution-track">
+
+                        <div
+                            class="rq-distribution-fill rq-blue-fill"
+                            style="width: 32%;">
+                        </div>
+
+                    </div>
+
+                    <div class="rq-distribution-value">
+                        32%
+                    </div>
+
+                    <div class="rq-distribution-count">
+                        (398)
+                    </div>
+
+                </div>
+
+
+                <!-- 40 - 59 -->
+
+                <div class="rq-distribution-row">
+
+                    <div class="rq-distribution-label">
+                        40 – 59
+                    </div>
+
+                    <div class="rq-distribution-track">
+
+                        <div
+                            class="rq-distribution-fill rq-orange-fill"
+                            style="width: 24%;">
+                        </div>
+
+                    </div>
+
+                    <div class="rq-distribution-value">
+                        24%
+                    </div>
+
+                    <div class="rq-distribution-count">
+                        (299)
+                    </div>
+
+                </div>
+
+
+                <!-- Below 40 -->
+
+                <div class="rq-distribution-row">
+
+                    <div class="rq-distribution-label">
+                        Below 40
+                    </div>
+
+                    <div class="rq-distribution-track">
+
+                        <div
+                            class="rq-distribution-fill rq-red-fill"
+                            style="width: 16%;">
+                        </div>
+
+                    </div>
+
+                    <div class="rq-distribution-value">
+                        16%
+                    </div>
+
+                    <div class="rq-distribution-count">
+                        (199)
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             AI SKILL GAP ANALYSIS
+        ================================================== -->
+
+        <div class="overview-panel rq-analytics-panel">
+
+            <div class="rq-panel-heading">
+
+                <div>
+
+                    <h3 class="overview-panel-title">
+                        AI Skill Gap Analysis
+                    </h3>
+
+                    <p class="rq-panel-subtitle">
+                        Common missing skills across ResumeIQ users.
+                    </p>
+
+                </div>
+
+                <div class="rq-panel-icon rq-purple">
+                    ◈
+                </div>
+
+            </div>
+
+
+            <div class="rq-skill-list">
+
+
+                <!-- Python -->
+
+                <div class="rq-skill-item">
+
+                    <div class="rq-skill-name">
+
+                        <span class="rq-skill-icon rq-skill-blue">
+                            ⌘
+                        </span>
+
+                        Python
+
+                    </div>
+
+                    <div class="rq-skill-bar">
+
+                        <div
+                            class="rq-skill-fill rq-skill-blue-fill"
+                            style="width: 68%;">
+                        </div>
+
+                    </div>
+
+                    <span class="rq-skill-percent">
+                        68%
+                    </span>
+
+                </div>
+
+
+                <!-- SQL -->
+
+                <div class="rq-skill-item">
+
+                    <div class="rq-skill-name">
+
+                        <span class="rq-skill-icon rq-skill-green">
+                            ▤
+                        </span>
+
+                        SQL
+
+                    </div>
+
+                    <div class="rq-skill-bar">
+
+                        <div
+                            class="rq-skill-fill rq-skill-green-fill"
+                            style="width: 52%;">
+                        </div>
+
+                    </div>
+
+                    <span class="rq-skill-percent">
+                        52%
+                    </span>
+
+                </div>
+
+
+                <!-- Communication -->
+
+                <div class="rq-skill-item">
+
+                    <div class="rq-skill-name">
+
+                        <span class="rq-skill-icon rq-skill-purple">
+                            ◎
+                        </span>
+
+                        Communication
+
+                    </div>
+
+                    <div class="rq-skill-bar">
+
+                        <div
+                            class="rq-skill-fill rq-skill-purple-fill"
+                            style="width: 41%;">
+                        </div>
+
+                    </div>
+
+                    <span class="rq-skill-percent">
+                        41%
+                    </span>
+
+                </div>
+
+
+                <!-- React -->
+
+                <div class="rq-skill-item">
+
+                    <div class="rq-skill-name">
+
+                        <span class="rq-skill-icon rq-skill-orange">
+                            ▣
+                        </span>
+
+                        React
+
+                    </div>
+
+                    <div class="rq-skill-bar">
+
+                        <div
+                            class="rq-skill-fill rq-skill-orange-fill"
+                            style="width: 34%;">
+                        </div>
+
+                    </div>
+
+                    <span class="rq-skill-percent">
+                        34%
+                    </span>
+
+                </div>
+
+
+                <!-- Data Analysis -->
+
+                <div class="rq-skill-item">
+
+                    <div class="rq-skill-name">
+
+                        <span class="rq-skill-icon rq-skill-cyan">
+                            ◇
+                        </span>
+
+                        Data Analysis
+
+                    </div>
+
+                    <div class="rq-skill-bar">
+
+                        <div
+                            class="rq-skill-fill rq-skill-cyan-fill"
+                            style="width: 29%;">
+                        </div>
+
+                    </div>
+
+                    <span class="rq-skill-percent">
+                        29%
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TOP USERS
+        ================================================== -->
+
+        <div class="overview-panel rq-analytics-panel rq-top-users-panel">
+
+            <div class="rq-panel-heading">
+
+                <div>
+
+                    <h3 class="overview-panel-title">
+                        Top Users
+                    </h3>
+
+                    <p class="rq-panel-subtitle">
+                        Highest performing ResumeIQ users.
+                    </p>
+
+                </div>
+
+                <div class="rq-panel-icon rq-orange">
+                    ♕
+                </div>
+
+            </div>
+
+
+            <div class="rq-users-table">
+
+
+                <!-- Table Header -->
+
+                <div class="rq-user-table-header">
+
+                    <span>#</span>
+
+                    <span>User</span>
+
+                    <span>ATS</span>
+
+                    <span>Test</span>
+
+                    <span>Score</span>
+
+                </div>
+
+
+                <!-- User 1 -->
+
+                <div class="rq-user-row">
+
+                    <span>
+                        1.
+                    </span>
+
+                    <span class="rq-user-name">
+                        Karan Patel
+                    </span>
+
+                    <span>
+                        91
+                    </span>
+
+                    <span>
+                        88
+                    </span>
+
+                    <span class="rq-score-pill">
+                        92%
+                    </span>
+
+                </div>
+
+
+                <!-- User 2 -->
+
+                <div class="rq-user-row">
+
+                    <span>
+                        2.
+                    </span>
+
+                    <span class="rq-user-name">
+                        Aisha Shah
+                    </span>
+
+                    <span>
+                        87
+                    </span>
+
+                    <span>
+                        91
+                    </span>
+
+                    <span class="rq-score-pill">
+                        89%
+                    </span>
+
+                </div>
+
+
+                <!-- User 3 -->
+
+                <div class="rq-user-row">
+
+                    <span>
+                        3.
+                    </span>
+
+                    <span class="rq-user-name">
+                        Rahul Mehta
+                    </span>
+
+                    <span>
+                        84
+                    </span>
+
+                    <span>
+                        86
+                    </span>
+
+                    <span class="rq-score-pill">
+                        85%
+                    </span>
+
+                </div>
+
+
+                <!-- User 4 -->
+
+                <div class="rq-user-row">
+
+                    <span>
+                        4.
+                    </span>
+
+                    <span class="rq-user-name">
+                        Neha Patel
+                    </span>
+
+                    <span>
+                        82
+                    </span>
+
+                    <span>
+                        83
+                    </span>
+
+                    <span class="rq-score-pill">
+                        82%
+                    </span>
+
+                </div>
+
+
+                <!-- User 5 -->
+
+                <div class="rq-user-row">
+
+                    <span>
+                        5.
+                    </span>
+
+                    <span class="rq-user-name">
+                        Aditya Singh
+                    </span>
+
+                    <span>
+                        78
+                    </span>
+
+                    <span>
+                        80
+                    </span>
+
+                    <span class="rq-score-pill">
+                        78%
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RESUME ANALYSIS TREND
+        ================================================== -->
+
+        <div class="overview-panel rq-analytics-panel">
+
+            <div class="rq-panel-heading">
+
+                <div>
+
+                    <h3 class="overview-panel-title">
+                        Resume Analysis Trend
+                    </h3>
+
+                    <p class="rq-panel-subtitle">
+                        Average ATS score over time.
+                    </p>
+
+                </div>
+
+                <div class="rq-panel-icon rq-blue">
+                    ↗
+                </div>
+
+            </div>
+
+
+            <div class="rq-line-chart">
+
+
+                <!-- Y Axis -->
+
+                <div class="rq-chart-y-axis">
+
+                    <span>100</span>
+
+                    <span>80</span>
+
+                    <span>60</span>
+
+                    <span>40</span>
+
+                    <span>20</span>
+
+                    <span>0</span>
+
+                </div>
+
+
+                <div class="rq-chart-area">
+
+
+                    <!-- Horizontal grid -->
+
+                    <div class="rq-chart-grid rq-grid-100"></div>
+
+                    <div class="rq-chart-grid rq-grid-80"></div>
+
+                    <div class="rq-chart-grid rq-grid-60"></div>
+
+                    <div class="rq-chart-grid rq-grid-40"></div>
+
+                    <div class="rq-chart-grid rq-grid-20"></div>
+
+                    <div class="rq-chart-grid rq-grid-0"></div>
+
+
+                    <!-- Trend line -->
+
+                    <svg
+                        class="rq-trend-svg"
+                        viewBox="0 0 600 220"
+                        preserveAspectRatio="none"
+                    >
+
+                        <defs>
+
+                            <linearGradient
+                                id="rqTrendGradient"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                            >
+
+                                <stop
+                                    offset="0%"
+                                    stop-opacity="0.22"
+                                />
+
+                                <stop
+                                    offset="100%"
+                                    stop-opacity="0"
+                                />
+
+                            </linearGradient>
+
+                        </defs>
+
+
+                        <!-- Area -->
+
+                        <polygon
+                            class="rq-trend-area"
+                            points="
+                                0,175
+                                100,150
+                                200,130
+                                300,108
+                                400,82
+                                500,58
+                                600,35
+                                600,220
+                                0,220
+                            "
+                        />
+
+
+                        <!-- Line -->
+
+                        <polyline
+                            class="rq-trend-line"
+                            points="
+                                0,175
+                                100,150
+                                200,130
+                                300,108
+                                400,82
+                                500,58
+                                600,35
+                            "
+                        />
+
+
+                        <!-- Points -->
+
+                        <circle
+                            cx="0"
+                            cy="175"
+                            r="5"
+                        />
+
+                        <circle
+                            cx="100"
+                            cy="150"
+                            r="5"
+                        />
+
+                        <circle
+                            cx="200"
+                            cy="130"
+                            r="5"
+                        />
+
+                        <circle
+                            cx="300"
+                            cy="108"
+                            r="5"
+                        />
+
+                        <circle
+                            cx="400"
+                            cy="82"
+                            r="5"
+                        />
+
+                        <circle
+                            cx="500"
+                            cy="58"
+                            r="5"
+                        />
+
+                        <circle
+                            cx="600"
+                            cy="35"
+                            r="5"
+                        />
+
+                    </svg>
+
+
+                    <!-- Current score -->
+
+                    <div class="rq-trend-value">
+                        78
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- Chart labels -->
+
+            <div class="rq-chart-labels">
+
+                <span>W1</span>
+
+                <span>W2</span>
+
+                <span>W3</span>
+
+                <span>W4</span>
+
+                <span>W5</span>
+
+                <span>W6</span>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             AI INSIGHTS
+        ================================================== -->
+
+        <div class="overview-panel rq-analytics-panel">
+
+            <div class="rq-panel-heading">
+
+                <div>
+
+                    <h3 class="overview-panel-title">
+                        AI Insights
+                    </h3>
+
+                    <p class="rq-panel-subtitle">
+                        Key insights generated by ResumeIQ AI.
+                    </p>
+
+                </div>
+
+                <div class="rq-panel-icon rq-purple">
+                    ✦
+                </div>
+
+            </div>
+
+
+            <div class="rq-insights-list">
+
+
+                <!-- Insight 1 -->
+
+                <div class="rq-insight">
+
+                    <div class="rq-insight-icon rq-insight-warning">
+                        △
+                    </div>
+
+                    <div>
+                        12 users have ATS scores
+                        below 50.
+                    </div>
+
+                </div>
+
+
+                <!-- Insight 2 -->
+
+                <div class="rq-insight">
+
+                    <div class="rq-insight-icon rq-insight-purple">
+                        &lt;/&gt;
+                    </div>
+
+                    <div>
+                        Python is the most frequently
+                        missing skill.
+                    </div>
+
+                </div>
+
+
+                <!-- Insight 3 -->
+
+                <div class="rq-insight">
+
+                    <div class="rq-insight-icon rq-insight-orange">
+                        ▤
+                    </div>
+
+                    <div>
+                        8 users need better
+                        resume summaries.
+                    </div>
+
+                </div>
+
+
+                <!-- Insight 4 -->
+
+                <div class="rq-insight">
+
+                    <div class="rq-insight-icon rq-insight-green">
+                        ↗
+                    </div>
+
+                    <div>
+                        Resume analysis activity
+                        increased 18% this month.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
     {% comment %} recent Activity {% endcomment %}
 
     <div class="overview-panel overview-activity">
 
-    <h3 class="overview-panel-title">
-        Recent activity
-    </h3>
+        <h3 class="overview-panel-title">
+            Recent activity
+        </h3>
 
-    {% for item in activity_items %}
-    <div class="overview-activity-row">
 
-        <div class="overview-activity-left">
+        {% for item in activity_items %}
 
-            <span class="overview-activity-icon">
-                {{ item.icon }}
-            </span>
+        <div class="overview-activity-row">
 
-            <span>
-                <strong>{{ item.text_bold }}</strong>
-                {{ item.text_rest }}
+            <div class="overview-activity-left">
+
+                <span class="overview-activity-icon">
+                    {{ item.icon }}
+                </span>
+
+                <span>
+                    <strong>{{ item.text_bold }}</strong>
+                    {{ item.text_rest }}
+                </span>
+
+            </div>
+
+            <span class="overview-activity-time">
+                {{ item.time_ago }}
             </span>
 
         </div>
 
-        <span class="overview-activity-time">
-            {{ item.time_ago }}
-        </span>
+        {% empty %}
+
+        <div class="overview-activity-row">
+
+            <span>
+                No recent activity yet.
+            </span>
+
+        </div>
+
+        {% endfor %}
 
     </div>
-    {% empty %}
-    <div class="overview-activity-row">
-        <span>No recent activity yet.</span>
-    </div>
-    {% endfor %}
 
-</div>
-
-
-   
-   
 
 </div>
 
