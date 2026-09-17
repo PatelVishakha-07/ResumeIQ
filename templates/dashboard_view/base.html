@@ -24,9 +24,21 @@
       <div class="who">
         <div class="avatar">{{ nav.avatar_initial }}</div>{{ nav.avatar_name }}
       </div>
-    </div>
+    </div>    
 
-    {% block content %}{% endblock %}
+    {% block content %}
+    
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {% endblock %}
   </main>
 
 </div>

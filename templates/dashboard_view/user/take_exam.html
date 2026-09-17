@@ -128,7 +128,7 @@
 
   const session = (realSession && realSession.length) ? realSession : fallbackSession;
 
-  const sessionTopic = params.get('topic') || 'your generated session'; // still placeholder -- see note below
+  const sessionTopic = "{{ topic|escapejs }}";// still placeholder -- see note below
 
   // =========================================================
   // STATE
@@ -175,7 +175,7 @@
     document.getElementById('progressLabel').textContent = 'Question ' + (current + 1) + ' of ' + session.length;
     document.getElementById('progressFill').style.width = ((current) / session.length) * 100 + '%';
     document.getElementById('qType').textContent = q.type === 'mcq' ? 'MCQ' : q.type === 'behavioral' ? 'Behavioral' : 'Technical';
-    document.getElementById('qDiff').textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    document.getElementById('qDiff').textContent = q.level.charAt(0).toUpperCase() + q.level.slice(1);
     document.getElementById('questionText').textContent = q.q;
 
     document.getElementById('feedbackBox').style.display = 'none';
