@@ -21,30 +21,36 @@ if genai is not None:
     if api_key:
         gemini_client = genai.Client(api_key=api_key)
 
-
 system_prompt = """You are an interview-question generator for a career-readiness platform.
- 
+
 Given a topic, technology, role, or pasted job description, generate interview
 practice questions tailored specifically to that input — never generic filler.
- 
+
 Respond with ONLY valid JSON, no prose, no markdown fences, in exactly this shape:
 {
   "questions": [
     {
-      "type": "mcq" | "behavioral" | "technical",      
+      "type": "mcq" | "behavioral" | "technical",
       "level": "easy" | "intermediate" | "advanced" | "expert",
       "question_text": "the question itself",
-      "options": ["four options"],                     // ONLY present when type is "mcq"
-      "correct_answer": "the correct option, verbatim"  // ONLY present when type is "mcq", must exactly match one entry in options
+      "options": ["four options"],
+      "correct_answer": "the correct option, verbatim"
     }
   ]
 }
- 
-Behavioral questions should be answerable with the STAR method. Technical
-questions should be specific to the tools/technologies implied by the input."""
+
+IMPORTANT:
+- Generate exactly the requested number of questions.
+- Use ONLY the requested question type.
+- Use ONLY the requested difficulty level.
+- Questions must be relevant to the given topic.
+- MCQ questions must contain exactly four options.
+- correct_answer must exactly match one of the options.
+
+Behavioral questions should be answerable with the STAR method.
+Technical questions should be specific to the tools/technologies implied by the input."""
 
 allowed_types = {"mcq", "behavioral", "technical"}
-allowed_difficulties = {"easy", "medium", "hard"}
 allowed_levels = {"easy", "intermediate", "advanced", "expert"}
 allowed_modes = {"mock", "practice"}
 max_questions = 30
@@ -69,8 +75,6 @@ def validate_questions(data):
             return False
         if q.get("level") not in allowed_levels:
             return False
-        if q.get("difficulty") not in allowed_difficulties:
-            return False
         if not isinstance(q.get("question_text"), str) or not q["question_text"].strip():
             return False
 
@@ -88,31 +92,31 @@ def validate_questions(data):
 def fallback_questions(count, allowed_types):
     bank = [
         {
-            "type": "mcq", "difficulty": "medium", "level": "intermediate",
+            "type": "mcq", "level": "intermediate",
             "question_text": "What is the time complexity of binary search on a sorted array?",
             "options": ["O(n)", "O(log n)", "O(n log n)", "O(1)"], "correct_answer": "O(log n)"
         },
         {
-            "type": "mcq", "difficulty": "medium", "level": "intermediate",
+            "type": "mcq", "level": "intermediate",
             "question_text": "In REST APIs, which HTTP method is idempotent?",
             "options": ["POST", "PATCH", "PUT", "CONNECT"], "correct_answer": "PUT"
         },
         {
-            "type": "mcq", "difficulty": "easy", "level": "easy",
+            "type": "mcq", "level": "easy",
             "question_text": "Which of these is NOT a valid HTTP status code range?",
             "options": ["2xx Success", "3xx Redirection", "6xx Client Error", "5xx Server Error"],
             "correct_answer": "6xx Client Error"
         },
         {
-            "type": "behavioral", "difficulty": "medium", "level": "intermediate",
+            "type": "behavioral", "level": "intermediate",
             "question_text": "Tell me about a time you had to push back on a decision made by a teammate or manager."
         },
         {
-            "type": "behavioral", "difficulty": "medium", "level": "intermediate",
+            "type": "behavioral", "level": "intermediate",
             "question_text": "Describe a project where the requirements changed midway through. How did you handle it?"
         },
         {   
-            "type": "technical", "difficulty": "hard", "level": "advanced",
+            "type": "technical", "level": "advanced",
             "question_text": "Walk through how you would design a rate limiter for a public API."
         },
     ]
@@ -138,22 +142,23 @@ def generate_questions(request):
 
     topic_text = (request.POST.get("topic") or "").strip()
     questions_count = request.POST.get("questions_count", 10)
-    question_type = request.POST.getlist("questions_types")
+    question_types = request.POST.get("question_type")
     level = request.POST.get("level", "intermediate")
-    difficulty = request.POST.get("difficulty", "medium")
     mode = request.POST.get("mode", "practice")
 
     try:
         questions_count = int(questions_count)
         if questions_count < 1:
             questions_count = 10
+
+        if questions_count > max_questions:
+            questions_count = max_questions
     except (ValueError, TypeError):
         questions_count = 10
 
-    question_type = [q_type for q_type in question_type if q_type in allowed_types]
- 
-    if not question_type:
-        messages.error(request, "Please select at least one question type.")
+
+    if question_types not in allowed_types:
+        messages.error(request, "Please select a valid question type.")
         return redirect("interview_prep")
  
     if len(topic_text) < 2:
@@ -162,8 +167,6 @@ def generate_questions(request):
 
     if level not in allowed_levels:
         level = "intermediate"
-    if difficulty not in allowed_difficulties:
-        difficulty = "medium"
 
     if mode not in allowed_modes:
         mode = "practice"
@@ -177,8 +180,8 @@ def generate_questions(request):
             user_prompt = (
                 f"Topic / job description:\n{topic_text}\n\n"
                 f"Generate exactly {questions_count} questions.\n"
-                f"Only use these question types: {', '.join(question_type)}.\n"
-                f"Target difficulty: {difficulty}. Target level: {level}."
+                f"Only use these question types: {', '.join(question_types)}.\n"
+                f"Target level: {level}."
             )
             """ response = client.chat.completions.create(            
                 model="gpt-4o-mini",
@@ -208,11 +211,13 @@ def generate_questions(request):
             data = json.loads(raw)
             if validate_questions(data):
                 generated = data["questions"][:questions_count]
-        except Exception:
+        except Exception as e:
+            print("Gemini error:", e)
             generated = None
 
     if generated is None:
-        generated = fallback_questions(questions_count, question_type)
+        # generated = fallback_questions(questions_count, {question_type})
+        generated = fallback_questions(questions_count, {question_types})
 
     created_ids = []
     for q in generated:
@@ -221,7 +226,6 @@ def generate_questions(request):
             resume=None,
             question_text=q["question_text"],
             question_type=q["type"],
-            difficulty=q["difficulty"],
             options=q.get("options"),
             correct_answer=q.get("correct_answer"),
             level=q["level"],
@@ -232,6 +236,8 @@ def generate_questions(request):
 
     request.session["exam_mode"] = mode
     request.session["exam_topic"] = topic_text
+    request.session["exam_level"] = level
+    request.session["exam_question_type"] = question_types
  
     return redirect("take_exam")
 
@@ -256,7 +262,7 @@ def take_exam_view(request):
     for q in questions:
         entry = {
             "type": q.question_type,
-            "difficulty": q.difficulty,
+            "level": q.level,
             "q": q.question_text
         }
         if q.question_type == "mcq":
@@ -265,37 +271,7 @@ def take_exam_view(request):
             entry["correct"] = options.index(q.correct_answer) if q.correct_answer in options else -1
         session_data.append(entry)
 
-    return render(request, "dashboard_view/user/take_exam.html", { "questions_for_js":session_data, "mode": request.session.get("exam_mode", "practice")})
-
-
-def questions_result_view(request):
-    user_id = request.session.get("user_id")
-    if not user_id:
-        messages.error(request, "Please sign in to continue.")
-        return redirect("login")
-
-    question_ids = request.session.get("last_generated_question_ids", [])
-
-    questions = list(Questions.objects.filter(question_id__in=question_ids, user_id=user_id))
-
-    questions.sort(key=lambda q: question_ids.index(q.question_id))
-
-    if not questions:
-        messages.error(request, "No generated questions found — try generating a new session.")
-        return redirect("interview_prep")
-
-    counts = {"mcq": 0, "behavioral": 0, "technical": 0}
-    for q in questions:
-        if q.question_type in counts:   
-            counts[q.question_type] += 1
-
-    return render(request, "dashboard_view/user/question_result.html", {
-            "questions": questions,
-            "mcq_count": counts["mcq"],
-            "behavioral_count": counts["behavioral"],
-            "technical_count": counts["technical"],
-        })
-
+    return render(request, "dashboard_view/user/take_exam.html", { "questions_for_js":session_data, "mode": request.session.get("exam_mode", "practice"), "topic": request.session.get("exam_topic", "your generated session")})
 
 def submit_exam_view(request):
     if request.method != "POST":
