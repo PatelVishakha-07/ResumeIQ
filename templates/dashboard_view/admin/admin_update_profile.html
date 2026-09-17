@@ -1,4 +1,4 @@
-e{% extends "dashboard_view/base.html" %}
+{% extends "dashboard_view/base.html" %}
 
 {% block title %}Update Profile — ResumeIQ Admin{% endblock %}
 
@@ -38,11 +38,17 @@ e{% extends "dashboard_view/base.html" %}
 
             <div class="rq-avatar-wrap">
 
-                <img
-                    id="avatarPreview"
-                    src="{{ admin_user.profile.get_image_url }}"
-                    alt="Profile photo"
-                >
+                {% if profile.profile_image %}
+                    <img
+                        id="avatarPreview"
+                        src="{{ profile.get_image_url }}"
+                        alt="Profile photo"
+                    >
+                {% else %}
+                    <div id="avatarPreview" class="rq-avatar-placeholder">
+                        {{ admin_user.name|first|upper }}
+                    </div>
+                {% endif %}
 
                 <label
                     for="profile_image"
@@ -76,7 +82,7 @@ e{% extends "dashboard_view/base.html" %}
                 {{ admin_user.email }}
             </div>
 
-            {% if admin_user.profile.profile_image %}
+            {% if profile.profile_image %}
             <div class="rq-remove-row">
                 <label>
                     <input
@@ -133,7 +139,7 @@ e{% extends "dashboard_view/base.html" %}
                     name="bio"
                     maxlength="160"
                     placeholder="e.g. Placement Officer overseeing student resume reviews"
-                >{{ admin_user.profile.bio|default:"" }}</textarea>
+                >{{ profile.bio|default:"" }}</textarea>
 
                 <div class="rq-field-foot">
                     <span>Shown on your profile card</span>

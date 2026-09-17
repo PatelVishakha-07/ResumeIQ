@@ -49,9 +49,7 @@ class Profile(models.Model):
         db_table = 'profile'
 
     def get_image_url(self):
-        if self.profile_image and hasattr(self.profile_image, 'url'):
-            return self.profile_image.url
+        if self.profile_image:
+            return f"{self.profile_image.url}?v={self.updated_at.timestamp()}"
+
         return settings.STATIC_URL + 'img/default-avatar.png'
-
-
-    
