@@ -1,0 +1,347 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}Give Exam — ResumeIQ{% endblock %}
+{% block page_title %}Practice session{% endblock %}
+{% block page_desc %}Answer each question — your session adapts based on the mode you picked.{% endblock %}
+
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/interview_prep.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== QUIZ ===== -->
+<div class="card quiz-card" id="quizCard">
+  <div class="quiz-topbar">
+    <span class="hint" id="progressLabel">Question 1 of 6</span>
+    <span class="timer-badge" id="timerBadge" style="display:none;">14:00</span>
+    <button type="button" class="btn ghost sm" id="quitBtn">Quit session</button>
+  </div>
+  <p class="hint" id="topicLabel" style="margin:-8px 0 12px;">Practicing: —</p>
+
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="question-tags">
+    <span class="tag qtype" id="qType">MCQ</span>
+    <span class="tag qdiff" id="qDiff">Medium</span>
+  </div>
+
+  <h3 class="question-text" id="questionText">Loading question…</h3>
+
+  <div id="mcqOptions" class="mcq-options"></div>
+
+  <div id="openAnswer" class="open-answer" style="display:none;">
+    <p class="star-hint" id="starHint" style="display:none;">Structure your answer with the STAR method: Situation, Task, Action, Result.</p>
+    <textarea id="answerText" class="answer-textarea" rows="5" placeholder="Type your answer here..."></textarea>
+  </div>
+
+  <div id="feedbackBox" class="feedback-box" style="display:none;"></div>
+
+  <div class="quiz-actions">
+    <button type="button" class="btn ghost sm" id="skipBtn">Skip</button>
+    <button type="button" class="btn sm" id="submitBtn">Submit answer</button>
+    <button type="button" class="btn sm" id="nextBtn" style="display:none;">Next question →</button>
+  </div>
+</div>
+
+<!-- ===== SCORECARD (hidden until session ends) ===== -->
+<div class="card" id="scoreCard" style="display:none;">
+  <div class="card-head"><h3>Session complete</h3></div>
+
+  <div class="score-hero">
+    <div class="ring-big">
+      <svg width="120" height="120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#D9D4C4" stroke-width="10"/>
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#2F6F4E" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="327" id="scoreRing" transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="num" id="scoreNum">0</div>
+    </div>
+    <div>
+      <p id="scoreSummary" style="margin:0 0 10px;color:#4A4636;">Nice work — here's how it broke down.</p>
+      <div class="breakdown-grid">
+        <div class="breakdown-item"><div class="label">MCQ ACCURACY</div><div class="value" id="mcqScore">—</div></div>
+        <div class="breakdown-item"><div class="label">BEHAVIORAL</div><div class="value" id="behavioralScore">—</div></div>
+        <div class="breakdown-item"><div class="label">TECHNICAL</div><div class="value" id="technicalScore">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="weak-area-callout" id="weakAreaCallout" style="display:none;">
+    <strong>Weakest area:</strong> <span id="weakAreaText">System design</span> — we'll prioritize this in your next session.
+  </div>
+
+  <div class="input-footer" style="margin-top:8px;">
+    <p class="hint">Results are added to your progress tracking automatically.</p>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="btn ghost sm" id="backToSetupBtn">Back to setup</button>
+      <button type="button" class="btn sm" id="practiceWeakBtn">Practice weak areas</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ questions_for_js|json_script:"exam-questions-data" }}
+<script>
+(function () {
+
+  // =========================================================
+  // MODE + QUESTION DATA
+  // =========================================================
+  // Mode: prefer the server-rendered value (set at generation time and
+  // stashed in session), with the URL query param as an override/fallback
+  // for direct navigation during testing.
+  const params = new URLSearchParams(window.location.search);
+  const serverMode = "{{ mode|default:'practice' }}";
+  const urlMode = params.get('mode');
+  const mode = (urlMode === 'mock' || urlMode === 'practice')
+    ? urlMode
+    : (serverMode === 'mock' ? 'mock' : 'practice');
+
+  // Real, backend-generated questions -- rendered safely via Django's
+  // json_script filter (see take_exam_view). Falls back to a small
+  // placeholder set only if this page is opened with nothing generated yet
+  // (e.g. direct navigation during development).
+  const dataEl = document.getElementById('exam-questions-data');
+  const realSession = dataEl ? JSON.parse(dataEl.textContent) : null;
+
+  const fallbackSession = [
+    { type: 'mcq', difficulty: 'medium',
+      q: 'What is the time complexity of binary search on a sorted array?',
+      options: ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'], correct: 1 },
+    { type: 'mcq', difficulty: 'medium',
+      q: 'In REST APIs, which HTTP method is idempotent?',
+      options: ['POST', 'PATCH', 'PUT', 'CONNECT'], correct: 2 },
+    { type: 'behavioral', difficulty: 'medium',
+      q: 'Tell me about a time you had to push back on a decision made by a teammate or manager.' },
+    { type: 'technical', difficulty: 'hard',
+      q: 'Walk through how you would design a rate limiter for a public API.' },
+    { type: 'mcq', difficulty: 'easy',
+      q: 'Which of these is NOT a valid HTTP status code range?',
+      options: ['2xx Success', '3xx Redirection', '6xx Client Error', '5xx Server Error'], correct: 2 },
+    { type: 'behavioral', difficulty: 'medium',
+      q: 'Describe a project where the requirements changed midway through. How did you handle it?' },
+  ];
+
+  const session = (realSession && realSession.length) ? realSession : fallbackSession;
+
+  const sessionTopic = params.get('topic') || 'your generated session'; // still placeholder -- see note below
+
+  // =========================================================
+  // STATE
+  // =========================================================
+  let current = 0;
+  let answers = [];
+  let timerInterval = null;
+  let secondsLeft = Math.max(5, session.length) * 90; // ~1.5 min/question in mock mode
+
+  const quizCard = document.getElementById('quizCard');
+  const scoreCard = document.getElementById('scoreCard');
+
+  document.getElementById('topicLabel').textContent = 'Practicing: ' + sessionTopic;
+
+  if (mode === 'mock') {
+    document.getElementById('timerBadge').style.display = 'inline-block';
+    startTimer();
+  }
+
+  renderQuestion();
+
+  // =========================================================
+  // TIMER (mock mode only)
+  // =========================================================
+  function startTimer() {
+    updateTimerLabel();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(function () {
+      secondsLeft--;
+      updateTimerLabel();
+      if (secondsLeft <= 0) { clearInterval(timerInterval); finishSession(); }
+    }, 1000);
+  }
+  function updateTimerLabel() {
+    const m = Math.floor(secondsLeft / 60), s = secondsLeft % 60;
+    document.getElementById('timerBadge').textContent = m + ':' + String(s).padStart(2, '0');
+  }
+
+  // =========================================================
+  // RENDER A QUESTION
+  // =========================================================
+  function renderQuestion() {
+    const q = session[current];
+    document.getElementById('progressLabel').textContent = 'Question ' + (current + 1) + ' of ' + session.length;
+    document.getElementById('progressFill').style.width = ((current) / session.length) * 100 + '%';
+    document.getElementById('qType').textContent = q.type === 'mcq' ? 'MCQ' : q.type === 'behavioral' ? 'Behavioral' : 'Technical';
+    document.getElementById('qDiff').textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    document.getElementById('questionText').textContent = q.q;
+
+    document.getElementById('feedbackBox').style.display = 'none';
+    document.getElementById('submitBtn').style.display = 'inline-block';
+    document.getElementById('nextBtn').style.display = 'none';
+
+    const mcqBox = document.getElementById('mcqOptions');
+    const openBox = document.getElementById('openAnswer');
+    mcqBox.innerHTML = '';
+
+    if (q.type === 'mcq') {
+      openBox.style.display = 'none';
+      mcqBox.style.display = 'block';
+      q.options.forEach(function (opt, i) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'mcq-option';
+        b.textContent = opt;
+        b.dataset.index = i;
+        b.addEventListener('click', function () {
+          mcqBox.querySelectorAll('.mcq-option').forEach(function (o) { o.classList.remove('selected'); });
+          b.classList.add('selected');
+        });
+        mcqBox.appendChild(b);
+      });
+    } else {
+      mcqBox.style.display = 'none';
+      openBox.style.display = 'block';
+      document.getElementById('answerText').value = '';
+      document.getElementById('starHint').style.display = q.type === 'behavioral' ? 'block' : 'none';
+    }
+  }
+
+  // =========================================================
+  // SUBMIT / FEEDBACK
+  // =========================================================
+  document.getElementById('submitBtn').addEventListener('click', function () {
+    const q = session[current];
+    const record = { type: q.type };
+
+    if (q.type === 'mcq') {
+      const selected = document.querySelector('.mcq-option.selected');
+      const chosenIndex = selected ? Number(selected.dataset.index) : -1;
+      const isCorrect = chosenIndex === q.correct;
+      record.correct = isCorrect;
+
+      document.querySelectorAll('.mcq-option').forEach(function (o, i) {
+        if (i === q.correct) o.classList.add('correct');
+        else if (i === chosenIndex) o.classList.add('incorrect');
+      });
+
+      if (mode === 'practice') {
+        showFeedback(isCorrect
+          ? 'Correct! ' + q.options[q.correct] + ' is right.'
+          : 'Not quite — the correct answer is "' + q.options[q.correct] + '".', isCorrect);
+      }
+    } else {
+      // PLACEHOLDER SCORING for open-ended answers -- a real backend would
+      // send this to the LLM for actual evaluation.
+      const text = document.getElementById('answerText').value.trim();
+      const mockScore = text.length > 40 ? 3 : text.length > 10 ? 2 : 1; // out of 3
+      record.score = mockScore;
+
+      if (mode === 'practice') {
+        const notes = [
+          'Too brief to evaluate well — aim for 3–5 sentences with a concrete outcome.',
+          'Reasonable start — add a specific, measurable result to strengthen this.',
+          'Solid answer — clear structure and a concrete outcome.',
+        ];
+        showFeedback(notes[mockScore - 1], mockScore === 3);
+      }
+    }
+
+    answers.push(record);
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  });
+
+  function showFeedback(text, positive) {
+    const box = document.getElementById('feedbackBox');
+    box.textContent = text;
+    box.className = 'feedback-box ' + (positive ? 'good' : 'warn');
+    box.style.display = 'block';
+  }
+
+  function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
+  }
+
+  document.getElementById('skipBtn').addEventListener('click', function () {
+    answers.push({ type: session[current].type, skipped: true });
+    advance();
+  });
+  document.getElementById('nextBtn').addEventListener('click', advance);
+  document.getElementById('quitBtn').addEventListener('click', function () {
+    clearInterval(timerInterval);
+    window.location.href = "{% url 'interview_prep' %}";
+  });
+
+  function advance() {
+    current++;
+    if (current >= session.length) { finishSession(); return; }
+    renderQuestion();
+  }
+
+  // =========================================================
+  // SCORECARD
+  // =========================================================
+  function finishSession() {
+    clearInterval(timerInterval);
+    quizCard.style.display = 'none';
+    scoreCard.style.display = 'block';
+
+    const mcqAnswers = answers.filter(function (a) { return a.type === 'mcq' && !a.skipped; });
+    const behAnswers = answers.filter(function (a) { return a.type === 'behavioral' && !a.skipped; });
+    const techAnswers = answers.filter(function (a) { return a.type === 'technical' && !a.skipped; });
+
+    const mcqPct = mcqAnswers.length ? Math.round(100 * mcqAnswers.filter(function (a) { return a.correct; }).length / mcqAnswers.length) : null;
+    const behPct = behAnswers.length ? Math.round(100 * behAnswers.reduce(function (s, a) { return s + a.score; }, 0) / (behAnswers.length * 3)) : null;
+    const techPct = techAnswers.length ? Math.round(100 * techAnswers.reduce(function (s, a) { return s + a.score; }, 0) / (techAnswers.length * 3)) : null;
+
+    const parts = [mcqPct, behPct, techPct].filter(function (v) { return v !== null; });
+    const overall = parts.length ? Math.round(parts.reduce(function (a, b) { return a + b; }, 0) / parts.length) : 0;
+
+    document.getElementById('mcqScore').textContent = mcqPct !== null ? mcqPct + '%' : '—';
+    document.getElementById('behavioralScore').textContent = behPct !== null ? behPct + '%' : '—';
+    document.getElementById('technicalScore').textContent = techPct !== null ? techPct + '%' : '—';
+
+    document.getElementById('scoreNum').textContent = overall;
+    document.getElementById('scoreRing').setAttribute('stroke-dashoffset', Math.round(327 * (1 - overall / 100)));
+    document.getElementById('scoreRing').setAttribute('stroke', overall >= 75 ? '#2F6F4E' : overall >= 50 ? '#C98A3E' : '#B23A2E');
+
+    const weakest = [['MCQ', mcqPct], ['Behavioral', behPct], ['Technical', techPct]]
+      .filter(function (pair) { return pair[1] !== null; })
+      .sort(function (a, b) { return a[1] - b[1]; })[0];
+    if (weakest && weakest[1] < 70) {
+      document.getElementById('weakAreaCallout').style.display = 'block';
+      document.getElementById('weakAreaText').textContent = weakest[0];
+    }
+
+    // Persist the result -- this is what actually writes/clears the
+    // weak_areas row server-side. The scorecard above has already rendered
+    // regardless of whether this succeeds; it's not blocking, just best-effort.
+    fetch("{% url 'submit_exam' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        overall: overall,
+        mcq: mcqPct,
+        behavioral: behPct,
+        technical: techPct,
+      }),
+    }).catch(function () { /* non-critical -- scorecard already shown */ });
+  }
+
+  document.getElementById('backToSetupBtn').addEventListener('click', function () {
+    window.location.href = "{% url 'interview_prep' %}";
+  });
+  document.getElementById('practiceWeakBtn').addEventListener('click', function () {
+    window.location.href = "{% url 'interview_prep' %}";
+  });
+
+})();
+</script>
+{% endblock %}

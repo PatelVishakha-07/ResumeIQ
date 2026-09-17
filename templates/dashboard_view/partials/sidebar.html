@@ -53,9 +53,12 @@
       <div class="navitem {% if request.resolver_match.url_name == 'interview_prep' %}active{% endif %}">
         <a href="{% url 'interview_prep' %}"><span class="dot"></span>Interview prep</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'take_test' %}active{% endif %}">
-        <a href=""><span class="dot"></span>Take Test</a>
+
+      <div class="navitem {% if request.resolver_match.url_name == 'quiz_questions' %}active{% endif %}">
+        <a href="{% url 'quiz_questions' %}"><span class="dot"></span>Generate Interview Questions</a>
       </div>
+
+
     </div>
 
     <div class="navgroup">

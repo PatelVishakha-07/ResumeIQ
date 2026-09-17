@@ -1,0 +1,421 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}Generate Questions | ResumeIQ{% endblock %}
+
+{% block page_title %}Generate Questions{% endblock %}
+
+{% block page_desc %}
+Create AI-powered questions based on your topic, level and difficulty.
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+.quiz-container {
+    max-width: 850px;
+}
+
+.quiz-card {
+    background: var(--paper-raised);
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.quiz-intro {
+    margin-bottom: 28px;
+}
+
+.quiz-intro h2 {
+    font-size: 23px;
+    margin-bottom: 7px;
+}
+
+.quiz-intro p {
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.field-group input,
+.field-group select {
+    height: 42px;
+}
+
+.type-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.type-option {
+    position: relative;
+}
+
+.type-option input {
+    position: absolute;
+    opacity: 0;
+}
+
+.type-option label {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    cursor: pointer;
+    background: #fff;
+    transition: 0.2s ease;
+}
+
+.type-option label:hover {
+    border-color: var(--ink);
+}
+
+.type-option input:checked + label {
+    border-color: var(--blue);
+    background: var(--blue-dim);
+}
+
+.type-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.type-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+.generate-area {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.generate-note {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.generate-btn {
+    min-width: 180px;
+    justify-content: center;
+}
+
+.error-message {
+    background: var(--rust-dim);
+    color: var(--rust);
+    border: 1px solid #e2b9ae;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+
+@media(max-width: 700px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .type-options {
+        grid-template-columns: 1fr;
+    }
+
+    .generate-area {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="quiz-container">
+
+    <div class="quiz-card">
+
+        <div class="quiz-intro">
+
+            <span class="eyebrow">
+                AI Question Generator
+            </span>
+
+            <h2>
+                Create Your Question Set
+            </h2>
+
+            <p>
+                Tell ResumeIQ what you want to practice and
+                OpenAI will generate questions specifically
+                for your requirements.
+            </p>
+
+        </div>
+
+
+        {% if error %}
+
+        <div class="error-message">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <form
+            method="POST"
+            action="{% url 'quiz_result' %}"
+        >
+
+            {% csrf_token %}
+
+
+            <div class="form-grid">
+
+
+                <!-- Topic -->
+
+                <div class="field-group full-width">
+
+                    <label
+                        class="field"
+                        for="topic"
+                    >
+                        Topic Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="topic"
+                        name="topic"
+                        placeholder="e.g. Linear Regression"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Level -->
+
+                <div class="field-group">
+
+                    <label
+                        class="field"
+                        for="level"
+                    >
+                        Level
+                    </label>
+
+                    <select
+                        id="level"
+                        name="level"
+                        required
+                    >
+
+                        <option value="">
+                            Select level
+                        </option>
+
+                        <option value="easy">
+                            Easy
+                        </option>
+
+                        <option value="intermediate">
+                            Intermediate
+                        </option>
+
+                        <option value="advanced">
+                            Advanced
+                        </option>
+
+                        <option value="expert">
+                            Expert
+                        </option>
+
+                    </select>
+
+                </div>              
+
+                <!-- Question Type -->
+
+                <div class="field-group full-width">
+
+                    <label class="field">
+                        Question Type
+                    </label>
+
+                    <div class="type-options">
+
+
+                        <!-- MCQ -->
+
+                        <div class="type-option">
+
+                            <input
+                                type="radio"
+                                id="mcq"
+                                name="question_type"
+                                value="mcq"
+                                required
+                            >
+
+                            <label for="mcq">
+
+                                <span class="type-title">
+                                    MCQ
+                                </span>
+
+                                <span class="type-desc">
+                                    Multiple choice questions
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <!-- Behavioral -->
+
+                        <div class="type-option">
+
+                            <input
+                                type="radio"
+                                id="behavioral"
+                                name="question_type"
+                                value="behavioral"
+                            >
+
+                            <label for="behavioral">
+
+                                <span class="type-title">
+                                    Behavioral
+                                </span>
+
+                                <span class="type-desc">
+                                    HR and behavioral interview
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <!-- Technical -->
+
+                        <div class="type-option">
+
+                            <input
+                                type="radio"
+                                id="technical"
+                                name="question_type"
+                                value="technical"
+                            >
+
+                            <label for="technical">
+
+                                <span class="type-title">
+                                    Technical
+                                </span>
+
+                                <span class="type-desc">
+                                    Technical interview questions
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- Number of Questions -->
+
+                <div class="field-group">
+
+                    <label
+                        class="field"
+                        for="num_questions"
+                    >
+                        Number of Questions
+                    </label>
+
+                    <input
+                        type="number"
+                        id="num_questions"
+                        name="num_questions"
+                        min="1"
+                        max="50"
+                        value="10"
+                        required
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <div class="generate-area">
+
+                <div class="generate-note">
+
+                    Questions will be generated using AI.
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn generate-btn"
+                >
+
+                    Generate Questions →
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
