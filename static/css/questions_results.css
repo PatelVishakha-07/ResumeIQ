@@ -1,0 +1,162 @@
+/* question_results.css
+   Page-specific styles for dashboard_view/user/question_results.html.
+   Loaded after dashboard_style.css, so :root tokens (--ink, --blue, --amber,
+   --rust, --line, --muted, --card-tint, etc.) are already available. */
+
+.qr-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.qr-summary-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.qr-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--card-tint);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.qr-pill strong { color: var(--ink); font-weight: 700; margin-right: 4px; }
+
+.qr-pill-mcq { border-color: var(--blue); }
+.qr-pill-mcq strong { color: var(--blue); }
+.qr-pill-behavioral { border-color: var(--amber); }
+.qr-pill-behavioral strong { color: var(--amber); }
+.qr-pill-technical { border-color: var(--rust); }
+.qr-pill-technical strong { color: var(--rust); }
+
+.qr-toolbar-actions { display: flex; gap: 8px; }
+
+/* ---------------------------------------------------------
+   Question cards
+--------------------------------------------------------- */
+.qr-list { display: flex; flex-direction: column; gap: 14px; }
+
+.qr-card { padding: 22px 24px; }
+
+.qr-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.qr-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.qr-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* .tag base styling (padding, radius, font) comes from dashboard_style.css;
+   these just set the per-type color. */
+.qr-type-mcq { background: var(--blue-dim); color: var(--blue); }
+.qr-type-behavioral { background: var(--amber-dim); color: var(--amber); }
+.qr-type-technical { background: var(--rust-dim); color: var(--rust); }
+.qr-tag-muted { background: var(--card-tint); color: var(--muted); }
+
+.qr-question-text {
+  font-family: 'Source Serif 4', serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------
+   MCQ options
+--------------------------------------------------------- */
+.qr-options {
+  list-style-type: upper-alpha;
+  padding-left: 26px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.qr-options li::marker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.qr-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.qr-option-correct {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+  font-weight: 600;
+}
+
+.qr-option-text { flex: 1; }
+
+.qr-correct-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------
+   Behavioral / technical hint boxes
+--------------------------------------------------------- */
+.qr-hint-box {
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: var(--ink);
+}
+.qr-hint-star { background: var(--amber-dim); }
+.qr-hint-technical { background: var(--rust-dim); }
+
+/* ---------------------------------------------------------
+   Print / "Download PDF"
+--------------------------------------------------------- */
+@media print {
+  .sidebar, .topbar, .no-print { display: none !important; }
+  .main { padding: 0 !important; max-width: none !important; }
+  body { background: #fff !important; }
+  .qr-card { break-inside: avoid; border: 1px solid #ccc; }
+  .qr-option-correct {
+    background: #eef1fb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media (max-width: 700px) {
+  .qr-toolbar { flex-direction: column; align-items: stretch; }
+  .qr-toolbar-actions { justify-content: flex-end; }
+}

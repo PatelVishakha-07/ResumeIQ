@@ -9,12 +9,6 @@ class Questions(models.Model):
         ("technical", "Technical")
     ]
 
-    difficulties_list = [
-        ("easy", "Easy"),
-        ("medium", "Medium"),
-        ("hard", "Hard")
-    ]
-
     levels_list = [
         ("easy", "Easy"),
         ("intermediate", "Intermediate"),
@@ -27,12 +21,11 @@ class Questions(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", blank=True, null=True)
 
-    question_test = models.TextField()
+    question_text = models.TextField()
     question_type = models.CharField(max_length=20, choices=questions_type_list)
-    difficultiy = models.CharField(max_length=10, choices=difficulties_list)
     options = models.JSONField(null=True, blank=True)
 
-    correct_answer = models.CharField(max_length=255, null=True, blank=True)
+    correct_answer = models.TextField( null=True, blank=True)
     level = models.CharField(max_length=20, choices=levels_list)
 
     class Meta:

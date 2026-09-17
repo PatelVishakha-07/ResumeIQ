@@ -1,0 +1,471 @@
+{% extends "dashboard_view/base.html" %}
+
+{% block title %}Generated Questions | ResumeIQ{% endblock %}
+
+{% block page_title %}Generated Questions{% endblock %}
+
+{% block page_desc %}
+Practice your AI-generated interview questions and reveal answers when ready.
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+.questions-container {
+    max-width: 900px;
+}
+
+
+/* Summary */
+
+.quiz-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: var(--ink);
+    color: var(--paper);
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    margin-bottom: 18px;
+}
+
+.summary-topic {
+    font-family: 'Source Serif 4', serif;
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.summary-details {
+    margin-top: 5px;
+
+    font-family: 'IBM Plex Mono', monospace;
+
+    font-size: 10px;
+
+    color: #B4B1A0;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.06em;
+}
+
+.summary-count {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+
+/* Question */
+
+.question-card {
+    background: var(--paper-raised);
+
+    border: 1px solid var(--line);
+
+    border-radius: 12px;
+
+    margin-bottom: 15px;
+
+    overflow: hidden;
+}
+
+.question-header {
+    padding: 20px;
+}
+
+.question-number {
+
+    font-family: 'IBM Plex Mono', monospace;
+
+    font-size: 10px;
+
+    color: var(--blue);
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.08em;
+
+    margin-bottom: 9px;
+}
+
+.question-text {
+
+    font-family: 'Source Serif 4', serif;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    line-height: 1.45;
+
+    margin: 0;
+}
+
+
+/* Options */
+
+.options {
+
+    padding: 0 20px 18px;
+
+    display: grid;
+
+    gap: 8px;
+}
+
+.option {
+
+    border: 1px solid var(--line);
+
+    border-radius: 7px;
+
+    padding: 11px 13px;
+
+    font-size: 13px;
+
+    background: var(--paper);
+}
+
+.option-letter {
+
+    font-family: 'IBM Plex Mono', monospace;
+
+    font-weight: 600;
+
+    color: var(--blue);
+
+    margin-right: 8px;
+}
+
+
+/* Answer */
+
+.answer-section {
+
+    border-top: 1px solid var(--line);
+}
+
+.answer-toggle {
+
+    width: 100%;
+
+    border: none;
+
+    background: var(--card-tint);
+
+    padding: 13px 20px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    cursor: pointer;
+
+    font-family: 'Inter', sans-serif;
+
+    font-size: 12.5px;
+
+    font-weight: 600;
+
+    color: var(--ink);
+
+    text-align: left;
+}
+
+.answer-toggle:hover {
+
+    background: var(--blue-dim);
+}
+
+.toggle-arrow {
+
+    transition: transform 0.2s ease;
+}
+
+.answer-toggle.open .toggle-arrow {
+
+    transform: rotate(180deg);
+}
+
+.answer-content {
+
+    display: none;
+
+    padding: 16px 20px 19px;
+
+    background: #fff;
+}
+
+.answer-content.show {
+
+    display: block;
+}
+
+.answer-label {
+
+    font-family: 'IBM Plex Mono', monospace;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.07em;
+
+    font-size: 10px;
+
+    color: var(--blue);
+
+    font-weight: 600;
+
+    margin-bottom: 7px;
+}
+
+.answer-text {
+
+    font-size: 13.5px;
+
+    line-height: 1.6;
+}
+
+
+/* Buttons */
+
+.bottom-actions {
+
+    margin-top: 22px;
+
+    display: flex;
+
+    justify-content: space-between;
+}
+
+
+@media(max-width: 650px) {
+
+    .quiz-summary {
+
+        align-items: flex-start;
+
+    }
+
+    .question-text {
+
+        font-size: 16px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="questions-container">
+
+
+    <!-- Summary -->
+
+    <div class="quiz-summary">
+
+        <div>
+
+            <div class="summary-topic">
+                {{ topic }}
+            </div>
+
+            <div class="summary-details">
+
+                {{ level }}                
+                ·
+                {{ question_type }}
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-count">
+
+            {{ questions|length }}
+
+        </div>
+
+    </div>
+
+
+    <!-- Questions -->
+
+    {% for question in questions %}
+
+    <div class="question-card">
+
+
+        <div class="question-header">
+
+            <div class="question-number">
+
+                Question {{ forloop.counter }}
+
+            </div>
+
+
+            <h2 class="question-text">
+
+                {{ question.question_text }}
+
+            </h2>
+
+        </div>
+
+
+        <!-- MCQ Options -->
+
+        {% if question.options %}
+
+        <div class="options">
+
+            {% for option in question.options %}
+
+            <div class="option">
+
+                <span class="option-letter">
+
+                    {{ forloop.counter }}
+
+                </span>
+
+                {{ option }}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- Answer Toggle -->
+
+        <div class="answer-section">
+
+            <button
+                type="button"
+                class="answer-toggle"
+                onclick="toggleAnswer(this)"
+            >
+
+                <span>
+                    Show Answer
+                </span>
+
+                <span class="toggle-arrow">
+                    ▼
+                </span>
+
+            </button>
+
+
+            <div class="answer-content">
+
+                <div class="answer-label">
+                    Correct Answer
+                </div>
+
+                <div class="answer-text">
+
+                    {{ question.correct_answer }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+    {% empty %}
+
+    <div class="card">
+
+        <h3>
+            No questions found
+        </h3>
+
+        <p class="hint">
+            Try generating a new question set.
+        </p>
+
+    </div>
+
+    {% endfor %}
+
+
+    <div class="bottom-actions">
+
+        <a
+            href="{% url 'quiz_questions' %}"
+            class="btn ghost"
+        >
+            ← Generate Again
+        </a>
+
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+function toggleAnswer(button) {
+
+    const answer = button.nextElementSibling;
+
+    const text = button.querySelector("span:first-child");
+
+    const isOpen = answer.classList.contains("show");
+
+
+    if (isOpen) {
+
+        answer.classList.remove("show");
+
+        button.classList.remove("open");
+
+        text.textContent = "Show Answer";
+
+    }
+
+    else {
+
+        answer.classList.add("show");
+
+        button.classList.add("open");
+
+        text.textContent = "Hide Answer";
+
+    }
+
+}
+
+</script>
+
+{% endblock %}
