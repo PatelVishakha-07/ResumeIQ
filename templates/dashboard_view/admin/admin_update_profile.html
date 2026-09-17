@@ -1,13 +1,25 @@
 {% extends "dashboard_view/base.html" %}
 
 {% block title %}Update Profile — ResumeIQ Admin{% endblock %}
+
 {% block page_title %}Update Profile{% endblock %}
-{% block page_desc %}Update your account name.{% endblock %}
+
+{% block page_desc %}Update your account name, bio, and profile picture.{% endblock %}
 
 {% block content %}
 
+{% load static %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/dashboard_style.css' %}">
+
+<div class="rq-profile-page">
+
+
 {% if messages %}
-<div class="messages" style="margin-bottom:16px;">
+<div class="messages">
     {% for message in messages %}
         <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
             {{ message }}
@@ -16,26 +28,226 @@
 </div>
 {% endif %}
 
-<div class="card">
-    <form method="post">
-        {% csrf_token %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
 
-        <div class="field-group">
-            <label for="name">Full name</label>
-            <input type="text" id="name" name="name" value="{{ admin_user.name }}" required>
-        </div>
+    <div class="rq-grid">
 
-        <div class="field-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" value="{{ admin_user.email }}" disabled>
-            <div class="desc" style="margin-top:4px;">Email cannot be changed.</div>
-        </div>
+        <!-- Identity card -->
+        <aside class="rq-identity">
 
-        <div class="btn-row" style="margin-top:14px;">
-            <button type="submit" class="btn sm">Save changes</button>
-            <a href="{% url 'admin_settings' %}" class="btn sm">Cancel</a>
-        </div>
-    </form>
+            <div class="rq-avatar-wrap">
+
+                {% if profile.profile_image %}
+                    <img
+                        id="avatarPreview"
+                        src="{{ profile.get_image_url }}"
+                        alt="Profile photo"
+                    >
+                {% else %}
+                    <div id="avatarPreview" class="rq-avatar-placeholder">
+                        {{ admin_user.name|first|upper }}
+                    </div>
+                {% endif %}
+
+                <label
+                    for="profile_image"
+                    class="rq-avatar-edit"
+                    title="Change photo"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 2l-1.83 2H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2h-3.17L15 2H9zm3 15a5 5 0 110-10 5 5 0 010 10zm0-2a3 3 0 100-6 3 3 0 000 6z"/>
+                    </svg>
+                </label>
+
+                <input
+                    type="file"
+                    id="profile_image"
+                    name="profile_image"
+                    accept="image/png, image/jpeg, image/webp"
+                    style="display: none;"
+                >
+
+            </div>
+
+            <div class="rq-identity-name">
+                {{ admin_user.name }}
+            </div>
+
+            <span class="rq-role-pill">
+                Administrator
+            </span>
+
+            <div class="rq-identity-email">
+                {{ admin_user.email }}
+            </div>
+
+            {% if profile.profile_image %}
+            <div class="rq-remove-row">
+                <label>
+                    <input
+                        type="checkbox"
+                        name="remove_image"
+                        value="1"
+                    >
+                    Remove current photo
+                </label>
+            </div>
+            {% endif %}
+
+            <div class="rq-hint">
+                JPG, PNG or WEBP · Max 2MB
+            </div>
+
+        </aside>
+
+
+        <!-- Details card -->
+        <section class="rq-details">
+
+            <div class="rq-details-heading">
+                Account details
+            </div>
+
+            <div class="rq-details-subheading"></div>
+
+            <div class="rq-field">
+
+                <label for="name">
+                    Full name
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ admin_user.name }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="rq-field">
+
+                <label for="bio">
+                    Bio
+                </label>
+
+                <textarea
+                    id="bio"
+                    name="bio"
+                    maxlength="160"
+                    placeholder="e.g. Placement Officer overseeing student resume reviews"
+                >{{ profile.bio|default:"" }}</textarea>
+
+                <div class="rq-field-foot">
+                    <span>Shown on your profile card</span>
+                    <span id="bioCount" class="rq-char-count">0/160</span>
+                </div>
+
+            </div>
+
+
+            <div class="rq-field">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    value="{{ admin_user.email }}"
+                    disabled
+                >
+
+                <div class="rq-field-foot">
+                    <span></span>
+                </div>
+
+            </div>
+
+
+            <div class="rq-actions">
+
+                <button
+                    type="submit"
+                    class="rq-btn-primary"
+                >
+                    Save changes
+                </button>
+
+                <a
+                    href="{% url 'admin_settings' %}"
+                    class="rq-btn-secondary"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</form>
+
+
 </div>
+
+<script>
+(function () {
+
+    const fileInput = document.getElementById("profile_image");
+    const preview = document.getElementById("avatarPreview");
+    const bio = document.getElementById("bio");
+    const bioCount = document.getElementById("bioCount");
+
+    fileInput.addEventListener("change", function (e) {
+
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+
+            alert("Image must be 2MB or smaller.");
+
+            e.target.value = "";
+
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (ev) {
+            preview.src = ev.target.result;
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+
+    function updateBioCount() {
+
+        const len = bio.value.length;
+
+        bioCount.textContent = len + "/160";
+
+        bioCount.classList.toggle(
+            "rq-limit",
+            len >= 160
+        );
+
+    }
+
+    bio.addEventListener("input", updateBioCount);
+
+    updateBioCount();
+
+})();
+</script>
 
 {% endblock %}

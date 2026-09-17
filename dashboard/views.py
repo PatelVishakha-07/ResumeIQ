@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render,get_object_or_404
-from accounts.models import User
+from accounts.models import User,Profile
 import os
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -17,6 +17,7 @@ from resume.ats_scoring import compute_ats_score
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 import json
+from django.contrib.auth.decorators import login_required
 
 def dashboard_redirect(request):
     """
@@ -37,7 +38,15 @@ def dashboard_redirect(request):
         'avatar_name': user.name
     }
 
-    if role == "admin":        
+    if role == "admin": 
+        return adminOverview(request)   
+        user = User.objects.get(user_id = user_id)    
+        nav = {
+            'role' : role,
+            'avatar_initial' : user.name[0].upper() if user.name else " ",
+            'avatar_name' : user.name
+
+        }
         return render(request, "dashboard_view/admin/overview.html", {'nav':nav})
         
     return render(request, "dashboard_view/user/overview.html", {'nav':nav})
@@ -75,10 +84,6 @@ def adminOverview(request):
             "timestamp": resume.updated_at,
         })
 
-    # Recent completed analyses
-    # Note: due to name= (not related_name=) on the model FKs,
-    # ResumeAnalysis.analyses actually points to its parent ResumeVersion,
-    # and ResumeVersion.versions actually points to its parent Resume.
 
     recent_analyses = ResumeAnalysis.objects.select_related('analyses__versions__user').order_by('-analyzed_at')[:5]
     for analysis in recent_analyses:
@@ -156,7 +161,7 @@ def userDetail(request, user_id):
             "latest_analysis": latest_analysis,
         })
 
-    # Static placeholder until the WeakArea model/table is wired up
+    # Static placeholder
     weak_areas = [
         {"topic": "System Design", "performance_score": 45.00, "last_updated": "2025-01-22"},
         {"topic": "Data Structures", "performance_score": 58.00, "last_updated": "2025-01-20"},
@@ -164,16 +169,16 @@ def userDetail(request, user_id):
     ]
 
     context = {
-        "nav":{
-            "role":"admin",
-            "avatar_initial": request.user.name[0].upper(),
-            "avatar_name": request.user.name,
-
-        },
-        "detail_user": detail_user,
-        "resume_summaries": resume_summaries,
-        "weak_areas": weak_areas,
-    }
+    "nav": {
+        "role": "admin",
+        "avatar_initial": admin_user.name[0].upper(),
+        "avatar_name": admin_user.name,
+    },
+    "admin_user": admin_user,
+    "detail_user": detail_user,
+    "resume_summaries": resume_summaries,
+    "weak_areas": weak_areas,
+}
     return render(request, "dashboard_view/admin/user_detail.html", context)
 
 def manageStaffRole(request):
@@ -201,6 +206,18 @@ def feedback(request):
             }
         })
 
+def reports(request):
+    admin_id = request.session.get("user_id")
+    admin_user = User.objects.get(user_id=admin_id)
+    return render(request,"dashboard_view/admin/admin_reports.html",
+            {
+                'nav': {
+                    'role': 'admin',
+                    "avatar_initial": admin_user.name[0].upper(),
+                    "avatar_name": admin_user.name,
+                }
+            })
+
 def adminSettings(request):
     admin_id = request.session.get("user_id")
     if not admin_id:
@@ -220,6 +237,8 @@ def adminSettings(request):
     return render(request, "dashboard_view/admin/admin_settings.html", context)
 
 
+
+
 def adminUpdateProfile(request):
     admin_id = request.session.get("user_id")
     if not admin_id:
@@ -227,16 +246,49 @@ def adminUpdateProfile(request):
         return redirect("login")
 
     admin_user = User.objects.get(user_id=admin_id)
+    profile, _ = Profile.objects.get_or_create(user=admin_user)
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
+        bio = request.POST.get("bio", "").strip()
 
         if not name:
             messages.error(request, "Name cannot be empty.")
             return redirect("admin_update_profile")
 
+        # Update name
         admin_user.name = name
         admin_user.save()
+
+        # Update bio
+        profile.bio = bio
+
+        # Remove current photo
+        if request.POST.get("remove_image") == "1" and profile.profile_image:
+            profile.profile_image.delete(save=False)
+            profile.profile_image = None
+
+        # Handle new upload
+        uploaded_image = request.FILES.get("profile_image")
+        if uploaded_image:
+            allowed_types = ["image/jpeg", "image/png", "image/webp"]
+
+            if uploaded_image.content_type not in allowed_types:
+                messages.error(request, "Only JPG, PNG, or WEBP images are allowed.")
+                return redirect("admin_update_profile")
+
+            if uploaded_image.size > 2 * 1024 * 1024:
+                messages.error(request, "Image must be 2MB or smaller.")
+                return redirect("admin_update_profile")
+
+            # Delete old image
+            if profile.profile_image:
+                profile.profile_image.delete(save=False)
+
+            # Save new image
+            profile.profile_image = uploaded_image
+
+        profile.save()
 
         request.session["name"] = admin_user.name
         messages.success(request, "Profile updated successfully.")
@@ -247,8 +299,10 @@ def adminUpdateProfile(request):
             "role": "admin",
             "avatar_initial": admin_user.name[0].upper(),
             "avatar_name": admin_user.name,
+            "avatar_image": profile.get_image_url() if profile.profile_image else None,
         },
         "admin_user": admin_user,
+        "profile": profile,
     }
     return render(request, "dashboard_view/admin/admin_update_profile.html", context)
 

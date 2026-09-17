@@ -24,7 +24,12 @@
       <div class="navitem {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}">
         <a href="{% url 'feedback' %}"><span class="dot"></span>User Feedback</a>
       </div>
+      <div class="navitem {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+        <a href="{% url 'reports' %}"><span class="dot"></span>Reports</a>
+      </div>
     </div>
+
+    
 
     <div class="navgroup">
       <div class="navlabel">Account</div>
