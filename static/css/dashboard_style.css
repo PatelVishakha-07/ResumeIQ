@@ -177,3 +177,395 @@ tr:last-child td{border-bottom:none;}
   .grid.cols-3, .grid.cols-2, .grid.cols-2b{grid-template-columns:1fr;}
   .main{padding:20px;}
 }
+
+
+
+/* admin overview */
+
+.overview-dashboard {
+    width: 100%;
+    color: #222222;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+
+
+.overview-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.overview-stat-card {
+    min-height: 150px;
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    transition: 0.2s ease;
+}
+
+.overview-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Card heading */
+
+.overview-stat-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    color: #555555;
+
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.overview-stat-icon {
+    color: #777777;
+    font-size: 20px;
+}
+
+
+/* Number */
+
+.overview-stat-number {
+    margin-top: 10px;
+
+    color: #202020;
+
+    font-family: "Source Serif 4", Georgia, serif;
+
+    font-size: 32px;
+    font-weight: 600;
+
+    line-height: 1.2;
+}
+
+
+/* Green text */
+
+.overview-stat-positive {
+    margin-top: 5px;
+
+    color: #16a34a;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+/* Normal secondary text */
+
+.overview-stat-description {
+    margin-top: 5px;
+
+    color: #888888;
+
+    font-size: 14px;
+}
+
+
+/* Warning */
+
+.overview-stat-warning {
+    margin-top: 5px;
+
+    color: #e59f00;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+
+
+.overview-main-grid {
+    display: grid;
+
+    grid-template-columns: 1.25fr 1fr;
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+
+
+.overview-panel {
+    padding: 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.overview-panel-title {
+    margin: 0 0 20px 0;
+
+    color: #222222;
+
+    font-size: 16px;
+    font-weight: 650;
+}
+
+
+
+.overview-chart {
+    height: 170px;
+
+    display: flex;
+
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 0 8px;
+}
+
+
+/* Each column */
+
+.overview-bar-column {
+    height: 100%;
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 9px;
+}
+
+
+/* Bars */
+
+.overview-bar {
+    width: 100%;
+    max-width: 42px;
+
+    min-height: 10px;
+
+    background: #0b3b69;
+
+    border-radius: 4px 4px 0 0;
+
+    transition: 0.2s ease;
+}
+
+
+/* Current week */
+
+.overview-bar-active .overview-bar {
+    background: #3182ce;
+}
+
+
+/* Hover */
+
+.overview-bar-column:hover .overview-bar {
+    opacity: 0.8;
+}
+
+
+/* Week labels */
+
+.overview-bar-column span {
+    color: #777777;
+
+    font-size: 14px;
+}
+
+
+
+.overview-weak-item {
+    margin-bottom: 17px;
+}
+
+.overview-weak-item:last-child {
+    margin-bottom: 0;
+}
+
+
+/* Title and percentage */
+
+.overview-weak-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+
+    color: #333333;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.overview-weak-header span:last-child {
+    color: #555555;
+
+    font-weight: 500;
+}
+
+
+/* Progress background */
+
+.overview-progress {
+    width: 100%;
+    height: 6px;
+
+    overflow: hidden;
+
+    background: #e5e7eb;
+
+    border-radius: 20px;
+}
+
+
+/* Progress */
+
+.overview-progress-fill {
+    height: 100%;
+
+    background: #f5b400;
+
+    border-radius: 20px;
+
+    transition: width 0.4s ease;
+}
+
+
+
+.overview-activity {
+    padding-bottom: 8px;
+}
+
+
+.overview-activity-row {
+    min-height: 50px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    border-top: 1px solid #eeeeee;
+
+    color: #333333;
+
+    font-size: 14px;
+}
+
+
+.overview-activity-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* Activity icon */
+
+.overview-activity-icon {
+    width: 28px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #1976d2;
+
+    font-size: 20px;
+}
+
+
+/* Strong text */
+
+.overview-activity-left strong {
+    color: #222222;
+
+    font-weight: 600;
+}
+
+
+/* Time */
+
+.overview-activity-time {
+    flex-shrink: 0;
+
+    color: #888888;
+
+    font-size: 13px;
+}
+
+
+
+@media (max-width: 900px) {
+
+    .overview-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .overview-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+@media (max-width: 600px) {
+
+    .overview-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-stat-card {
+        min-height: 130px;
+    }
+
+    .overview-panel {
+        padding: 16px;
+    }
+
+    .overview-chart {
+        height: 145px;
+        gap: 8px;
+    }
+
+    .overview-bar {
+        max-width: 32px;
+    }
+
+    .overview-activity-row {
+        align-items: flex-start;
+        padding: 12px 0;
+    }
+
+    .overview-activity-time {
+        padding-top: 2px;
+    }
+}
