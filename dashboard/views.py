@@ -38,7 +38,15 @@ def dashboard_redirect(request):
         'avatar_name': user.name
     }
 
-    if role == "admin":        
+    if role == "admin": 
+        return adminOverview(request)   
+        user = User.objects.get(user_id = user_id)    
+        nav = {
+            'role' : role,
+            'avatar_initial' : user.name[0].upper() if user.name else " ",
+            'avatar_name' : user.name
+
+        }
         return render(request, "dashboard_view/admin/overview.html", {'nav':nav})
         
     return render(request, "dashboard_view/user/overview.html", {'nav':nav})
@@ -76,10 +84,6 @@ def adminOverview(request):
             "timestamp": resume.updated_at,
         })
 
-    # Recent completed analyses
-    # Note: due to name= (not related_name=) on the model FKs,
-    # ResumeAnalysis.analyses actually points to its parent ResumeVersion,
-    # and ResumeVersion.versions actually points to its parent Resume.
 
     recent_analyses = ResumeAnalysis.objects.select_related('analyses__versions__user').order_by('-analyzed_at')[:5]
     for analysis in recent_analyses:
@@ -157,7 +161,7 @@ def userDetail(request, user_id):
             "latest_analysis": latest_analysis,
         })
 
-    # Static placeholder until the WeakArea model/table is wired up
+    # Static placeholder
     weak_areas = [
         {"topic": "System Design", "performance_score": 45.00, "last_updated": "2025-01-22"},
         {"topic": "Data Structures", "performance_score": 58.00, "last_updated": "2025-01-20"},
@@ -246,15 +250,20 @@ def adminUpdateProfile(request):
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
+        bio = request.POST.get("bio", "").strip()
 
         if not name:
             messages.error(request, "Name cannot be empty.")
             return redirect("admin_update_profile")
 
+        # Update name
         admin_user.name = name
         admin_user.save()
 
-        # Remove current photo if requested
+        # Update bio
+        profile.bio = bio
+
+        # Remove current photo
         if request.POST.get("remove_image") == "1" and profile.profile_image:
             profile.profile_image.delete(save=False)
             profile.profile_image = None
@@ -263,6 +272,7 @@ def adminUpdateProfile(request):
         uploaded_image = request.FILES.get("profile_image")
         if uploaded_image:
             allowed_types = ["image/jpeg", "image/png", "image/webp"]
+
             if uploaded_image.content_type not in allowed_types:
                 messages.error(request, "Only JPG, PNG, or WEBP images are allowed.")
                 return redirect("admin_update_profile")
@@ -271,8 +281,11 @@ def adminUpdateProfile(request):
                 messages.error(request, "Image must be 2MB or smaller.")
                 return redirect("admin_update_profile")
 
+            # Delete old image
             if profile.profile_image:
                 profile.profile_image.delete(save=False)
+
+            # Save new image
             profile.profile_image = uploaded_image
 
         profile.save()
