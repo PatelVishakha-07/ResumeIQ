@@ -10,3 +10,6 @@ pip install openai pymupdf python-docx python-dotenv
 
 pip install xhtml2pdf
 pip install openai
+
+
+pip install google-genai

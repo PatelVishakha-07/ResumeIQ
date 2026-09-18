@@ -1,0 +1,285 @@
+{% extends "dashboard_view/base.html" %}
+{% load static %}
+
+{% block title %}LinkedIn Summary Generator — ResumeIQ{% endblock %}
+{% block page_title %}LinkedIn summary{% endblock %}
+{% block page_desc %}A few quick questions from ResumeIQ AI, then we'll draft it from your resume.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/linkedin_summary_wizard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<main class="li-main">
+  <div class="li-wizard" id="liWizard" data-max-questions="5">
+
+    <!-- Step 0: pick a resume -->
+    <section class="li-step" data-step="setup">
+      <p class="li-eyebrow">LinkedIn summary</p>
+      <h1 class="li-heading">Which resume should this be based on?</h1>
+      <p class="li-subtext">ResumeIQ AI will ask a few follow-up questions based on what it reads here.</p>
+
+      <div class="li-field">
+        <select id="liVersionSelect" class="li-input">
+          {% for v in versions %}
+            <option value="{{ v.version_id }}">v{{ v.version_number }} — {{ v.versions.file_path|slice:"-40:" }}</option>
+          {% empty %}
+            <option disabled>No resumes uploaded yet</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="li-actions">
+        <a href="{% url 'export_documents' %}" class="li-btn li-btn--ghost">Back</a>
+        <button type="button" class="li-btn li-btn--primary" id="liStart">Start</button>
+      </div>
+    </section>
+
+    <!-- Step 1: AI-asked questions, one at a time -->
+    <section class="li-step" data-step="qa" hidden>
+      <div class="li-progress">
+        <div class="li-progress__bar" id="liProgressBar"></div>
+      </div>
+      <p class="li-step-label" id="liStepLabel"></p>
+
+      <h2 class="li-question">
+        <span class="li-spin" id="liQuestionLoading" hidden>&#9696;</span>
+        <span id="liQuestionText"></span>
+      </h2>
+      <p class="li-question-hint" id="liHint"></p>
+
+      <div class="li-field" id="liFieldWrap"></div>
+
+      <div class="li-actions">
+        <button type="button" class="li-btn li-btn--ghost" id="liBack">Back</button>
+        <div>
+          <button type="button" class="li-btn li-btn--ghost" id="liFinishEarly" hidden>Generate now</button>
+          <button type="button" class="li-btn li-btn--primary" id="liNext">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: generating -->
+    <section class="li-step" data-step="generating" hidden>
+      <p class="li-eyebrow">Working</p>
+      <h2 class="li-heading"><span class="li-spin">&#9696;</span> Writing your LinkedIn summary&hellip;</h2>
+    </section>
+
+    <!-- Step 3: result -->
+    <section class="li-step" data-step="result" hidden>
+      <p class="li-eyebrow">Draft ready</p>
+      <h2 class="li-heading">Your LinkedIn summary</h2>
+
+      <div class="li-result-card">
+        <textarea class="li-result-text" id="liResultText" rows="16"></textarea>
+      </div>
+
+      <form method="post" id="liSaveForm" action="">
+        {% csrf_token %}
+        <input type="hidden" name="content" id="liContentHidden">
+        <div class="li-actions">
+          <button type="button" class="li-btn li-btn--ghost" id="liStartOver">Start over</button>
+          <button type="button" class="li-btn li-btn--ghost" id="liCopy">Copy text</button>
+          <button type="submit" class="li-btn li-btn--primary">Save &amp; download PDF</button>
+        </div>
+      </form>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var EXPORT_TYPE = "linkedin";
+  var wizard = document.getElementById("liWizard");
+  var maxQuestions = parseInt(wizard.dataset.maxQuestions, 10) || 5;
+  var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  var steps = {
+    setup: wizard.querySelector('[data-step="setup"]'),
+    qa: wizard.querySelector('[data-step="qa"]'),
+    generating: wizard.querySelector('[data-step="generating"]'),
+    result: wizard.querySelector('[data-step="result"]')
+  };
+  function showStep(name) {
+    Object.keys(steps).forEach(function (key) { steps[key].hidden = key !== name; });
+  }
+
+  var state = { versionId: null, qaHistory: [], current: null };
+
+  var fieldWrap = document.getElementById("liFieldWrap");
+  var backBtn = document.getElementById("liBack");
+  var nextBtn = document.getElementById("liNext");
+  var finishEarlyBtn = document.getElementById("liFinishEarly");
+  var progressBar = document.getElementById("liProgressBar");
+  var stepLabel = document.getElementById("liStepLabel");
+  var questionText = document.getElementById("liQuestionText");
+  var questionLoading = document.getElementById("liQuestionLoading");
+  var hintEl = document.getElementById("liHint");
+
+  document.getElementById("liStart").addEventListener("click", function () {
+    var sel = document.getElementById("liVersionSelect");
+    if (!sel.value) return;
+    state.versionId = sel.value;
+    showStep("qa");
+    fetchNextQuestion();
+  });
+
+  function renderField(q) {
+    fieldWrap.innerHTML = "";
+    var input;
+    if (q.field_type === "textarea") {
+      input = document.createElement("textarea");
+      input.rows = 5;
+    } else if (q.field_type === "select" && q.options && q.options.length) {
+      input = document.createElement("select");
+      var blank = document.createElement("option");
+      blank.value = ""; blank.textContent = "Select one\u2026"; blank.disabled = true; blank.selected = true;
+      input.appendChild(blank);
+      q.options.forEach(function (opt) {
+        var o = document.createElement("option");
+        o.value = opt; o.textContent = opt;
+        input.appendChild(o);
+      });
+    } else {
+      input = document.createElement("input");
+      input.type = "text";
+    }
+    input.className = "li-input";
+    input.id = "liCurrentInput";
+    fieldWrap.appendChild(input);
+    input.focus();
+  }
+
+  async function fetchNextQuestion() {
+    questionLoading.hidden = false;
+    questionText.textContent = "";
+    hintEl.textContent = "";
+    fieldWrap.innerHTML = "";
+    nextBtn.disabled = true;
+
+    stepLabel.textContent = "Question " + (state.qaHistory.length + 1) + " of up to " + maxQuestions;
+    progressBar.style.width = ((state.qaHistory.length / maxQuestions) * 100) + "%";
+
+    try {
+      var formData = new FormData();
+      formData.append("version_id", state.versionId);
+      formData.append("export_type", EXPORT_TYPE);
+      formData.append("qa_history", JSON.stringify(state.qaHistory));
+
+      var res = await fetch("/export/next-question/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+      var data = await res.json();
+
+      if (data.done || state.qaHistory.length >= maxQuestions) {
+        generateFinal();
+        return;
+      }
+
+      state.current = data;
+      questionText.textContent = data.question;
+      hintEl.textContent = data.hint || "";
+      hintEl.hidden = !data.hint;
+      renderField(data);
+
+      finishEarlyBtn.hidden = state.qaHistory.length < 2;
+      backBtn.disabled = state.qaHistory.length === 0;
+      nextBtn.textContent = "Next";
+    } catch (e) {
+      console.error(e);
+      questionText.textContent = "Something went wrong loading the next question.";
+    } finally {
+      questionLoading.hidden = true;
+      nextBtn.disabled = false;
+    }
+  }
+
+  function readCurrentAnswer() {
+    var el = document.getElementById("liCurrentInput");
+    return el ? el.value.trim() : "";
+  }
+
+  nextBtn.addEventListener("click", function () {
+    var answer = readCurrentAnswer();
+    if (!answer) {
+      var el = document.getElementById("liCurrentInput");
+      if (el) el.classList.add("li-input--error");
+      return;
+    }
+    state.qaHistory.push({ question: state.current.question, answer: answer });
+    fetchNextQuestion();
+  });
+
+  backBtn.addEventListener("click", function () {
+    if (state.qaHistory.length === 0) {
+      showStep("setup");
+      return;
+    }
+    var last = state.qaHistory.pop();
+    state.current = { question: last.question, field_type: "text", options: [] };
+    questionText.textContent = last.question;
+    renderField(state.current);
+    document.getElementById("liCurrentInput").value = last.answer;
+    stepLabel.textContent = "Question " + (state.qaHistory.length + 1) + " of up to " + maxQuestions;
+  });
+
+  finishEarlyBtn.addEventListener("click", function () {
+    var answer = readCurrentAnswer();
+    if (answer && state.current) {
+      state.qaHistory.push({ question: state.current.question, answer: answer });
+    }
+    generateFinal();
+  });
+
+  async function generateFinal() {
+    showStep("generating");
+    try {
+      var formData = new FormData();
+      formData.append("version_id", state.versionId);
+      formData.append("export_type", EXPORT_TYPE);
+      formData.append("qa_history", JSON.stringify(state.qaHistory));
+
+      var res = await fetch("/export/generate-final/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+      var data = await res.json();
+
+      document.getElementById("liResultText").value = data.content || "";
+      document.getElementById("liSaveForm").action = "/export/save/" + state.versionId + "/" + EXPORT_TYPE + "/";
+      showStep("result");
+    } catch (e) {
+      console.error(e);
+      showStep("qa");
+    }
+  }
+
+  document.getElementById("liStartOver").addEventListener("click", function () {
+    state = { versionId: state.versionId, qaHistory: [], current: null };
+    showStep("qa");
+    fetchNextQuestion();
+  });
+
+  document.getElementById("liCopy").addEventListener("click", function (e) {
+    var text = document.getElementById("liResultText").value;
+    navigator.clipboard.writeText(text).then(function () {
+      var btn = e.currentTarget;
+      var original = btn.textContent;
+      btn.textContent = "Copied";
+      setTimeout(function () { btn.textContent = original; }, 1400);
+    });
+  });
+
+  document.getElementById("liSaveForm").addEventListener("submit", function () {
+    document.getElementById("liContentHidden").value = document.getElementById("liResultText").value;
+  });
+})();
+</script>
+{% endblock %}

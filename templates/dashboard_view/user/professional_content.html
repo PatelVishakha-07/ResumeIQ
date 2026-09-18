@@ -1,0 +1,38 @@
+{% extends "dashboard_view/base.html" %}
+{% load static %}
+
+{% block title %}Professional Documents — ResumeIQ{% endblock %}
+{% block page_title %}Professional documents{% endblock %}
+{% block page_desc %}Generate a tailored cover letter or LinkedIn summary from your resume, with a few quick questions from ResumeIQ AI.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/professional_content.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<main class="rq-main">
+  <div class="rq-choice-grid">
+
+    <a href="{% url 'cover_letter_wizard' %}" class="rq-choice-card" style="text-decoration:none; color:inherit; display:block;">
+      <svg class="rq-choice-card__icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <rect x="6" y="9" width="28" height="22" rx="2" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M7 11l13 10 13-10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="rq-choice-card__title">Cover letter</span>
+      <span class="rq-choice-card__desc">Tailored to one company and role, built from your resume and the job description.</span>
+    </a>
+
+    <a href="{% url 'linkedin_wizard' %}" class="rq-choice-card" style="text-decoration:none; color:inherit; display:block;">
+      <svg class="rq-choice-card__icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <circle cx="20" cy="14" r="6" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M8 33c1.5-7 6-10.5 12-10.5S30.5 26 32 33" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="rq-choice-card__title">LinkedIn summary</span>
+      <span class="rq-choice-card__desc">A short "About" section that highlights your skills, experience, and goals.</span>
+    </a>
+
+  </div>
+</main>
+
+{% endblock %}

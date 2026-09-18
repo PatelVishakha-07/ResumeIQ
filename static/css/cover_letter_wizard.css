@@ -1,0 +1,204 @@
+/* cover_letter_wizard.css
+   =========================
+   Styles for the Cover Letter generator page only.
+   Accent color: indigo/blue, to match the cover-letter icon color
+   used on the export chooser page.
+*/
+
+.cl-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 8px 0 48px;
+}
+
+.cl-wizard {
+    display: flex;
+    flex-direction: column;
+}
+
+.cl-step {
+    background: #ffffff;
+    border: 1px solid #e7e5df;
+    border-radius: 14px;
+    padding: 32px;
+}
+
+.cl-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5d6cff;
+    margin: 0 0 8px;
+}
+
+.cl-heading {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    line-height: 1.3;
+    color: #1a1a1f;
+}
+
+.cl-subtext {
+    font-size: 13.5px;
+    color: #6b6b76;
+    margin: 0 0 24px;
+}
+
+/* ---------- Progress bar ---------- */
+
+.cl-progress {
+    height: 4px;
+    background: #eceafd;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.cl-progress__bar {
+    height: 100%;
+    width: 0%;
+    background: #5d6cff;
+    border-radius: 999px;
+    transition: width 0.25s ease;
+}
+
+.cl-step-label {
+    font-size: 12px;
+    color: #9c9ca6;
+    margin: 0 0 16px;
+}
+
+/* ---------- Question + field ---------- */
+
+.cl-question {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1a1a1f;
+}
+
+.cl-question-hint {
+    font-size: 12.5px;
+    color: #8a8a94;
+    margin: 0 0 16px;
+}
+
+.cl-field {
+    margin-bottom: 20px;
+}
+
+.cl-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1a1a1f;
+    background: #ffffff;
+    border: 1px solid #d8d6cf;
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.cl-input:focus {
+    border-color: #5d6cff;
+}
+
+.cl-input--error {
+    border-color: #d94f4f !important;
+}
+
+textarea.cl-input {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* ---------- Actions / buttons ---------- */
+
+.cl-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.cl-btn {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 10px;
+    padding: 9px 18px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.cl-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cl-btn--primary {
+    background: #5d6cff;
+    color: #ffffff;
+}
+
+.cl-btn--primary:hover:not(:disabled) {
+    background: #3b47cc;
+}
+
+.cl-btn--ghost {
+    background: #ffffff;
+    color: #1a1a1f;
+    border-color: #d8d6cf;
+}
+
+.cl-btn--ghost:hover:not(:disabled) {
+    background: #f6f5f2;
+}
+
+/* ---------- Result step ---------- */
+
+.cl-result-card {
+    margin-bottom: 16px;
+}
+
+.cl-result-text {
+    width: 100%;
+    min-height: 320px;
+    font-family: inherit;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #1a1a1f;
+    background: #fdfcfa;
+    border: 1px solid #e7e5df;
+    border-radius: 10px;
+    padding: 16px;
+    resize: vertical;
+    white-space: pre-wrap;
+}
+
+/* ---------- Loading spinner ---------- */
+
+.cl-spin {
+    display: inline-block;
+    animation: cl-spin-anim 0.8s linear infinite;
+    font-size: 16px;
+    line-height: 1;
+    color: #5d6cff;
+}
+
+@keyframes cl-spin-anim {
+    to { transform: rotate(360deg); }
+}

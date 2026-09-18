@@ -6,6 +6,16 @@
 
 {% block content %}
 
+{% load static %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/dashboard_style.css' %}">
+
+<div class="rq-settings-page">
+
+
 {% if messages %}
 <div class="messages" style="margin-bottom:16px;">
     {% for message in messages %}
@@ -17,19 +27,89 @@
 {% endif %}
 
 <div class="card">
-    <a href="{% url 'admin_update_profile' %}" style="text-decoration:none; color:inherit;">
-        <div class="navitem" style="padding:16px 0; border-bottom:1px solid #eee;">
-            <strong>Update Profile</strong>
-            <div class="desc" style="margin-top:4px;">Change your display name.</div>
+
+    <div class="rq-summary">
+
+        <img
+            src="{{ admin_user.profile.get_image_url }}"
+            alt="Profile photo"
+        >
+
+        <div>
+
+            <div class="rq-summary-name">
+                {{ admin_user.name }}
+            </div>
+
+            <span class="rq-summary-role">
+                Administrator
+            </span>
+
+            <div class="rq-summary-email">
+                {{ admin_user.email }}
+            </div>
+
+            {% if admin_user.profile.bio %}
+            <div class="rq-summary-bio">
+                {{ admin_user.profile.bio }}
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <a
+        href="{% url 'admin_update_profile' %}"
+        class="rq-navitem"
+    >
+        <div class="rq-navitem-inner">
+
+            <div>
+                <div class="rq-navitem-title">
+                    Update Profile
+                </div>
+
+                <div class="rq-navitem-desc">
+                    Change your display name, bio, and profile picture.
+                </div>
+            </div>
+
+            <span class="rq-navitem-arrow">
+                ›
+            </span>
+
         </div>
     </a>
 
-    <a href="{% url 'admin_change_password' %}" style="text-decoration:none; color:inherit;">
-        <div class="navitem" style="padding:16px 0;">
-            <strong>Change Password</strong>
-            <div class="desc" style="margin-top:4px;">Update your account password.</div>
+
+    <a
+        href="{% url 'admin_change_password' %}"
+        class="rq-navitem"
+    >
+        <div class="rq-navitem-inner">
+
+            <div>
+                <div class="rq-navitem-title">
+                    Change Password
+                </div>
+
+                <div class="rq-navitem-desc">
+                    Update your account password.
+                </div>
+            </div>
+
+            <span class="rq-navitem-arrow">
+                ›
+            </span>
+
         </div>
     </a>
+
+</div>
+
+
 </div>
 
 {% endblock %}
