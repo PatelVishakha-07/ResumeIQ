@@ -15,8 +15,16 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-# OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_FALLBACK_MODELS = [
+    "models/gemini-3.7-flash",
+    "models/gemini-3.8-flash",
+    "models/gemini-3.5-flash",
+    "models/gemini-3.1-flash-lite",
+]
+
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,6 +55,7 @@ INSTALLED_APPS = [
     'resume',
     'dashboard',
     'questions',
+    'professionalContent',
 ]
 
 MIDDLEWARE = [

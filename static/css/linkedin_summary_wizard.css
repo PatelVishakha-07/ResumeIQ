@@ -1,0 +1,199 @@
+
+
+.li-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 8px 0 48px;
+}
+
+.li-wizard {
+    display: flex;
+    flex-direction: column;
+}
+
+.li-step {
+    background: #ffffff;
+    border: 1px solid #e7e5df;
+    border-radius: 14px;
+    padding: 32px;
+}
+
+.li-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0f9d8f;
+    margin: 0 0 8px;
+}
+
+.li-heading {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    line-height: 1.3;
+    color: #1a1a1f;
+}
+
+.li-subtext {
+    font-size: 13.5px;
+    color: #6b6b76;
+    margin: 0 0 24px;
+}
+
+/* ---------- Progress bar ---------- */
+
+.li-progress {
+    height: 4px;
+    background: #dff5f2;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.li-progress__bar {
+    height: 100%;
+    width: 0%;
+    background: #0f9d8f;
+    border-radius: 999px;
+    transition: width 0.25s ease;
+}
+
+.li-step-label {
+    font-size: 12px;
+    color: #9c9ca6;
+    margin: 0 0 16px;
+}
+
+/* ---------- Question + field ---------- */
+
+.li-question {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1a1a1f;
+}
+
+.li-question-hint {
+    font-size: 12.5px;
+    color: #8a8a94;
+    margin: 0 0 16px;
+}
+
+.li-field {
+    margin-bottom: 20px;
+}
+
+.li-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1a1a1f;
+    background: #ffffff;
+    border: 1px solid #d8d6cf;
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.li-input:focus {
+    border-color: #0f9d8f;
+}
+
+.li-input--error {
+    border-color: #d94f4f !important;
+}
+
+textarea.li-input {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* ---------- Actions / buttons ---------- */
+
+.li-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.li-btn {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 10px;
+    padding: 9px 18px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.li-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.li-btn--primary {
+    background: #0f9d8f;
+    color: #ffffff;
+}
+
+.li-btn--primary:hover:not(:disabled) {
+    background: #0c7d72;
+}
+
+.li-btn--ghost {
+    background: #ffffff;
+    color: #1a1a1f;
+    border-color: #d8d6cf;
+}
+
+.li-btn--ghost:hover:not(:disabled) {
+    background: #f6f5f2;
+}
+
+/* ---------- Result step ---------- */
+
+.li-result-card {
+    margin-bottom: 16px;
+}
+
+.li-result-text {
+    width: 100%;
+    min-height: 320px;
+    font-family: inherit;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #1a1a1f;
+    background: #fdfcfa;
+    border: 1px solid #e7e5df;
+    border-radius: 10px;
+    padding: 16px;
+    resize: vertical;
+    white-space: pre-wrap;
+}
+
+/* ---------- Loading spinner ---------- */
+
+.li-spin {
+    display: inline-block;
+    animation: li-spin-anim 0.8s linear infinite;
+    font-size: 16px;
+    line-height: 1;
+    color: #0f9d8f;
+}
+
+@keyframes li-spin-anim {
+    to { transform: rotate(360deg); }
+}

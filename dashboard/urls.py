@@ -27,8 +27,5 @@ urlpatterns = [
     path('admin_panel/reports', views.reports, name="reports"),
     path('admin_panel/feedback', views.feedback, name="feedback"),
 
-    path('admin_panel/settings/', views.adminSettings, name='admin_settings'),
-    path('admin_panel/settings/profile/', views.adminUpdateProfile, name='admin_update_profile'),
-    path('admin_panel/settings/password/', views.adminChangePassword, name='admin_change_password'),
 
 ]
