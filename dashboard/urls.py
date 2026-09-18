@@ -24,10 +24,8 @@ urlpatterns = [
     path('admin_panel/manage_user/<int:user_id>/toggle/',views.toggleUserStatus,name='toggle_user_status'),
     path('admin_panel/manage_user/<int:user_id>/', views.userDetail, name='user_detail'),
     path('admin_panel/manage_staffRole', views.manageStaffRole, name="manageStaffRole"),
+    path('admin_panel/reports', views.reports, name="reports"),
     path('admin_panel/feedback', views.feedback, name="feedback"),
 
-    path('admin_panel/settings/', views.adminSettings, name='admin_settings'),
-    path('admin_panel/settings/profile/', views.adminUpdateProfile, name='admin_update_profile'),
-    path('admin_panel/settings/password/', views.adminChangePassword, name='admin_change_password'),
 
 ]

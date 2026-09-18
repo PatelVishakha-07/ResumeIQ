@@ -1,0 +1,285 @@
+{% extends "dashboard_view/base.html" %}
+{% load static %}
+
+{% block title %}Cover Letter Generator — ResumeIQ{% endblock %}
+{% block page_title %}Cover letter{% endblock %}
+{% block page_desc %}A few quick questions from ResumeIQ AI, then we'll draft it from your resume.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cover_letter_wizard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<main class="cl-main">
+  <div class="cl-wizard" id="clWizard" data-max-questions="5">
+
+    <!-- Step 0: pick a resume -->
+    <section class="cl-step" data-step="setup">
+      <p class="cl-eyebrow">Cover letter</p>
+      <h1 class="cl-heading">Which resume should this be based on?</h1>
+      <p class="cl-subtext">ResumeIQ AI will ask a few follow-up questions based on what it reads here.</p>
+
+      <div class="cl-field">
+        <select id="clVersionSelect" class="cl-input">
+          {% for v in versions %}
+            <option value="{{ v.version_id }}">v{{ v.version_number }} — {{ v.versions.file_path|slice:"-40:" }}</option>
+          {% empty %}
+            <option disabled>No resumes uploaded yet</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="cl-actions">
+        <a href="{% url 'export_documents' %}" class="cl-btn cl-btn--ghost">Back</a>
+        <button type="button" class="cl-btn cl-btn--primary" id="clStart">Start</button>
+      </div>
+    </section>
+
+    <!-- Step 1: AI-asked questions, one at a time -->
+    <section class="cl-step" data-step="qa" hidden>
+      <div class="cl-progress">
+        <div class="cl-progress__bar" id="clProgressBar"></div>
+      </div>
+      <p class="cl-step-label" id="clStepLabel"></p>
+
+      <h2 class="cl-question">
+        <span class="cl-spin" id="clQuestionLoading" hidden>&#9696;</span>
+        <span id="clQuestionText"></span>
+      </h2>
+      <p class="cl-question-hint" id="clHint"></p>
+
+      <div class="cl-field" id="clFieldWrap"></div>
+
+      <div class="cl-actions">
+        <button type="button" class="cl-btn cl-btn--ghost" id="clBack">Back</button>
+        <div>
+          <button type="button" class="cl-btn cl-btn--ghost" id="clFinishEarly" hidden>Generate now</button>
+          <button type="button" class="cl-btn cl-btn--primary" id="clNext">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: generating -->
+    <section class="cl-step" data-step="generating" hidden>
+      <p class="cl-eyebrow">Working</p>
+      <h2 class="cl-heading"><span class="cl-spin">&#9696;</span> Writing your cover letter&hellip;</h2>
+    </section>
+
+    <!-- Step 3: result -->
+    <section class="cl-step" data-step="result" hidden>
+      <p class="cl-eyebrow">Draft ready</p>
+      <h2 class="cl-heading">Your cover letter</h2>
+
+      <div class="cl-result-card">
+        <textarea class="cl-result-text" id="clResultText" rows="16"></textarea>
+      </div>
+
+      <form method="post" id="clSaveForm" action="">
+        {% csrf_token %}
+        <input type="hidden" name="content" id="clContentHidden">
+        <div class="cl-actions">
+          <button type="button" class="cl-btn cl-btn--ghost" id="clStartOver">Start over</button>
+          <button type="button" class="cl-btn cl-btn--ghost" id="clCopy">Copy text</button>
+          <button type="submit" class="cl-btn cl-btn--primary">Save &amp; download PDF</button>
+        </div>
+      </form>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var EXPORT_TYPE = "cover_letter";
+  var wizard = document.getElementById("clWizard");
+  var maxQuestions = parseInt(wizard.dataset.maxQuestions, 10) || 5;
+  var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  var steps = {
+    setup: wizard.querySelector('[data-step="setup"]'),
+    qa: wizard.querySelector('[data-step="qa"]'),
+    generating: wizard.querySelector('[data-step="generating"]'),
+    result: wizard.querySelector('[data-step="result"]')
+  };
+  function showStep(name) {
+    Object.keys(steps).forEach(function (key) { steps[key].hidden = key !== name; });
+  }
+
+  var state = { versionId: null, qaHistory: [], current: null };
+
+  var fieldWrap = document.getElementById("clFieldWrap");
+  var backBtn = document.getElementById("clBack");
+  var nextBtn = document.getElementById("clNext");
+  var finishEarlyBtn = document.getElementById("clFinishEarly");
+  var progressBar = document.getElementById("clProgressBar");
+  var stepLabel = document.getElementById("clStepLabel");
+  var questionText = document.getElementById("clQuestionText");
+  var questionLoading = document.getElementById("clQuestionLoading");
+  var hintEl = document.getElementById("clHint");
+
+  document.getElementById("clStart").addEventListener("click", function () {
+    var sel = document.getElementById("clVersionSelect");
+    if (!sel.value) return;
+    state.versionId = sel.value;
+    showStep("qa");
+    fetchNextQuestion();
+  });
+
+  function renderField(q) {
+    fieldWrap.innerHTML = "";
+    var input;
+    if (q.field_type === "textarea") {
+      input = document.createElement("textarea");
+      input.rows = 5;
+    } else if (q.field_type === "select" && q.options && q.options.length) {
+      input = document.createElement("select");
+      var blank = document.createElement("option");
+      blank.value = ""; blank.textContent = "Select one\u2026"; blank.disabled = true; blank.selected = true;
+      input.appendChild(blank);
+      q.options.forEach(function (opt) {
+        var o = document.createElement("option");
+        o.value = opt; o.textContent = opt;
+        input.appendChild(o);
+      });
+    } else {
+      input = document.createElement("input");
+      input.type = "text";
+    }
+    input.className = "cl-input";
+    input.id = "clCurrentInput";
+    fieldWrap.appendChild(input);
+    input.focus();
+  }
+
+  async function fetchNextQuestion() {
+    questionLoading.hidden = false;
+    questionText.textContent = "";
+    hintEl.textContent = "";
+    fieldWrap.innerHTML = "";
+    nextBtn.disabled = true;
+
+    stepLabel.textContent = "Question " + (state.qaHistory.length + 1) + " of up to " + maxQuestions;
+    progressBar.style.width = ((state.qaHistory.length / maxQuestions) * 100) + "%";
+
+    try {
+      var formData = new FormData();
+      formData.append("version_id", state.versionId);
+      formData.append("export_type", EXPORT_TYPE);
+      formData.append("qa_history", JSON.stringify(state.qaHistory));
+
+      var res = await fetch("/export/next-question/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+      var data = await res.json();
+
+      if (data.done || state.qaHistory.length >= maxQuestions) {
+        generateFinal();
+        return;
+      }
+
+      state.current = data;
+      questionText.textContent = data.question;
+      hintEl.textContent = data.hint || "";
+      hintEl.hidden = !data.hint;
+      renderField(data);
+
+      finishEarlyBtn.hidden = state.qaHistory.length < 2;
+      backBtn.disabled = state.qaHistory.length === 0;
+      nextBtn.textContent = "Next";
+    } catch (e) {
+      console.error(e);
+      questionText.textContent = "Something went wrong loading the next question.";
+    } finally {
+      questionLoading.hidden = true;
+      nextBtn.disabled = false;
+    }
+  }
+
+  function readCurrentAnswer() {
+    var el = document.getElementById("clCurrentInput");
+    return el ? el.value.trim() : "";
+  }
+
+  nextBtn.addEventListener("click", function () {
+    var answer = readCurrentAnswer();
+    if (!answer) {
+      var el = document.getElementById("clCurrentInput");
+      if (el) el.classList.add("cl-input--error");
+      return;
+    }
+    state.qaHistory.push({ question: state.current.question, answer: answer });
+    fetchNextQuestion();
+  });
+
+  backBtn.addEventListener("click", function () {
+    if (state.qaHistory.length === 0) {
+      showStep("setup");
+      return;
+    }
+    var last = state.qaHistory.pop();
+    state.current = { question: last.question, field_type: "text", options: [] };
+    questionText.textContent = last.question;
+    renderField(state.current);
+    document.getElementById("clCurrentInput").value = last.answer;
+    stepLabel.textContent = "Question " + (state.qaHistory.length + 1) + " of up to " + maxQuestions;
+  });
+
+  finishEarlyBtn.addEventListener("click", function () {
+    var answer = readCurrentAnswer();
+    if (answer && state.current) {
+      state.qaHistory.push({ question: state.current.question, answer: answer });
+    }
+    generateFinal();
+  });
+
+  async function generateFinal() {
+    showStep("generating");
+    try {
+      var formData = new FormData();
+      formData.append("version_id", state.versionId);
+      formData.append("export_type", EXPORT_TYPE);
+      formData.append("qa_history", JSON.stringify(state.qaHistory));
+
+      var res = await fetch("/export/generate-final/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+      var data = await res.json();
+
+      document.getElementById("clResultText").value = data.content || "";
+      document.getElementById("clSaveForm").action = "/export/save/" + state.versionId + "/" + EXPORT_TYPE + "/";
+      showStep("result");
+    } catch (e) {
+      console.error(e);
+      showStep("qa");
+    }
+  }
+
+  document.getElementById("clStartOver").addEventListener("click", function () {
+    state = { versionId: state.versionId, qaHistory: [], current: null };
+    showStep("qa");
+    fetchNextQuestion();
+  });
+
+  document.getElementById("clCopy").addEventListener("click", function (e) {
+    var text = document.getElementById("clResultText").value;
+    navigator.clipboard.writeText(text).then(function () {
+      var btn = e.currentTarget;
+      var original = btn.textContent;
+      btn.textContent = "Copied";
+      setTimeout(function () { btn.textContent = original; }, 1400);
+    });
+  });
+
+  document.getElementById("clSaveForm").addEventListener("submit", function () {
+    document.getElementById("clContentHidden").value = document.getElementById("clResultText").value;
+  });
+})();
+</script>
+{% endblock %}

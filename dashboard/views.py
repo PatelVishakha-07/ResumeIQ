@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render,get_object_or_404
-from accounts.models import User
+from accounts.models import User,Profile
 import os
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -17,6 +17,7 @@ from resume.ats_scoring import compute_ats_score
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 import json
+from django.contrib.auth.decorators import login_required
 
 def dashboard_redirect(request):
     """
@@ -37,7 +38,15 @@ def dashboard_redirect(request):
         'avatar_name': user.name
     }
 
-    if role == "admin":        
+    if role == "admin": 
+        return adminOverview(request)   
+        user = User.objects.get(user_id = user_id)    
+        nav = {
+            'role' : role,
+            'avatar_initial' : user.name[0].upper() if user.name else " ",
+            'avatar_name' : user.name
+
+        }
         return render(request, "dashboard_view/admin/overview.html", {'nav':nav})
         
     return render(request, "dashboard_view/user/overview.html", {'nav':nav})
@@ -75,10 +84,6 @@ def adminOverview(request):
             "timestamp": resume.updated_at,
         })
 
-    # Recent completed analyses
-    # Note: due to name= (not related_name=) on the model FKs,
-    # ResumeAnalysis.analyses actually points to its parent ResumeVersion,
-    # and ResumeVersion.versions actually points to its parent Resume.
 
     recent_analyses = ResumeAnalysis.objects.select_related('analyses__versions__user').order_by('-analyzed_at')[:5]
     for analysis in recent_analyses:
@@ -156,7 +161,7 @@ def userDetail(request, user_id):
             "latest_analysis": latest_analysis,
         })
 
-    # Static placeholder until the WeakArea model/table is wired up
+    # Static placeholder
     weak_areas = [
         {"topic": "System Design", "performance_score": 45.00, "last_updated": "2025-01-22"},
         {"topic": "Data Structures", "performance_score": 58.00, "last_updated": "2025-01-20"},
@@ -164,16 +169,16 @@ def userDetail(request, user_id):
     ]
 
     context = {
-        "nav":{
-            "role":"admin",
-            "avatar_initial": request.user.name[0].upper(),
-            "avatar_name": request.user.name,
-
-        },
-        "detail_user": detail_user,
-        "resume_summaries": resume_summaries,
-        "weak_areas": weak_areas,
-    }
+    "nav": {
+        "role": "admin",
+        "avatar_initial": admin_user.name[0].upper(),
+        "avatar_name": admin_user.name,
+    },
+    "admin_user": admin_user,
+    "detail_user": detail_user,
+    "resume_summaries": resume_summaries,
+    "weak_areas": weak_areas,
+}
     return render(request, "dashboard_view/admin/user_detail.html", context)
 
 def manageStaffRole(request):
@@ -201,102 +206,18 @@ def feedback(request):
             }
         })
 
-def adminSettings(request):
+def reports(request):
     admin_id = request.session.get("user_id")
-    if not admin_id:
-        messages.error(request, "Please sign in to continue.")
-        return redirect("login")
-
     admin_user = User.objects.get(user_id=admin_id)
+    return render(request,"dashboard_view/admin/admin_reports.html",
+            {
+                'nav': {
+                    'role': 'admin',
+                    "avatar_initial": admin_user.name[0].upper(),
+                    "avatar_name": admin_user.name,
+                }
+            })
 
-    context = {
-        "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
-        },
-        "admin_user": admin_user,
-    }
-    return render(request, "dashboard_view/admin/admin_settings.html", context)
-
-
-def adminUpdateProfile(request):
-    admin_id = request.session.get("user_id")
-    if not admin_id:
-        messages.error(request, "Please sign in to continue.")
-        return redirect("login")
-
-    admin_user = User.objects.get(user_id=admin_id)
-
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-
-        if not name:
-            messages.error(request, "Name cannot be empty.")
-            return redirect("admin_update_profile")
-
-        admin_user.name = name
-        admin_user.save()
-
-        request.session["name"] = admin_user.name
-        messages.success(request, "Profile updated successfully.")
-        return redirect("admin_settings")
-
-    context = {
-        "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
-        },
-        "admin_user": admin_user,
-    }
-    return render(request, "dashboard_view/admin/admin_update_profile.html", context)
-
-
-def adminChangePassword(request):
-    admin_id = request.session.get("user_id")
-    if not admin_id:
-        messages.error(request, "Please sign in to continue.")
-        return redirect("login")
-
-    admin_user = User.objects.get(user_id=admin_id)
-
-    if request.method == "POST":
-        current_password = request.POST.get("current_password", "")
-        new_password = request.POST.get("new_password", "")
-        confirm_password = request.POST.get("confirm_password", "")
-
-        if not admin_user.password:
-            messages.error(request, "This account has no password set. Please use social login.")
-            return redirect("admin_change_password")
-
-        #check current password matches
-        if not check_password(current_password, admin_user.password):
-            messages.error(request, "Current password is incorrect.")
-            return redirect("admin_change_password")
-
-        if len(new_password) < 8:
-            messages.error(request, "New password must be at least 8 characters.")
-            return redirect("admin_change_password")
-
-        if new_password != confirm_password:
-            messages.error(request, "New password and confirmation do not match.")
-            return redirect("admin_change_password")
-
-        admin_user.password = make_password(new_password)
-        admin_user.save()
-
-        messages.success(request, "Password changed successfully.")
-        return redirect("admin_settings")
-
-    context = {
-        "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
-        },
-    }
-    return render(request, "dashboard_view/admin/admin_change_password.html", context)
 
 
 
