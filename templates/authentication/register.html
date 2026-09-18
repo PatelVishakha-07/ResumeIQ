@@ -31,10 +31,9 @@
       },
     },
   }
-
-  
 </script>
 <link rel="stylesheet" href="styles.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="font-sans">
 
@@ -96,6 +95,8 @@
           </div>
        {% endif %}
 
+      <div id="googleError" class="hidden mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2"></div>
+
       <form class="space-y-5" method="POST" action="{% url 'register' %}">
         {% csrf_token %}
         <div>
@@ -148,10 +149,10 @@
           <span class="h-px flex-1 bg-paperline"></span>
         </div>
 
-        <button type="button"
+        <button type="button" id="googleBtn"
           class="w-full border border-paperline hover:border-graphite text-ink text-sm font-medium py-3 rounded-md transition-colors flex items-center justify-center gap-2.5">
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.85.86-3.05.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.71A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.17.29-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
-          Continue with Google
+          <span id="googleBtnLabel">Continue with Google</span>
         </button>
       </form>
 
@@ -190,6 +191,82 @@
     });
     label.textContent = v.length > 0 ? labels[Math.max(score - 1, 0)] : '\u00A0';
   });
+</script>
+
+<script>
+  // ---- Google sign-up (same endpoint as sign-in: it creates the account
+  // if it doesn't exist yet, so there's nothing separate to build here) ----
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+    return null;
+  }
+
+  const googleBtn = document.getElementById('googleBtn');
+  const googleBtnLabel = document.getElementById('googleBtnLabel');
+  const googleError = document.getElementById('googleError');
+  let googleTokenClient = null;
+
+  function initGoogle() {
+    if (typeof google === 'undefined' || !google.accounts) {
+      googleBtn.disabled = true;
+      googleBtnLabel.textContent = 'Google sign-in unavailable';
+      return;
+    }
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: "{{ google_client_id }}",
+      scope: 'email profile',
+      callback: handleGoogleToken,
+      error_callback: () => showGoogleError('Google sign-in was cancelled or blocked.'),
+    });
+  }
+
+  function showGoogleError(msg) {
+    googleError.textContent = msg;
+    googleError.classList.remove('hidden');
+  }
+
+  function handleGoogleToken(tokenResponse) {
+    if (!tokenResponse || !tokenResponse.access_token) {
+      showGoogleError('Google did not return an access token.');
+      return;
+    }
+    googleError.classList.add('hidden');
+    googleBtnLabel.textContent = 'Signing in…';
+    googleBtn.disabled = true;
+
+    fetch("{% url 'google_login' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({ access_token: tokenResponse.access_token }),
+    })
+      .then(r => r.json().then(data => ({ status: r.status, data })))
+      .then(({ status, data }) => {
+        if (status === 200 && data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          showGoogleError(data.error || 'Google sign-in failed. Try again.');
+          googleBtnLabel.textContent = 'Continue with Google';
+          googleBtn.disabled = false;
+        }
+      })
+      .catch(() => {
+        showGoogleError('Network error — please try again.');
+        googleBtnLabel.textContent = 'Continue with Google';
+        googleBtn.disabled = false;
+      });
+  }
+
+  googleBtn.addEventListener('click', () => {
+    if (!googleTokenClient) { showGoogleError('Google sign-in is still loading — try again in a moment.'); return; }
+    googleTokenClient.requestAccessToken();
+  });
+
+  window.addEventListener('load', initGoogle);
 </script>
 </body>
 </html>
