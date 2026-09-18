@@ -11,6 +11,7 @@ urlpatterns = [
     path('resume/', include('resume.urls')),
     path('dashboard/', include("dashboard.urls")),
     path('questions/', include("questions.urls")),
+    path('', include('professionalContent.urls')),
 ]
 
 if settings.DEBUG:

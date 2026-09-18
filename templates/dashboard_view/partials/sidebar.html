@@ -63,6 +63,14 @@
         <a href="{% url 'quiz_questions' %}"><span class="dot"></span>Generate Interview Questions</a>
       </div>
 
+      <div class="navitem {% if request.resolver_match.url_name == 'professional_content' %}active{% endif %}">
+          <a href="{% url 'professional_content' %}">
+              <span class="dot"></span>
+              Cover letter &amp; LinkedIn
+          </a>
+      </div>
+      
+
 
     </div>
 
