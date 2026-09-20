@@ -7,7 +7,16 @@
 {% load static %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/roadmap_generator.css' %}">
-
+<style>
+  .rm-meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+  .rm-summary { margin:0 0 12px; line-height:1.55; }
+  .stage-extra { margin:10px 0 0; font-size:13px; line-height:1.5; }
+  .stage-extra strong { font-weight:600; }
+  .rm-panel { margin-top:18px; padding:14px 16px; border:1px solid rgba(128,128,128,.25); border-radius:10px; }
+  .rm-panel h4 { margin:0 0 6px; font-size:14px; }
+  .rm-panel p { margin:0 0 8px; font-size:13px; line-height:1.5; }
+  .rm-error { display:none; margin:8px 0 0; font-size:13px; color:#b91c1c; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -44,7 +53,7 @@
 </div>
 
 <div id="roadmapResult" class="roadmap-result">
-  <!-- populated by JS via a real call to /roadmap/generate/ -->
+  <!-- populated by JS via a call to generate_roadmap (Gemini) -->
 </div>
 
 {% endblock %}
@@ -61,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const errorEl = document.getElementById('roadmapError');
 
   let lastQueryText = '';
+  let currentRoadmap = null;
 
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -95,7 +105,16 @@ document.addEventListener('DOMContentLoaded', function () {
     generateSpinner.style.display = isLoading ? 'inline-block' : 'none';
   }
 
-  function renderRoadmap(queryLabel, stages, source) {
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  function renderRoadmap(queryLabel, data) {
+    const stages = data.stages || [];
+    currentRoadmap = Object.assign({}, data, { query_label: queryLabel });
+
     const stagesHtml = stages.map((s, i) => `
       <div class="stage">
         <div class="stage-marker">
@@ -104,57 +123,131 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <div class="stage-card">
           <div class="stage-head">
-            <h4>${s.title}</h4>
-            <span class="stage-duration">${s.duration}</span>
+            <h4>${esc(s.title)}</h4>
+            <span class="stage-duration">${esc(s.duration)}</span>
           </div>
-          <p class="stage-desc">${s.desc}</p>
+          <p class="stage-desc">${esc(s.desc)}</p>
           <div class="tag-row">
-            ${s.topics.map(t => `<span class="tag topic">${t}</span>`).join('')}
+            ${(s.topics || []).map(t => `<span class="tag topic">${esc(t)}</span>`).join('')}
           </div>
-          <span class="level-badge">${s.level}</span>
+          ${s.milestone ? `<p class="stage-extra"><strong>Build:</strong> ${esc(s.milestone)}</p>` : ''}
+          ${(s.resources && s.resources.length) ? `<p class="stage-extra"><strong>Study:</strong> ${s.resources.map(esc).join(' &middot; ')}</p>` : ''}
+          <span class="level-badge">${esc(s.level)}</span>
         </div>
       </div>
     `).join('');
 
+    const prereqHtml = (data.prerequisites && data.prerequisites.length)
+      ? `<span class="hint">Before you start:</span> ${data.prerequisites.map(p => `<span class="tag">${esc(p)}</span>`).join('')}`
+      : '';
+
+    const capstoneHtml = data.capstone_project ? `
+      <div class="rm-panel">
+        <h4>Capstone project</h4>
+        <p>${esc(data.capstone_project)}</p>
+      </div>` : '';
+
+    const interviewHtml = (data.interview_focus && data.interview_focus.length) ? `
+      <div class="rm-panel">
+        <h4>What interviewers will probe</h4>
+        <div class="tag-row">${data.interview_focus.map(t => `<span class="tag topic">${esc(t)}</span>`).join('')}</div>
+      </div>` : '';
+
     result.innerHTML = `
       <div class="card" style="margin-top:18px;">
         <div class="card-head">
-          <h3>Roadmap for &ldquo;${queryLabel}&rdquo;</h3>
+          <h3>Roadmap for &ldquo;${esc(queryLabel)}&rdquo;</h3>
         </div>
-        <p class="hint" style="margin-bottom:18px;">
-          ${stages.length} stages, tailored to what you entered.
-          ${source === 'fallback' ? ' (Showing a general starter structure — the AI generator was unavailable.)' : ''}
-        </p>
+        ${data.summary ? `<p class="rm-summary">${esc(data.summary)}</p>` : ''}
+        <div class="rm-meta">
+          <span class="hint">${stages.length} stages${data.total_duration ? ' &middot; about ' + esc(data.total_duration) : ''}</span>
+          ${prereqHtml}
+        </div>
         <div class="stage-timeline">${stagesHtml}</div>
-        <div class="input-footer no-print" style="margin-top:8px;">
-          <p class="hint">Regenerate anytime as you narrow your focus, or download this roadmap as a PDF.</p>
+        ${capstoneHtml}
+        ${interviewHtml}
+        <div class="input-footer no-print" style="margin-top:18px;">
+          <p class="hint">Regenerate for a different take, or download this roadmap as a PDF.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button type="button" class="btn ghost sm" id="downloadPdfBtn">Download PDF</button>
             <button type="button" class="btn ghost sm" id="regenerateBtn">Regenerate</button>
             <button type="button" class="btn sm">Save to my roadmaps</button>
           </div>
         </div>
+        <p class="rm-error no-print" id="downloadError"></p>
       </div>
     `;
 
     document.getElementById('regenerateBtn').addEventListener('click', () => {
-      runGenerate(lastQueryText);
+      runGenerate(lastQueryText, true);
     });
 
-    document.getElementById('downloadPdfBtn').addEventListener('click', () => {
-      window.print();
-    });
+    document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
 
     result.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  async function runGenerate(text) {
+  async function downloadPdf() {
+    if (!currentRoadmap) return;
+
+    const btn = document.getElementById('downloadPdfBtn');
+    const errEl = document.getElementById('downloadError');
+    const originalLabel = btn.textContent;
+
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Preparing PDF…';
+
+    try {
+      const formData = new FormData();
+      formData.append('roadmap', JSON.stringify(currentRoadmap));
+
+      const response = await fetch('{% url "download_roadmap_pdf" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let message = "Couldn't create the PDF. Please try again.";
+        try {
+          const err = await response.json();
+          if (err.error) message = err.error;
+        } catch (_) {}
+        errEl.textContent = message;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename="?([^";]+)"?/i);
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = match ? match[1] : 'ResumeIQ_Roadmap.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      errEl.textContent = "Couldn't reach the server. Please try again.";
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    }
+  }
+
+  async function runGenerate(text, regenerate = false) {
     lastQueryText = text;
     clearError();
     setLoading(true);
 
     const formData = new FormData();
     formData.append('query', text);
+    if (regenerate) formData.append('regenerate', '1');
 
     try {
       const response = await fetch('{% url "generate_roadmap" %}', {
@@ -170,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       const label = data.query_label || (text.length > 60 ? text.slice(0, 60) + '…' : text);
-      renderRoadmap(label, data.stages, data.source);
+      renderRoadmap(label, data);
     } catch (err) {
       showError("Couldn't reach the server. Please try again.");
     } finally {

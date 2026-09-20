@@ -171,3 +171,11 @@
     margin-left: 6px;
   }
   @keyframes roadmap-spin { to { transform: rotate(360deg); } }
+
+  .rm-meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+  .rm-summary { margin:0 0 12px; line-height:1.55; }
+  .stage-extra { margin:10px 0 0; font-size:13px; line-height:1.5; }
+  .stage-extra strong { font-weight:600; }
+  .rm-panel { margin-top:18px; padding:14px 16px; border:1px solid rgba(128,128,128,.25); border-radius:10px; }
+  .rm-panel h4 { margin:0 0 6px; font-size:14px; }
+  .rm-panel p { margin:0 0 8px; font-size:13px; line-height:1.5; }

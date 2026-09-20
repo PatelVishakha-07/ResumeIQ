@@ -17,6 +17,7 @@ urlpatterns = [
     path("user/resume_report/<int:version_id>/download/", views.download_report_resume_view, name="resume_report_download"),
     path("user/roadmap_generator_view/", views.roadmap_generator_view, name="roadmap_generator"),
     path("user/generate_roadmap/", views.generate_roadmap, name="generate_roadmap"),
+     path("user/download_roadmap/", views.download_roadmap_pdf, name="download_roadmap_pdf"),
 
 
     path('admin_panel/overview',views.adminOverview, name="adminOverview"),
