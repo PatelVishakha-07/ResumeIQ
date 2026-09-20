@@ -1,0 +1,907 @@
+/* =========================================================
+   RESUMEIQ USER OVERVIEW
+   File:
+   static/css/user_overview.css
+========================================================= */
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.user-overview {
+    width: 100%;
+    color: #14171A;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.user-overview-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    margin-bottom: 28px;
+}
+
+
+.user-overview-eyebrow {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #3852E3;
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    font-weight: 600;
+
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+
+.user-overview-header h2 {
+    margin: 0;
+
+    color: #14171A;
+
+    font-family: "Source Serif 4", serif;
+
+    font-size: 29px;
+    font-weight: 600;
+
+    letter-spacing: -0.02em;
+}
+
+
+.user-overview-subtitle {
+    margin-top: 7px;
+
+    color: #83806F;
+
+    font-size: 13.5px;
+}
+
+
+.user-overview-user {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #686657;
+
+    font-family: "IBM Plex Mono", monospace;
+
+    font-size: 11.5px;
+}
+
+
+.user-overview-avatar {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #14171A;
+
+    color: #FFFFFF;
+
+    font-family: "Source Serif 4", serif;
+
+    font-size: 17px;
+    font-weight: 600;
+}
+
+
+
+/* =========================================================
+   STAT CARDS
+========================================================= */
+
+.user-overview-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin-bottom: 18px;
+}
+
+
+.user-overview-stat {
+    min-height: 142px;
+
+    padding: 20px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #DEDACC;
+
+    border-radius: 12px;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.user-overview-stat:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 22px rgba(20, 23, 26, 0.06);
+}
+
+
+.user-overview-stat-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    color: #777566;
+
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+
+.user-overview-stat-icon {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #E8EAFB;
+
+    color: #3852E3;
+
+    font-size: 14px;
+}
+
+
+.user-overview-stat-number {
+    margin-top: 12px;
+
+    color: #14171A;
+
+    font-family: "Source Serif 4", serif;
+
+    font-size: 32px;
+    font-weight: 600;
+
+    line-height: 1;
+}
+
+
+.user-overview-stat-number span {
+    color: #929080;
+
+    font-family: "Inter", sans-serif;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+.user-overview-stat-description {
+    margin-top: 10px;
+
+    color: #83806F;
+
+    font-size: 12.5px;
+    line-height: 1.4;
+}
+
+
+
+/* =========================================================
+   MAIN GRID
+========================================================= */
+
+.user-overview-main {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.2fr)
+        minmax(0, 1fr);
+
+    gap: 18px;
+}
+
+
+.user-overview-panel {
+    min-width: 0;
+
+    padding: 22px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #DEDACC;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 8px rgba(20, 23, 26, 0.025);
+}
+
+
+.user-overview-panel-header {
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+
+.user-overview-panel-title {
+    margin: 0;
+
+    color: #14171A;
+
+    font-family: "Source Serif 4", serif;
+
+    font-size: 17px;
+    font-weight: 600;
+}
+
+
+.user-overview-panel-subtitle {
+    margin-top: 5px;
+
+    color: #83806F;
+
+    font-size: 11.5px;
+}
+
+
+.user-overview-trend-header {
+    margin-top: 28px;
+
+    margin-bottom: 14px;
+}
+
+
+
+/* =========================================================
+   ATS SCORE
+========================================================= */
+
+.user-overview-ats {
+    display: flex;
+
+    align-items: center;
+
+    gap: 22px;
+
+    padding: 16px;
+
+    background: #F5F3EC;
+
+    border: 1px solid #DEDACC;
+
+    border-radius: 10px;
+}
+
+
+.user-overview-score-ring {
+    position: relative;
+
+    width: 104px;
+    height: 104px;
+
+    flex-shrink: 0;
+}
+
+
+.user-overview-score-ring svg {
+    width: 100%;
+    height: 100%;
+
+    transform: rotate(-90deg);
+}
+
+
+.user-overview-score-ring .score-number {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #14171A;
+
+    font-family: "Source Serif 4", serif;
+
+    font-size: 23px;
+    font-weight: 600;
+}
+
+
+.user-overview-score-info {
+    min-width: 0;
+}
+
+
+.user-overview-score-info strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #14171A;
+
+    font-size: 13.5px;
+}
+
+
+.user-overview-score-info p {
+    margin: 0;
+
+    color: #777566;
+
+    font-size: 12.5px;
+
+    line-height: 1.55;
+}
+
+
+
+/* =========================================================
+   ATS TREND
+========================================================= */
+
+.user-overview-trend {
+    height: 155px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 12px;
+
+    padding: 0 8px;
+}
+
+
+.user-overview-trend-column {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 6px;
+}
+
+
+.user-overview-trend-bar-wrap {
+    width: 100%;
+
+    height: 105px;
+
+    display: flex;
+
+    align-items: flex-end;
+    justify-content: center;
+}
+
+
+.user-overview-trend-bar {
+    width: 70%;
+
+    max-width: 40px;
+
+    min-height: 5px;
+
+    background: #3852E3;
+
+    border-radius:
+        4px 4px 0 0;
+
+    transition:
+        height 0.3s ease,
+        opacity 0.2s ease;
+}
+
+
+.user-overview-trend-column:hover
+.user-overview-trend-bar {
+    opacity: 0.75;
+}
+
+
+.user-overview-trend-column.current
+.user-overview-trend-bar {
+    background: #14171A;
+}
+
+
+.user-overview-trend-score {
+    color: #4F4D43;
+
+    font-family: "IBM Plex Mono", monospace;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+.user-overview-trend-date {
+    color: #8B897A;
+
+    font-size: 10px;
+}
+
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.user-overview-empty {
+    min-height: 125px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    color: #83806F;
+
+    border: 1px dashed #DEDACC;
+
+    border-radius: 9px;
+
+    text-align: center;
+
+    font-size: 12px;
+}
+
+
+.user-overview-empty-icon {
+    margin-bottom: 2px;
+
+    color: #3852E3;
+
+    font-size: 22px;
+}
+
+
+.user-overview-empty strong {
+    color: #4D4B42;
+
+    font-size: 12.5px;
+}
+
+
+
+/* =========================================================
+   JD MATCH
+========================================================= */
+
+.user-overview-match {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 16px;
+
+    background: #F5F3EC;
+
+    border: 1px solid #DEDACC;
+
+    border-radius: 10px;
+
+    margin-bottom: 18px;
+}
+
+
+.user-overview-match-score {
+    min-width: 92px;
+
+    color: #3852E3;
+
+    font-family: "Source Serif 4", serif;
+
+    font-size: 31px;
+    font-weight: 600;
+
+    line-height: 1;
+}
+
+
+.user-overview-match-info {
+    min-width: 0;
+}
+
+
+.user-overview-match-info strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #14171A;
+
+    font-size: 13px;
+}
+
+
+.user-overview-match-info p {
+    margin: 0;
+
+    color: #777566;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+
+/* =========================================================
+   TARGET ROLE
+========================================================= */
+
+.user-overview-role {
+    padding: 13px 0;
+
+    border-bottom: 1px solid #DEDACC;
+}
+
+
+.user-overview-role-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #83806F;
+
+    font-family: "IBM Plex Mono", monospace;
+
+    font-size: 9.5px;
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+}
+
+
+.user-overview-role-value {
+    color: #24231F;
+
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+
+
+/* =========================================================
+   MISSING KEYWORDS
+========================================================= */
+
+.user-overview-keywords-title {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 18px;
+    margin-bottom: 10px;
+}
+
+
+.user-overview-keywords-title strong {
+    color: #24231F;
+
+    font-size: 13px;
+}
+
+
+.user-overview-keywords-count {
+    color: #83806F;
+
+    font-family: "IBM Plex Mono", monospace;
+
+    font-size: 9.5px;
+}
+
+
+.user-overview-keywords {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+
+.user-overview-keyword {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 9px;
+
+    background: #F5E4DE;
+
+    color: #B5482F;
+
+    border-radius: 20px;
+
+    font-family: "IBM Plex Mono", monospace;
+
+    font-size: 9.5px;
+
+    line-height: 1.2;
+}
+
+
+.user-overview-no-data {
+    padding: 10px;
+
+    background: #F5F3EC;
+
+    border-radius: 7px;
+
+    color: #83806F;
+
+    font-size: 11.5px;
+
+    text-align: center;
+}
+
+
+
+/* =========================================================
+   INTERVIEW READINESS
+========================================================= */
+
+.user-overview-readiness {
+    margin-top: 22px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #DEDACC;
+}
+
+
+.user-overview-readiness-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+}
+
+
+.user-overview-readiness-header strong {
+    color: #24231F;
+
+    font-size: 12.5px;
+}
+
+
+.user-overview-readiness-value {
+    color: #3852E3;
+
+    font-family: "IBM Plex Mono", monospace;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.user-overview-progress {
+    width: 100%;
+
+    height: 7px;
+
+    overflow: hidden;
+
+    background: #DEDACC;
+
+    border-radius: 20px;
+}
+
+
+.user-overview-progress-fill {
+    height: 100%;
+
+    background: #3852E3;
+
+    border-radius: 20px;
+
+    transition:
+        width 0.4s ease;
+}
+
+
+
+/* =========================================================
+   NEXT STEP
+========================================================= */
+
+.user-overview-next {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-top: 20px;
+
+    padding: 13px;
+
+    background: #E8EAFB;
+
+    border-radius: 9px;
+}
+
+
+.user-overview-next-icon {
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #3852E3;
+
+    color: #FFFFFF;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+.user-overview-next-content {
+    min-width: 0;
+}
+
+
+.user-overview-next-content strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #25316F;
+
+    font-size: 12px;
+}
+
+
+.user-overview-next-content p {
+    margin: 0;
+
+    color: #59618D;
+
+    font-size: 11.5px;
+
+    line-height: 1.5;
+}
+
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .user-overview-main {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 760px) {
+
+    .user-overview-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+
+    .user-overview-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .user-overview-user {
+        align-self: flex-start;
+    }
+
+}
+
+
+@media (max-width: 560px) {
+
+    .user-overview-stats {
+        grid-template-columns: 1fr;
+    }
+
+
+    .user-overview-panel {
+        padding: 17px;
+    }
+
+
+    .user-overview-ats {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .user-overview-match {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .user-overview-match-score {
+        min-width: auto;
+    }
+
+
+    .user-overview-trend {
+        gap: 7px;
+    }
+
+
+    .user-overview-trend-bar {
+        max-width: 28px;
+    }
+
+}
