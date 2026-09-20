@@ -551,7 +551,7 @@ def score_section_quality(text):
                 r'\bmaster\b',
                 r'\bdiploma\b'
             ]
-        degree_found = any(re.search(pattern,) for pattern in degree_patterns)
+        degree_found = any(re.search(pattern, education_text.lower()) for pattern in degree_patterns)
 
         if degree_found:
             education_score += 50
