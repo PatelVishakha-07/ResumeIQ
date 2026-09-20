@@ -12,17 +12,9 @@ urlpatterns = [
     path("export/generate-final/", views.generate_final_document, name="generate_final_document"),
 
     # Cover letter: still tied to a resume version.
-    path(
-        "export/save/<int:version_id>/<str:export_type>/",
-        views.save_export_document,
-        name="save_export_document",
-    ),
+    path("export/save/<int:version_id>/<str:export_type>/",views.save_export_document,name="save_export_document"),
     # LinkedIn: no resume version at all.
-    path(
-        "export/save/<str:export_type>/",
-        views.save_export_document,
-        name="save_export_document_no_version",
-    ),
+    path("export/save/<str:export_type>/",views.save_export_document,name="save_export_document_no_version"),
 
     path("export/autosave/linkedin/", views.autosave_linkedin, name="autosave_linkedin"),
 ]

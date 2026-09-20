@@ -1,1261 +1,832 @@
 /* =========================================================
    RESUMEIQ ADMIN REPORTS
-   ========================================================= */
+========================================================= */
 
-.rq-report-page {
+.report-page {
     width: 100%;
-    color: #16192B;
-    font-family: "Inter", sans-serif;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 10px 0 40px;
+    box-sizing: border-box;
 }
 
 
 /* =========================================================
-   REPORT HEADER
-   ========================================================= */
+   REPORT GENERATOR
+========================================================= */
 
-.rq-report-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 22px;
+.report-generator {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+    margin-bottom: 24px;
 }
 
 
-.rq-report-heading {
+.generator-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 25px 28px;
+    border-bottom: 1px solid #edf0f3;
+    background: #fafbfc;
+}
+
+
+.generator-title-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+
+.generator-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #eef4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.generator-icon svg {
+    width: 25px;
+    height: 25px;
+    fill: #2563eb;
+}
+
+
+.generator-title-area h2 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #172033;
+}
+
+
+.generator-title-area p {
+    margin: 0;
+    color: #697386;
+    font-size: 13px;
+}
+
+
+.report-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border-radius: 20px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.report-form {
+    padding: 28px;
+}
+
+
+.form-section {
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+
+.form-section:last-of-type {
+    margin-bottom: 0;
+}
+
+
+.section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+
+.step-number {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+
+.section-heading h3 {
+    margin: 1px 0 4px;
+    font-size: 15px;
+    color: #202938;
+}
+
+
+.section-heading p {
+    margin: 0;
+    font-size: 12px;
+    color: #7a8494;
+}
+
+
+/* =========================================================
+   FORM FIELD
+========================================================= */
+
+.form-field {
+    width: 100%;
+}
+
+
+.form-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+}
+
+
+.select-wrapper,
+.date-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+
+.select-wrapper select,
+.date-input-wrapper input {
+    width: 100%;
+    height: 46px;
+    padding: 0 42px;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #273142;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+
+.select-wrapper select {
+    appearance: none;
+    cursor: pointer;
+}
+
+
+.select-wrapper select:focus,
+.date-input-wrapper input:focus {
+    border-color: #4f8df7;
+    box-shadow: 0 0 0 3px rgba(79, 141, 247, 0.10);
+}
+
+
+.field-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 17px;
+    height: 17px;
+    fill: #7b8798;
+    pointer-events: none;
+    z-index: 2;
+}
+
+
+.select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7a8494;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   PERIOD OPTIONS
+========================================================= */
+
+.period-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+
+.period-card {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+
+.period-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+.period-content {
+    min-height: 82px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e1e5ea;
+    border-radius: 12px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+
+.period-card:hover .period-content {
+    border-color: #a9c5f9;
+    background: #fafcff;
+}
+
+
+.period-card input:checked + .period-content {
+    border-color: #4f8df7;
+    background: #f5f8ff;
+    box-shadow: 0 0 0 2px rgba(79, 141, 247, 0.08);
+}
+
+
+.period-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.period-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+
+.weekly-icon {
+    background: #eef6ff;
+}
+
+
+.weekly-icon svg {
+    fill: #2563eb;
+}
+
+
+.monthly-icon {
+    background: #f5f0ff;
+}
+
+
+.monthly-icon svg {
+    fill: #7c3aed;
+}
+
+
+.yearly-icon {
+    background: #ecfdf5;
+}
+
+
+.yearly-icon svg {
+    fill: #059669;
+}
+
+
+.custom-icon {
+    background: #fff7ed;
+}
+
+
+.custom-icon svg {
+    fill: #ea580c;
+}
+
+
+.period-content strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #263142;
+    font-size: 13px;
+}
+
+
+.period-content small {
+    display: block;
+    color: #7b8494;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   DATE RANGE
+========================================================= */
+
+.date-grid {
+    display: grid;
+    grid-template-columns: 1fr 50px 1fr;
+    align-items: end;
     gap: 14px;
 }
 
 
-.rq-report-heading-icon {
-    width: 46px;
-    height: 46px;
-
-    border-radius: 13px;
-
+.date-separator {
     display: flex;
     align-items: center;
     justify-content: center;
-
-    background: #EEF4FF;
+    padding-bottom: 13px;
 }
 
 
-.rq-report-heading-icon svg {
-    width: 23px;
-    height: 23px;
-
-    fill: #2F5FF6;
-}
-
-
-.rq-report-heading h2 {
-    margin: 0 0 4px;
-
-    font-family: "Manrope", sans-serif;
-
-    font-size: 21px;
+.date-separator span {
+    color: #8a94a5;
+    font-size: 10px;
     font-weight: 800;
-
-    color: #172554;
 }
 
 
-.rq-report-heading p {
-    margin: 0;
+/* =========================================================
+   GENERATE ACTION
+========================================================= */
 
-    color: #6B7BA5;
-
-    font-size: 13px;
-
-    line-height: 1.5;
-}
-
-
-.rq-report-date {
+.generator-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-
-    padding: 10px 14px;
-
-    background: #FFFFFF;
-
-    border: 1px solid #E2E8F5;
-
-    border-radius: 9px;
-
-    color: #34446D;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    box-shadow: 0 2px 8px rgba(31, 59, 120, 0.04);
-}
-
-
-.rq-report-date svg {
-    width: 17px;
-    height: 17px;
-
-    fill: #5572B8;
-}
-
-
-/* =========================================================
-   REPORT GRID
-   ========================================================= */
-
-.rq-report-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
-    gap: 18px;
-}
-
-
-/* =========================================================
-   REPORT CARD
-   ========================================================= */
-
-.rq-report-card {
-    position: relative;
-
-    display: flex;
-    flex-direction: column;
-
-    min-height: 370px;
-
-    padding: 22px;
-
-    background: #FFFFFF;
-
-    border: 1px solid #E2E8F5;
-
-    border-radius: 15px;
-
-    box-shadow:
-        0 3px 12px rgba(31, 59, 120, 0.045);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-}
-
-
-.rq-report-card:hover {
-    transform: translateY(-3px);
-
-    border-color: #C9D8F7;
-
-    box-shadow:
-        0 12px 28px rgba(31, 59, 120, 0.09);
-}
-
-
-/* =========================================================
-   CARD TOP
-   ========================================================= */
-
-.rq-report-card-top {
-    display: flex;
-
-    align-items: center;
-
     justify-content: space-between;
-
-    margin-bottom: 20px;
+    gap: 20px;
+    padding-top: 25px;
 }
 
 
-/* =========================================================
-   REPORT ICON
-   ========================================================= */
-
-.rq-report-icon {
-    width: 48px;
-    height: 48px;
-
+.action-info {
     display: flex;
-
     align-items: center;
-    justify-content: center;
-
-    border-radius: 13px;
-}
-
-
-.rq-report-icon svg {
-    width: 24px;
-    height: 24px;
-}
-
-
-.rq-blue {
-    background: #E9F1FF;
-}
-
-
-.rq-blue svg {
-    fill: #2F72F7;
-}
-
-
-.rq-purple {
-    background: #F0E9FF;
-}
-
-
-.rq-purple svg {
-    fill: #7C4DFF;
-}
-
-
-.rq-green {
-    background: #E3F7EF;
-}
-
-
-.rq-green svg {
-    fill: #16A47A;
-}
-
-
-/* =========================================================
-   PERIOD BADGE
-   ========================================================= */
-
-.rq-period-badge {
-    padding: 5px 10px;
-
-    border-radius: 100px;
-
-    font-size: 11px;
-
-    font-weight: 600;
-}
-
-
-.rq-blue-badge {
-    color: #2F65D9;
-    background: #EDF4FF;
-}
-
-
-.rq-purple-badge {
-    color: #7145D6;
-    background: #F2EDFF;
-}
-
-
-.rq-green-badge {
-    color: #168663;
-    background: #E9F8F1;
-}
-
-
-/* =========================================================
-   CARD TITLE
-   ========================================================= */
-
-.rq-report-card h3 {
-    margin: 0 0 8px;
-
-    font-family: "Manrope", sans-serif;
-
-    font-size: 17px;
-
-    font-weight: 800;
-
-    color: #172554;
-}
-
-
-/* =========================================================
-   CARD DESCRIPTION
-   ========================================================= */
-
-.rq-report-description {
-    margin: 0;
-
-    color: #6B7BA5;
-
-    font-size: 13px;
-
-    line-height: 1.65;
-
-    min-height: 43px;
-}
-
-
-/* =========================================================
-   FEATURES
-   ========================================================= */
-
-.rq-report-features {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 12px;
-
-    margin-top: 20px;
-
-    margin-bottom: 20px;
-}
-
-
-.rq-report-features div {
-    display: flex;
-
-    align-items: center;
-
     gap: 9px;
-
-    color: #40527C;
-
-    font-size: 12px;
-
-    line-height: 1.4;
-}
-
-
-.rq-check {
-    width: 19px;
-    height: 19px;
-
-    flex-shrink: 0;
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
+    color: #737e8f;
     font-size: 11px;
-
-    font-weight: 800;
 }
 
 
-.rq-blue-check {
-    color: #2F72F7;
-    background: #EAF2FF;
-}
-
-
-.rq-purple-check {
-    color: #7C4DFF;
-    background: #F0E9FF;
-}
-
-
-.rq-green-check {
-    color: #16A47A;
-    background: #E3F7EF;
-}
-
-
-/* =========================================================
-   GENERATE BUTTON
-   ========================================================= */
-
-.rq-generate-btn {
-    width: 100%;
-
-    box-sizing: border-box;
-
-    margin-top: auto;
-
+.info-icon {
+    width: 18px;
+    height: 18px;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    gap: 8px;
-
-    padding: 11px 14px;
-
-    border-radius: 9px;
-
-    text-decoration: none;
-
-    color: #FFFFFF;
-
-    font-size: 12px;
-
+    border: 1px solid #b8c0cc;
+    border-radius: 50%;
+    font-size: 11px;
     font-weight: 700;
-
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease,
-        opacity 0.15s ease;
 }
 
 
-.rq-generate-btn:hover {
-    color: #FFFFFF;
+.generate-button {
+    height: 45px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    transition: all 0.2s ease;
+}
 
+
+.generate-button:hover {
+    background: #1d4ed8;
     transform: translateY(-1px);
-
-    box-shadow:
-        0 5px 14px rgba(30, 69, 201, 0.18);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.20);
 }
 
 
-.rq-generate-btn svg {
+.generate-button svg {
     width: 17px;
     height: 17px;
-
     fill: currentColor;
 }
 
 
-.rq-blue-btn {
-    background: #2F6FF3;
+/* =========================================================
+   REPORT PREVIEW
+========================================================= */
+
+.report-preview {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
 }
 
 
-.rq-purple-btn {
-    background: #7650E8;
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px;
+    border-bottom: 1px solid #edf0f3;
 }
 
 
-.rq-green-btn {
-    background: #13A57A;
+.preview-label {
+    display: inline-block;
+    margin-bottom: 6px;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+
+.preview-header h2 {
+    margin: 0 0 5px;
+    color: #202938;
+    font-size: 19px;
+}
+
+
+.preview-header p {
+    margin: 0;
+    color: #7b8494;
+    font-size: 12px;
+}
+
+
+.download-actions {
+    display: flex;
+    gap: 8px;
+}
+
+
+.download-btn {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #485466;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+.download-btn:hover {
+    background: #f7f8fa;
+}
+
+
+.download-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+}
+
+
+.pdf-btn {
+    color: #dc2626;
+}
+
+
+.excel-btn {
+    color: #15803d;
+}
+
+
+.csv-btn {
+    color: #2563eb;
 }
 
 
 /* =========================================================
-   REPORT INFORMATION
-   ========================================================= */
+   SUMMARY
+========================================================= */
 
-.rq-report-details {
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 17px;
-
-    margin-top: 20px;
-
-    padding: 22px;
-
-    background:
-        linear-gradient(
-            110deg,
-            #F5F8FF 0%,
-            #FFFFFF 70%
-        );
-
-    border: 1px solid #DDE7FA;
-
-    border-radius: 15px;
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    padding: 22px 28px;
+    background: #fafbfc;
+    border-bottom: 1px solid #edf0f3;
 }
 
 
-.rq-report-details-icon {
-    width: 42px;
-    height: 42px;
-
-    flex-shrink: 0;
-
+.summary-card {
+    min-height: 76px;
+    padding: 14px;
     display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #e6e9ee;
+    border-radius: 11px;
+    background: #ffffff;
+}
 
+
+.summary-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    display: flex;
     align-items: center;
     justify-content: center;
-
-    border-radius: 50%;
-
-    background: #E8F1FF;
+    border-radius: 9px;
+    background: #eff6ff;
 }
 
 
-.rq-report-details-icon svg {
-    width: 21px;
-    height: 21px;
-
-    fill: #2F6FF3;
+.summary-icon svg {
+    width: 17px;
+    height: 17px;
+    fill: #2563eb;
 }
 
 
-.rq-report-details-content {
-    flex: 1;
+.summary-card span {
+    display: block;
+    margin-bottom: 4px;
+    color: #7b8494;
+    font-size: 10px;
 }
 
 
-.rq-report-details-content h3 {
-    margin: 0 0 6px;
+.summary-card strong {
+    color: #273142;
+    font-size: 16px;
+}
 
-    font-family: "Manrope", sans-serif;
 
-    color: #172554;
+/* =========================================================
+   EMPTY REPORT
+========================================================= */
 
+.empty-report {
+    padding: 60px 25px;
+    text-align: center;
+}
+
+
+.empty-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 15px;
+    border-radius: 14px;
+    background: #f4f6f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.empty-icon svg {
+    width: 28px;
+    height: 28px;
+    fill: #8993a3;
+}
+
+
+.empty-report h3 {
+    margin: 0 0 7px;
+    color: #293241;
     font-size: 15px;
+}
 
+
+.empty-report p {
+    max-width: 480px;
+    margin: 0 auto;
+    color: #7c8595;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   INFORMATION
+========================================================= */
+
+.report-information {
+    padding: 24px 28px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+
+.information-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    margin-bottom: 24px;
+}
+
+
+.information-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    background: #eef4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.information-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: #2563eb;
+}
+
+
+.information-header h3 {
+    margin: 1px 0 5px;
+    color: #293241;
+    font-size: 15px;
+}
+
+
+.information-header p {
+    margin: 0;
+    color: #7c8595;
+    font-size: 12px;
+}
+
+
+.information-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+
+.info-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+
+.info-step > span {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 8px;
+    background: #f4f6f8;
+    color: #657084;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
     font-weight: 800;
 }
 
 
-.rq-report-details-content > p {
+.info-step strong {
+    display: block;
+    margin: 1px 0 4px;
+    color: #354052;
+    font-size: 11px;
+}
+
+
+.info-step p {
     margin: 0;
-
-    max-width: 850px;
-
-    color: #64749C;
-
-    font-size: 12px;
-
-    line-height: 1.65;
-}
-
-
-/* =========================================================
-   REPORT METRICS
-   ========================================================= */
-
-.rq-report-metrics {
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-
-    gap: 10px;
-
-    margin-top: 17px;
-}
-
-
-.rq-report-metrics span {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 3px;
-
-    padding: 10px 12px;
-
-    background: #FFFFFF;
-
-    border: 1px solid #E4EAF6;
-
-    border-radius: 9px;
-
-    color: #7583A3;
-
+    color: #8992a1;
     font-size: 10px;
-
-    line-height: 1.4;
-}
-
-
-.rq-report-metrics b {
-    color: #263A68;
-
-    font-size: 11px;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.rq-report-footer {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    margin-top: 20px;
-
-    padding: 17px 20px;
-
-    background: #FFFFFF;
-
-    border: 1px solid #E2E8F5;
-
-    border-radius: 13px;
-}
-
-
-.rq-footer-title {
-    color: #24345D;
-
-    font-family: "Manrope", sans-serif;
-
-    font-size: 13px;
-
-    font-weight: 700;
-}
-
-
-.rq-footer-text {
-    margin-top: 3px;
-
-    color: #7A88A5;
-
-    font-size: 11px;
-}
-
-
-.rq-footer-label {
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    color: #2F5FF6;
-
-    font-size: 11px;
-
-    font-weight: 700;
-}
-
-
-.rq-footer-label span {
-    padding: 4px 8px;
-
-    border-radius: 100px;
-
-    background: #EAF2FF;
-
-    color: #416AC4;
-
-    font-size: 9px;
-
-    font-weight: 600;
+    line-height: 1.5;
 }
 
 
 /* =========================================================
    RESPONSIVE
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 1100px) {
 
-    .rq-report-grid {
-        grid-template-columns: 1fr 1fr;
+    .period-options {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .rq-report-card:last-child {
-        grid-column: 1 / -1;
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .rq-report-metrics {
-        grid-template-columns: 1fr 1fr;
+    .information-steps {
+        grid-template-columns: repeat(2, 1fr);
+        row-gap: 20px;
     }
-
 }
 
 
-@media (max-width: 750px) {
+@media (max-width: 700px) {
 
-    .rq-report-top {
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 14px;
+    .report-page {
+        padding: 5px 0 25px;
     }
 
-    .rq-report-grid {
+    .generator-header,
+    .preview-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .report-form {
+        padding: 20px;
+    }
+
+    .period-options {
         grid-template-columns: 1fr;
     }
 
-    .rq-report-card:last-child {
-        grid-column: auto;
-    }
-
-    .rq-report-details {
-        flex-direction: column;
-    }
-
-}
-
-
-@media (max-width: 500px) {
-
-    .rq-report-heading {
-        align-items: flex-start;
-    }
-
-    .rq-report-heading h2 {
-        font-size: 18px;
-    }
-
-    .rq-report-heading p {
-        font-size: 12px;
-    }
-
-    .rq-report-card {
-        padding: 18px;
-    }
-
-    .rq-report-metrics {
+    .date-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
     }
 
-    .rq-report-footer {
-        align-items: flex-start;
+    .date-separator {
+        display: none;
+    }
 
+    .generator-actions {
         flex-direction: column;
-
-        gap: 12px;
+        align-items: stretch;
     }
 
-}
-
-/* =========================================================
-   DATE RANGE SELECTOR
-   ========================================================= */
-
-.rq-date-selector {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-
-    min-width: 185px;
-
-    padding: 10px 13px;
-
-    border: 1px solid #DDE5F3;
-    border-radius: 10px;
-
-    background: #FFFFFF;
-
-    color: #24345D;
-
-    font-family: "Inter", sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    box-shadow: 0 3px 10px rgba(28, 58, 115, 0.05);
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
-}
-
-.rq-date-selector:hover {
-    border-color: #B9C9E8;
-
-    box-shadow:
-        0 6px 16px rgba(28, 58, 115, 0.09);
-
-    transform: translateY(-1px);
-}
-
-.rq-date-selector svg {
-    width: 17px;
-    height: 17px;
-
-    fill: #2F5FF6;
-
-    flex-shrink: 0;
-}
-
-.rq-date-arrow {
-    margin-left: auto;
-
-    color: #65779D;
-
-    font-size: 15px;
-}
-
-
-/* =========================================================
-   DATE MODAL OVERLAY
-   ========================================================= */
-
-.rq-date-modal-overlay {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 9999;
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(12, 23, 48, 0.42);
-
-    backdrop-filter: blur(4px);
-}
-
-.rq-date-modal-overlay.show {
-    display: flex;
-}
-
-
-/* =========================================================
-   DATE MODAL
-   ========================================================= */
-
-.rq-date-modal {
-    width: 100%;
-    max-width: 520px;
-
-    box-sizing: border-box;
-
-    background: #FFFFFF;
-
-    border: 1px solid #E1E7F2;
-
-    border-radius: 18px;
-
-    padding: 24px;
-
-    box-shadow:
-        0 25px 70px rgba(19, 42, 85, 0.20);
-
-    animation: rqDateModalOpen 0.2s ease;
-}
-
-
-@keyframes rqDateModalOpen {
-
-    from {
-        opacity: 0;
-        transform: translateY(10px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-
-}
-
-
-/* =========================================================
-   MODAL HEADER
-   ========================================================= */
-
-.rq-date-modal-header {
-    display: flex;
-
-    align-items: flex-start;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding-bottom: 18px;
-
-    border-bottom: 1px solid #E8ECF4;
-}
-
-
-.rq-date-modal-header h3 {
-    margin: 0 0 5px;
-
-    font-family: "Manrope", sans-serif;
-
-    color: #172554;
-
-    font-size: 18px;
-
-    font-weight: 800;
-}
-
-
-.rq-date-modal-header p {
-    margin: 0;
-
-    color: #71809F;
-
-    font-size: 12px;
-
-    line-height: 1.5;
-}
-
-
-.rq-date-close {
-    width: 32px;
-    height: 32px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border: none;
-
-    border-radius: 8px;
-
-    background: #F4F6FA;
-
-    color: #61708E;
-
-    font-size: 22px;
-
-    line-height: 1;
-
-    cursor: pointer;
-
-    transition:
-        background 0.15s ease,
-        color 0.15s ease;
-}
-
-
-.rq-date-close:hover {
-    background: #EAF0FB;
-
-    color: #172554;
-}
-
-
-/* =========================================================
-   SELECTED RANGE
-   ========================================================= */
-
-.rq-selected-range {
-    display: flex;
-
-    align-items: center;
-
-    margin-top: 20px;
-
-    padding: 14px;
-
-    background: #F7F9FD;
-
-    border: 1px solid #E5EAF3;
-
-    border-radius: 12px;
-}
-
-
-.rq-range-box {
-    flex: 1;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 5px;
-}
-
-
-.rq-range-box span {
-    color: #8290AA;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.08em;
-}
-
-
-.rq-range-box strong {
-    color: #263A68;
-
-    font-size: 13px;
-
-    font-weight: 700;
-}
-
-
-.rq-range-line {
-    width: 24px;
-
-    height: 1px;
-
-    margin: 0 12px;
-
-    background: #C8D2E5;
-}
-
-
-/* =========================================================
-   DATE FIELDS
-   ========================================================= */
-
-.rq-date-fields {
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 14px;
-
-    margin-top: 20px;
-}
-
-
-.rq-date-field label {
-    display: block;
-
-    margin-bottom: 7px;
-
-    color: #263A68;
-
-    font-size: 11px;
-
-    font-weight: 700;
-}
-
-
-.rq-date-input {
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 10px 11px;
-
-    background: #FFFFFF;
-
-    border: 1px solid #DDE4F0;
-
-    border-radius: 9px;
-
-    transition: border-color 0.15s ease,
-                box-shadow 0.15s ease;
-}
-
-
-.rq-date-input:focus-within {
-    border-color: #2F6FF3;
-
-    box-shadow:
-        0 0 0 3px rgba(47, 111, 243, 0.09);
-}
-
-
-.rq-date-input svg {
-    width: 16px;
-    height: 16px;
-
-    flex-shrink: 0;
-
-    fill: #6680B2;
-}
-
-
-.rq-date-input input {
-    width: 100%;
-
-    border: none;
-
-    outline: none;
-
-    background: transparent;
-
-    color: #263A68;
-
-    font-family: "Inter", sans-serif;
-
-    font-size: 12px;
-
-    font-weight: 600;
-}
-
-
-.rq-date-input input::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-
-    opacity: 0.65;
-}
-
-
-/* =========================================================
-   QUICK DATE SELECTION
-   ========================================================= */
-
-.rq-quick-dates {
-    margin-top: 21px;
-}
-
-
-.rq-quick-title {
-    display: block;
-
-    margin-bottom: 9px;
-
-    color: #697995;
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.07em;
-}
-
-
-.rq-quick-buttons {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 7px;
-}
-
-
-.rq-quick-buttons button {
-    padding: 7px 10px;
-
-    border: 1px solid #DDE5F2;
-
-    border-radius: 7px;
-
-    background: #FFFFFF;
-
-    color: #506284;
-
-    font-family: "Inter", sans-serif;
-
-    font-size: 10px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.15s ease,
-        border-color 0.15s ease,
-        color 0.15s ease;
-}
-
-
-.rq-quick-buttons button:hover {
-    border-color: #AFC5EF;
-
-    background: #F1F5FF;
-
-    color: #2F5FF6;
-}
-
-
-/* =========================================================
-   MODAL ACTIONS
-   ========================================================= */
-
-.rq-date-modal-actions {
-    display: flex;
-
-    justify-content: flex-end;
-
-    gap: 9px;
-
-    margin-top: 23px;
-
-    padding-top: 18px;
-
-    border-top: 1px solid #E8ECF4;
-}
-
-
-.rq-date-cancel,
-.rq-date-apply {
-    padding: 10px 16px;
-
-    border-radius: 8px;
-
-    font-family: "Inter", sans-serif;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-}
-
-
-.rq-date-cancel {
-    border: 1px solid #DDE4EF;
-
-    background: #FFFFFF;
-
-    color: #60708E;
-}
-
-
-.rq-date-cancel:hover {
-    border-color: #B9C5D8;
-
-    color: #263A68;
-}
-
-
-.rq-date-apply {
-    border: 1px solid #2F6FF3;
-
-    background: #2F6FF3;
-
-    color: #FFFFFF;
-
-    box-shadow:
-        0 4px 12px rgba(47, 111, 243, 0.20);
-}
-
-
-.rq-date-apply:hover {
-    background: #245CD5;
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 600px) {
-
-    .rq-date-modal {
-        padding: 19px;
-
-        border-radius: 15px;
-    }
-
-    .rq-date-fields {
-        grid-template-columns: 1fr;
-    }
-
-    .rq-selected-range {
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 10px;
-    }
-
-    .rq-range-line {
-        width: 30px;
-
-        height: 1px;
-
-        margin: 0;
-    }
-
-    .rq-date-modal-actions {
-        flex-direction: column-reverse;
-    }
-
-    .rq-date-cancel,
-    .rq-date-apply {
+    .generate-button {
         width: 100%;
     }
 
+    .summary-grid {
+        grid-template-columns: 1fr;
+        padding: 18px 20px;
+    }
+
+    .information-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .report-information {
+        padding: 20px;
+    }
+
+    .download-actions {
+        width: 100%;
+    }
+
+    .download-btn {
+        flex: 1;
+        justify-content: center;
+    }
 }
