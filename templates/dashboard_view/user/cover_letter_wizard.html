@@ -80,7 +80,11 @@
         <input type="hidden" name="content" id="clContentHidden">
         <div class="cl-actions">
           <button type="button" class="cl-btn cl-btn--ghost" id="clStartOver">Start over</button>
-          <button type="button" class="cl-btn cl-btn--ghost" id="clCopy">Copy text</button>
+          <button type="button" class="cl-btn cl-btn--ghost" id="clRegenerate">
+            <span class="cl-spin" id="clRegenerateSpin" hidden>&#9696;</span>
+            <span id="clRegenerateLabel">Regenerate</span>
+          </button>
+          {% comment %} <button type="button" class="cl-btn cl-btn--ghost" id="clCopy">Copy text</button> {% endcomment %}
           <button type="submit" class="cl-btn cl-btn--primary">Save &amp; download PDF</button>
         </div>
       </form>
@@ -119,6 +123,7 @@
   var questionText = document.getElementById("clQuestionText");
   var questionLoading = document.getElementById("clQuestionLoading");
   var hintEl = document.getElementById("clHint");
+  var resultText = document.getElementById("clResultText");
 
   document.getElementById("clStart").addEventListener("click", function () {
     var sel = document.getElementById("clVersionSelect");
@@ -252,7 +257,7 @@
       });
       var data = await res.json();
 
-      document.getElementById("clResultText").value = data.content || "";
+      resultText.value = data.content || "";
       document.getElementById("clSaveForm").action = "/export/save/" + state.versionId + "/" + EXPORT_TYPE + "/";
       showStep("result");
     } catch (e) {
@@ -267,18 +272,69 @@
     fetchNextQuestion();
   });
 
-  document.getElementById("clCopy").addEventListener("click", function (e) {
-    var text = document.getElementById("clResultText").value;
-    navigator.clipboard.writeText(text).then(function () {
+  // ---------------------------------------------------------------------
+  // Regenerate: re-runs generation on the SAME qa_history (and the same
+  // resume version). No new questions are asked — just a fresh pass at
+  // writing the letter from the answers already collected.
+  // ---------------------------------------------------------------------
+  var regenerateBtn = document.getElementById("clRegenerate");
+  var regenerateSpin = document.getElementById("clRegenerateSpin");
+  var regenerateLabel = document.getElementById("clRegenerateLabel");
+
+  regenerateBtn.addEventListener("click", async function () {
+    regenerateBtn.disabled = true;
+    regenerateSpin.hidden = false;
+    regenerateLabel.textContent = "Regenerating\u2026";
+
+    var failed = false;
+    try {
+      var formData = new FormData();
+      formData.append("version_id", state.versionId);
+      formData.append("export_type", EXPORT_TYPE);
+      formData.append("qa_history", JSON.stringify(state.qaHistory));
+
+      var res = await fetch("/export/generate-final/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+      var data = await res.json();
+
+      // Only replace the text with a real AI result; if the AI was
+      // unreachable, keep the current draft instead of overwriting it
+      // with the fallback message.
+      if (res.ok && data.content && data.source === "ai") {
+        resultText.value = data.content;
+      } else {
+        failed = true;
+      }
+    } catch (e) {
+      console.error(e);
+      failed = true;
+    } finally {
+      regenerateBtn.disabled = false;
+      regenerateSpin.hidden = true;
+      regenerateLabel.textContent = failed ? "Couldn\u2019t regenerate \u2014 try again" : "Regenerate";
+      if (failed) {
+        setTimeout(function () { regenerateLabel.textContent = "Regenerate"; }, 3000);
+      }
+    }
+  });
+
+ var copyBtn = document.getElementById("clCopy");
+if (copyBtn) {
+  copyBtn.addEventListener("click", function (e) {
+    navigator.clipboard.writeText(resultText.value).then(function () {
       var btn = e.currentTarget;
       var original = btn.textContent;
       btn.textContent = "Copied";
       setTimeout(function () { btn.textContent = original; }, 1400);
     });
   });
+}
 
   document.getElementById("clSaveForm").addEventListener("submit", function () {
-    document.getElementById("clContentHidden").value = document.getElementById("clResultText").value;
+    document.getElementById("clContentHidden").value = resultText.value;
   });
 })();
 </script>

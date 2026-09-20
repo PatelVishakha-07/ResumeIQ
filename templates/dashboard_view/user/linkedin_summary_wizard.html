@@ -3,7 +3,7 @@
 
 {% block title %}LinkedIn Summary Generator — ResumeIQ{% endblock %}
 {% block page_title %}LinkedIn summary{% endblock %}
-{% block page_desc %}A few quick questions from ResumeIQ AI, then we'll draft it from your resume.{% endblock %}
+{% block page_desc %}A few quick questions from ResumeIQ AI, then we'll write your summary from your answers.{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/linkedin_summary_wizard.css' %}">
@@ -14,30 +14,9 @@
 <main class="li-main">
   <div class="li-wizard" id="liWizard" data-max-questions="5">
 
-    <!-- Step 0: pick a resume -->
-    <section class="li-step" data-step="setup">
-      <p class="li-eyebrow">LinkedIn summary</p>
-      <h1 class="li-heading">Which resume should this be based on?</h1>
-      <p class="li-subtext">ResumeIQ AI will ask a few follow-up questions based on what it reads here.</p>
-
-      <div class="li-field">
-        <select id="liVersionSelect" class="li-input">
-          {% for v in versions %}
-            <option value="{{ v.version_id }}">v{{ v.version_number }} — {{ v.versions.file_path|slice:"-40:" }}</option>
-          {% empty %}
-            <option disabled>No resumes uploaded yet</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="li-actions">
-        <a href="{% url 'export_documents' %}" class="li-btn li-btn--ghost">Back</a>
-        <button type="button" class="li-btn li-btn--primary" id="liStart">Start</button>
-      </div>
-    </section>
-
-    <!-- Step 1: AI-asked questions, one at a time -->
-    <section class="li-step" data-step="qa" hidden>
+    {% csrf_token %}
+    <!-- Step 1: AI-asked questions, one at a time (starts immediately, no resume picker) -->
+    <section class="li-step" data-step="qa">
       <div class="li-progress">
         <div class="li-progress__bar" id="liProgressBar"></div>
       </div>
@@ -52,7 +31,7 @@
       <div class="li-field" id="liFieldWrap"></div>
 
       <div class="li-actions">
-        <button type="button" class="li-btn li-btn--ghost" id="liBack">Back</button>
+        <a href="{% url 'export_documents' %}" class="li-btn li-btn--ghost" id="liBack">Back</a>
         <div>
           <button type="button" class="li-btn li-btn--ghost" id="liFinishEarly" hidden>Generate now</button>
           <button type="button" class="li-btn li-btn--primary" id="liNext">Next</button>
@@ -66,7 +45,7 @@
       <h2 class="li-heading"><span class="li-spin">&#9696;</span> Writing your LinkedIn summary&hellip;</h2>
     </section>
 
-    <!-- Step 3: result -->
+    <!-- Step 3: result (saved to the database automatically) -->
     <section class="li-step" data-step="result" hidden>
       <p class="li-eyebrow">Draft ready</p>
       <h2 class="li-heading">Your LinkedIn summary</h2>
@@ -75,15 +54,16 @@
         <textarea class="li-result-text" id="liResultText" rows="16"></textarea>
       </div>
 
-      <form method="post" id="liSaveForm" action="">
-        {% csrf_token %}
-        <input type="hidden" name="content" id="liContentHidden">
-        <div class="li-actions">
-          <button type="button" class="li-btn li-btn--ghost" id="liStartOver">Start over</button>
-          <button type="button" class="li-btn li-btn--ghost" id="liCopy">Copy text</button>
-          <button type="submit" class="li-btn li-btn--primary">Save &amp; download PDF</button>
-        </div>
-      </form>
+      <div class="li-actions">
+        <button type="button" class="li-btn li-btn--ghost" id="liStartOver">Start over</button>
+        <button type="button" class="li-btn li-btn--ghost" id="liRegenerate">
+          <span class="li-spin" id="liRegenerateSpin" hidden>&#9696;</span>
+          <span id="liRegenerateLabel">Regenerate</span>
+        </button>
+        <button type="button" class="li-btn li-btn--primary" id="liCopy">Copy text</button>
+      </div>
+      <p class="li-copy-status" id="liCopyStatus" hidden></p>
+      <p class="li-copy-status" id="liSaveStatus" hidden></p>
     </section>
 
   </div>
@@ -94,12 +74,13 @@
   "use strict";
 
   var EXPORT_TYPE = "linkedin";
+  var AUTOSAVE_URL = "{% url 'autosave_linkedin' %}";
+
   var wizard = document.getElementById("liWizard");
   var maxQuestions = parseInt(wizard.dataset.maxQuestions, 10) || 5;
   var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
   var steps = {
-    setup: wizard.querySelector('[data-step="setup"]'),
     qa: wizard.querySelector('[data-step="qa"]'),
     generating: wizard.querySelector('[data-step="generating"]'),
     result: wizard.querySelector('[data-step="result"]')
@@ -108,7 +89,10 @@
     Object.keys(steps).forEach(function (key) { steps[key].hidden = key !== name; });
   }
 
-  var state = { versionId: null, qaHistory: [], current: null };
+  // exportId is the database row for the current summary. It is set after
+  // the first autosave, so later saves update that row instead of creating
+  // duplicates.
+  var state = { qaHistory: [], current: null, exportId: null };
 
   var fieldWrap = document.getElementById("liFieldWrap");
   var backBtn = document.getElementById("liBack");
@@ -119,15 +103,57 @@
   var questionText = document.getElementById("liQuestionText");
   var questionLoading = document.getElementById("liQuestionLoading");
   var hintEl = document.getElementById("liHint");
+  var resultText = document.getElementById("liResultText");
+  var saveStatus = document.getElementById("liSaveStatus");
 
-  document.getElementById("liStart").addEventListener("click", function () {
-    var sel = document.getElementById("liVersionSelect");
-    if (!sel.value) return;
-    state.versionId = sel.value;
-    showStep("qa");
-    fetchNextQuestion();
+  // ---------------------------------------------------------------------
+  // Automatic save
+  // ---------------------------------------------------------------------
+  var saveChain = Promise.resolve();  // serializes saves: no duplicate rows
+  var editTimer = null;
+
+  async function doSave() {
+    var text = resultText.value.trim();
+    if (!text) return;
+
+    try {
+      var fd = new FormData();
+      fd.append("content", text);
+      if (state.exportId) fd.append("export_id", state.exportId);
+
+      var res = await fetch(AUTOSAVE_URL, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: fd
+      });
+      var data = await res.json();
+
+      if (res.ok && data.saved) {
+        state.exportId = data.export_id;
+        saveStatus.textContent = "Saved to your exports.";
+      } else {
+        saveStatus.textContent = data.error || "Couldn't save.";
+      }
+    } catch (e) {
+      console.error(e);
+      saveStatus.textContent = "Couldn't save.";
+    }
+    saveStatus.hidden = false;
+  }
+
+  function autoSave() {
+    saveChain = saveChain.then(doSave);
+  }
+
+  // Save edits shortly after the user stops typing.
+  resultText.addEventListener("input", function () {
+    clearTimeout(editTimer);
+    editTimer = setTimeout(autoSave, 1200);
   });
 
+  // ---------------------------------------------------------------------
+  // Question flow
+  // ---------------------------------------------------------------------
   function renderField(q) {
     fieldWrap.innerHTML = "";
     var input;
@@ -166,7 +192,8 @@
 
     try {
       var formData = new FormData();
-      formData.append("version_id", state.versionId);
+      // No version_id sent at all — the backend never looks for one
+      // when export_type is "linkedin".
       formData.append("export_type", EXPORT_TYPE);
       formData.append("qa_history", JSON.stringify(state.qaHistory));
 
@@ -189,7 +216,6 @@
       renderField(data);
 
       finishEarlyBtn.hidden = state.qaHistory.length < 2;
-      backBtn.disabled = state.qaHistory.length === 0;
       nextBtn.textContent = "Next";
     } catch (e) {
       console.error(e);
@@ -216,19 +242,6 @@
     fetchNextQuestion();
   });
 
-  backBtn.addEventListener("click", function () {
-    if (state.qaHistory.length === 0) {
-      showStep("setup");
-      return;
-    }
-    var last = state.qaHistory.pop();
-    state.current = { question: last.question, field_type: "text", options: [] };
-    questionText.textContent = last.question;
-    renderField(state.current);
-    document.getElementById("liCurrentInput").value = last.answer;
-    stepLabel.textContent = "Question " + (state.qaHistory.length + 1) + " of up to " + maxQuestions;
-  });
-
   finishEarlyBtn.addEventListener("click", function () {
     var answer = readCurrentAnswer();
     if (answer && state.current) {
@@ -237,11 +250,14 @@
     generateFinal();
   });
 
+  // ---------------------------------------------------------------------
+  // Final generation (autosaves on success)
+  // ---------------------------------------------------------------------
   async function generateFinal() {
     showStep("generating");
+    saveStatus.hidden = true;
     try {
       var formData = new FormData();
-      formData.append("version_id", state.versionId);
       formData.append("export_type", EXPORT_TYPE);
       formData.append("qa_history", JSON.stringify(state.qaHistory));
 
@@ -252,9 +268,11 @@
       });
       var data = await res.json();
 
-      document.getElementById("liResultText").value = data.content || "";
-      document.getElementById("liSaveForm").action = "/export/save/" + state.versionId + "/" + EXPORT_TYPE + "/";
+      resultText.value = data.content || "";
       showStep("result");
+
+      // Don't save the "couldn't reach the AI" fallback text.
+      if (data.source === "ai") autoSave();
     } catch (e) {
       console.error(e);
       showStep("qa");
@@ -262,24 +280,70 @@
   }
 
   document.getElementById("liStartOver").addEventListener("click", function () {
-    state = { versionId: state.versionId, qaHistory: [], current: null };
+    clearTimeout(editTimer);
+    // A fresh run creates a new database row.
+    state = { qaHistory: [], current: null, exportId: null };
+    resultText.value = "";
+    saveStatus.hidden = true;
     showStep("qa");
     fetchNextQuestion();
   });
 
-  document.getElementById("liCopy").addEventListener("click", function (e) {
-    var text = document.getElementById("liResultText").value;
+  var regenerateBtn = document.getElementById("liRegenerate");
+  var regenerateSpin = document.getElementById("liRegenerateSpin");
+  var regenerateLabel = document.getElementById("liRegenerateLabel");
+
+  regenerateBtn.addEventListener("click", async function () {
+    // Re-runs generation on the SAME qa_history — no new questions asked,
+    // just a fresh pass at writing the summary from the existing answers.
+    // The existing database row is updated (state.exportId is kept).
+    regenerateBtn.disabled = true;
+    regenerateSpin.hidden = false;
+    regenerateLabel.textContent = "Regenerating\u2026";
+
+    try {
+      var formData = new FormData();
+      formData.append("export_type", EXPORT_TYPE);
+      formData.append("qa_history", JSON.stringify(state.qaHistory));
+
+      var res = await fetch("/export/generate-final/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+      var data = await res.json();
+
+      if (data.content) {
+        clearTimeout(editTimer);
+        resultText.value = data.content;
+        if (data.source === "ai") autoSave();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      regenerateBtn.disabled = false;
+      regenerateSpin.hidden = true;
+      regenerateLabel.textContent = "Regenerate";
+    }
+  });
+
+  document.getElementById("liCopy").addEventListener("click", function () {
+    var text = resultText.value;
+    var statusEl = document.getElementById("liCopyStatus");
+
     navigator.clipboard.writeText(text).then(function () {
-      var btn = e.currentTarget;
-      var original = btn.textContent;
-      btn.textContent = "Copied";
-      setTimeout(function () { btn.textContent = original; }, 1400);
+      statusEl.textContent = "Summary copied to clipboard — paste it into your LinkedIn \"About\" section.";
+      statusEl.hidden = false;
+      clearTimeout(statusEl._hideTimer);
+      statusEl._hideTimer = setTimeout(function () { statusEl.hidden = true; }, 4000);
+    }).catch(function () {
+      statusEl.textContent = "Couldn't copy automatically — please select and copy the text manually.";
+      statusEl.hidden = false;
     });
   });
 
-  document.getElementById("liSaveForm").addEventListener("submit", function () {
-    document.getElementById("liContentHidden").value = document.getElementById("liResultText").value;
-  });
+  // Kick off the Q&A immediately — no setup step anymore.
+  fetchNextQuestion();
 })();
 </script>
 {% endblock %}
