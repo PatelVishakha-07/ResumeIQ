@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    @page { size: A4; margin: 2.2cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 11pt; color: #1a1a1f; line-height: 1.5; }
+    .header { margin-bottom: 24px; }
+    .header .name { font-size: 14pt; font-weight: bold; }
+    .header .doc-type { font-size: 9pt; color: #6b6b76; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .content p { margin: 0 0 12px 0; text-align: left; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="name">{{ user.name }}</div>
+        <div class="doc-type">{{ title }}</div>
+    </div>
+    <div class="content">{{ content_html|safe }}</div>
+</body>
+</html>

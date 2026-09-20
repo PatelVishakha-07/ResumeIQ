@@ -1,17 +1,13 @@
 """
-Export model — add this to resume/models.py (same app as Resume,
-ResumeVersion, ResumeAnalysis, JDMatchResult, which the export views
-already import from `resume.models`).
+Export model — resume/models.py import stays the same, but the `resume`
+field is now nullable.
 
-Matches table 11 ("exports") in your data dictionary:
-  export_id, user_id, resume_id, export_type, file_path, created_at
-
-field_path is a FileField (not CharField) so that
-`export.file_path.save(filename, ContentFile(...), save=True)` in
-save_export_document works directly — Django's FileField stores the
-relative path as a string under the hood, same idea as file_path in
-your data dictionary, but it also handles the actual file write/read
-for you.
+Why: LinkedIn summary exports no longer go through a resume at all (pure
+Q&A flow), so there's nothing to attach as `resume_id` for those rows.
+Cover letter exports still always have one. null=True/blank=True lets
+both cases live in the same table, matching table 11 ("exports") in your
+data dictionary but relaxing the NOT NULL on resume_id specifically for
+this reason.
 """
 
 import uuid
@@ -19,7 +15,7 @@ import uuid
 from accounts.models import User
 from django.db import models
 
-from resume.models import Resume  
+from resume.models import Resume
 
 
 def export_file_upload_path(instance, filename):
@@ -39,10 +35,19 @@ class Export(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="exports", db_column="user_id"
     )
+    # CHANGED: null=True, blank=True — LinkedIn exports have no resume.
     resume = models.ForeignKey(
-        Resume, on_delete=models.CASCADE, related_name="exports", db_column="resume_id"
+        Resume,
+        on_delete=models.CASCADE,
+        related_name="exports",
+        db_column="resume_id",
+        null=True,
+        blank=True,
     )
     export_type = models.CharField(max_length=20, choices=EXPORT_TYPE_CHOICES)
+    # The raw generated text — kept alongside the PDF so it can be shown,
+    # re-edited, or reused without having to parse it back out of the PDF.
+    content = models.TextField()
     file_path = models.FileField(upload_to=export_file_upload_path)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,4 +1,9 @@
-
+/* linkedin_summary_wizard.css
+   =============================
+   Styles for the LinkedIn Summary generator page only.
+   Accent color: teal, to match the LinkedIn-summary icon color
+   used on the export chooser page.
+*/
 
 .li-main {
     max-width: 720px;
@@ -196,4 +201,12 @@ textarea.li-input {
 
 @keyframes li-spin-anim {
     to { transform: rotate(360deg); }
+}
+
+/* ---------- Copy status message ---------- */
+
+.li-copy-status {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: #0f9d8f;
 }
