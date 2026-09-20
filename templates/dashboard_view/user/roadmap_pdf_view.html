@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{{ roadmap.query_label }} - Roadmap</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 1.6cm 1.8cm 2cm 1.8cm;
+    @frame footer_frame {
+      -pdf-frame-content: footerContent;
+      bottom: 0.7cm; margin-left: 1.8cm; margin-right: 1.8cm; height: 0.7cm;
+    }
+  }
+  body { font-family: Helvetica; font-size: 10pt; color: #1f2937; line-height: 1.4; }
+  div { margin: 0; padding: 0; }
+  h1 { font-size: 20pt; margin: 0 0 4pt 0; color: #111827; }
+  h2 { font-size: 12pt; margin: 14pt 0 4pt 0; color: #111827; }
+  .brand { font-size: 9pt; color: #6b7280; margin-bottom: 10pt; }
+  .summary { font-size: 10.5pt; margin: 6pt 0 8pt 0; }
+  .meta { font-size: 9.5pt; color: #374151; margin: 0 0 4pt 0; }
+  .stage { width: 100%; margin: 0 0 10pt 0; page-break-inside: avoid; }
+  .num { width: 26pt; text-align: center; vertical-align: top; font-size: 12pt; font-weight: bold;
+         color: #ffffff; background-color: #4f46e5; padding: 6pt 0 6pt 0; }
+  .body { border: 1px solid #d1d5db; padding: 8pt 10pt 8pt 10pt; }
+  .st-title { font-size: 11.5pt; font-weight: bold; color: #111827; }
+  .st-meta { font-size: 9pt; color: #4f46e5; margin: 2pt 0 4pt 0; }
+  .st-desc { margin: 0 0 4pt 0; }
+  .label { font-weight: bold; }
+  .line { margin: 4pt 0 0 0; font-size: 9.5pt; }
+  #footerContent { font-size: 8pt; color: #9ca3af; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>{{ roadmap.query_label }}</h1>
+<div class="brand">ResumeIQ learning roadmap &nbsp;|&nbsp; Generated {{ generated_on|date:"d M Y" }}</div>
+
+{% if roadmap.summary %}<div class="summary">{{ roadmap.summary }}</div>{% endif %}
+
+<div class="meta">
+  <span class="label">{{ roadmap.stages|length }} stages</span>{% if roadmap.total_duration %} &nbsp;|&nbsp; about {{ roadmap.total_duration }}{% endif %}
+</div>
+{% if roadmap.prerequisites %}
+<div class="meta"><span class="label">Before you start:</span> {{ roadmap.prerequisites|join:", " }}</div>
+{% endif %}
+
+<h2>Learning path</h2>
+
+{% for s in roadmap.stages %}
+<table class="stage" cellpadding="0" cellspacing="0">
+  <tr>
+    <td class="num">{{ forloop.counter }}</td>
+    <td class="body">
+      <div class="st-title">{{ s.title }}</div>
+      <div class="st-meta">{{ s.duration }} &nbsp;|&nbsp; {{ s.level }}</div>
+      <div class="st-desc">{{ s.desc }}</div>
+      <div class="line"><span class="label">Topics:</span> {{ s.topics|join:", " }}</div>
+      {% if s.milestone %}<div class="line"><span class="label">Build:</span> {{ s.milestone }}</div>{% endif %}
+      {% if s.resources %}<div class="line"><span class="label">Study:</span> {{ s.resources|join:"; " }}</div>{% endif %}
+    </td>
+  </tr>
+</table>
+{% endfor %}
+
+{% if roadmap.capstone_project %}
+<table class="stage" cellpadding="0" cellspacing="0" style="margin-top:6pt;"><tr><td class="body">
+  <div class="st-title">Capstone project</div>
+  <div class="line">{{ roadmap.capstone_project }}</div>
+</td></tr></table>
+{% endif %}
+
+{% if roadmap.interview_focus %}
+<table class="stage" cellpadding="0" cellspacing="0"><tr><td class="body">
+  <div class="st-title">What interviewers will probe</div>
+  <div class="line">{{ roadmap.interview_focus|join:", " }}</div>
+</td></tr></table>
+{% endif %}
+
+<div id="footerContent">ResumeIQ &nbsp;|&nbsp; {{ roadmap.query_label }} &nbsp;|&nbsp; Page <pdf:pagenumber> of <pdf:pagecount></div>
+
+</body>
+</html>
