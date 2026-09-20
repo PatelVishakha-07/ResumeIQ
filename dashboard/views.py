@@ -204,17 +204,84 @@ def feedback(request):
             }
         })
 
-def reports(request):
+REPORT_TEMPLATE = "dashboard_view/admin/admin_reports.html"
+
+
+def admin_report(request):
     admin_id = request.session.get("user_id")
-    admin_user = User.objects.get(user_id=admin_id)
-    return render(request,"dashboard_view/admin/admin_reports.html",
-            {
-                'nav': {
-                    'role': 'admin',
-                    "avatar_initial": admin_user.name[0].upper(),
-                    "avatar_name": admin_user.name,
-                }
-            })
+    if not admin_id:
+        return redirect("login")
+
+    admin_user = User.objects.filter(user_id=admin_id).first()
+    if not admin_user or admin_user.role != "admin":
+        return redirect("dashboard")
+
+    ctx = {
+        "nav": {
+            "role": "admin",
+            "avatar_initial": admin_user.name[0].upper(),
+            "avatar_name": admin_user.name,
+        },
+        "tables": [(key, cfg["label"]) for key, cfg in REPORT_TABLES.items()],
+        "periods": PERIODS,
+        "selected_table": request.GET.get("table", ""),
+        "selected_period": request.GET.get("period", ""),
+        "from_date": request.GET.get("from_date", ""),
+        "to_date": request.GET.get("to_date", ""),
+        "generated": False,
+    }
+
+    # First page load (no form submitted yet)
+    if not ctx["selected_table"] and not ctx["selected_period"]:
+        return render(request, REPORT_TEMPLATE, ctx)
+
+    cfg = REPORT_TABLES.get(ctx["selected_table"])
+    if cfg is None:
+        ctx["error"] = "Please select a valid table."
+        return render(request, REPORT_TEMPLATE, ctx)
+
+    start, end, error = resolve_period(
+        ctx["selected_period"], ctx["from_date"], ctx["to_date"]
+    )
+    if error:
+        ctx["error"] = error
+        return render(request, REPORT_TEMPLATE, ctx)
+
+    tz = timezone.get_current_timezone()
+    start_dt = timezone.make_aware(datetime.combine(start, time.min), tz)
+    end_dt = timezone.make_aware(
+        datetime.combine(end + timedelta(days=1), time.min), tz
+    )
+
+    model = cfg["model"]
+    date_field = cfg["date_field"]
+    qs = model.objects.filter(
+        **{f"{date_field}__gte": start_dt, f"{date_field}__lt": end_dt}
+    ).order_by(f"-{date_field}")
+
+    fields = [
+        f for f in model._meta.concrete_fields
+        if f.name not in cfg.get("exclude", [])
+        and f.column not in cfg.get("exclude", [])
+    ]
+    columns = [f.column.replace("_", " ").title() for f in fields]
+    total = qs.count()
+    rows = [
+        [format_cell(v) for v in row]
+        for row in qs.values_list(*[f.attname for f in fields])[:MAX_ROWS]
+    ]
+
+    ctx.update({
+        "generated": True,
+        "report_title": f"{cfg['label']} Report",
+        "report_desc": f"{start:%d %b %Y} to {end:%d %b %Y} — {total} record(s)",
+        "columns": columns,
+        "rows": rows,
+        "total": total,
+        "truncated": total > MAX_ROWS,
+        "max_rows": MAX_ROWS,
+    })
+    return render(request, REPORT_TEMPLATE, ctx)
 
 
 #User Views
@@ -762,3 +829,111 @@ def download_roadmap_pdf(request):
     response = HttpResponse(pdf_buffer.getvalue(), content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+
+#----------------------Admin report-----------
+
+# dashboard_view/views.py
+
+from datetime import date, datetime, time, timedelta
+
+from django.shortcuts import render
+from django.utils import timezone
+
+from accounts.models import User, Profile
+from resume.models import (
+    Resume, ResumeVersion, ResumeAnalysis, JobDescription, JDMatchResult,
+)
+
+MAX_ROWS = 500          # preview limit so huge tables don't freeze the page
+MAX_CELL_CHARS = 100    # truncate long text (parsed_text, content_snapshot...)
+
+# key -> config. date_field is what the report period filters on.
+REPORT_TABLES = {
+    "user": {
+        "label": "Users",
+        "model": User,
+        "date_field": "created_at",
+        "exclude": ["password"],          # never show password hashes
+    },
+    "profile": {
+        "label": "Profiles",
+        "model": Profile,
+        "date_field": "created_at",
+    },
+    "resume": {
+        "label": "Resumes",
+        "model": Resume,
+        "date_field": "updated_at",
+    },
+    "resume_version": {
+        "label": "Resume Versions",
+        "model": ResumeVersion,
+        "date_field": "created_at",
+    },
+    "resume_analysis": {
+        "label": "Resume Analyses",
+        "model": ResumeAnalysis,
+        "date_field": "analyzed_at",
+    },
+    "job_description": {
+        "label": "Job Descriptions",
+        "model": JobDescription,
+        "date_field": "created_at",
+    },
+    "jd_match": {
+        "label": "JD Match Results",
+        "model": JDMatchResult,
+        "date_field": "jd__created_at",   # model has no date of its own
+    },
+}
+
+PERIODS = [
+    ("weekly", "Weekly"),
+    ("monthly", "Monthly"),
+    ("yearly", "Yearly"),
+    ("custom", "Custom Date Range"),
+]
+
+
+def resolve_period(period, from_str, to_str):
+    """Return (start_date, end_date, error). Dates are inclusive."""
+    today = timezone.localdate()
+
+    if period == "weekly":
+        return today - timedelta(days=6), today, None
+    if period == "monthly":
+        return today - timedelta(days=29), today, None
+    if period == "yearly":
+        return today - timedelta(days=364), today, None
+    if period == "custom":
+        try:
+            start = date.fromisoformat(from_str)
+            end = date.fromisoformat(to_str)
+        except (TypeError, ValueError):
+            return None, None, "Please enter a valid From and To date."
+        if start > end:
+            return None, None, "From date cannot be after To date."
+        return start, end, None
+
+    return None, None, "Please select a valid report period."
+
+
+def format_cell(value):
+    if value is None or value == "":
+        return "—"
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, datetime):
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+        return value.strftime("%Y-%m-%d %H:%M")
+    if isinstance(value, (dict, list)):
+        value = json.dumps(value, ensure_ascii=False)
+    value = str(value)
+    if len(value) > MAX_CELL_CHARS:
+        value = value[:MAX_CELL_CHARS] + "…"
+    return value
+
+
