@@ -5,7 +5,7 @@ from django.contrib import messages
 from resume.models import Resume,ResumeAnalysis
 from django.utils.timesince import timesince
 from django.utils import timezone
-from resume.models import Resume, ResumeAnalysis, ResumeVersion, JDMatchResult
+from resume.models import Resume, ResumeAnalysis, ResumeVersion, JDMatchResult, JobDescription
 from django.template.loader import render_to_string
 from django.http import HttpResponse, JsonResponse
 from io import BytesIO
@@ -40,19 +40,15 @@ def dashboard_redirect(request):
     if not user_id:
         return redirect("login")
 
-    user = User.objects.get(user_id = user_id)
-
     role = request.session.get("role")
-    nav = {
-        'role': role,
-        'avatar_initial': user.name[0].upper() if user.name else "",
-        'avatar_name': user.name
-    }
 
     if role == "admin": 
         return adminOverview(request)   
-        
-    return render(request, "dashboard_view/user/overview.html", {'nav':nav})
+
+    elif role == "user":
+        return redirect("user_dashboard")
+
+    return redirect("login")
 
 
 # Admin URL
@@ -221,9 +217,93 @@ def reports(request):
             })
 
 
-
-
 #User Views
+
+def user_dashboard(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("login")
+
+    user = User.objects.get(user_id=user_id)
+
+    try:
+        user = User.objects.filter(user_id = user_id).first()
+    except User.DoesNotExist:
+        request.session.flush()
+        user = None
+
+    if user.role != "user":
+        return redirect("dashboard")
+
+    user_name = user.name or "User"
+    ats_score = 0
+    ats_score_offset = 263.89
+    jd_match = 0
+    interview_readiness = 0
+    target_role = "No job description yet"
+    missing_keywords = []
+    ats_trend = []
+
+    user_resumes = Resume.objects.filter(user=user)
+    user_versions = ResumeVersion.objects.filter(versions__in = user_resumes)
+
+    #latest analysis score
+    analyses = (ResumeAnalysis.objects.filter(analyses__in = user_versions).order_by("analyzed_at"))
+    latest_analysis = analyses.last()
+
+    if latest_analysis:
+        try:
+            ats_score = float(latest_analysis.ats_score or 0)
+        except:
+            ats_score = 0
+        ats_score = max(0, min(100, ats_score))
+        circumference = 263.89
+        ats_score_offset = (circumference - (ats_score/100) * circumference)
+
+    for analysis in analyses:
+        try:
+            score = float(analysis.ats_score or 0)
+        except (TypeError, ValueError):
+            score = 0
+        score = max(0, min(100, score))
+
+        ats_trend.append({"score": score,
+            "date": ( analysis.analyzed_at.strftime("%d %b") if analysis.analyzed_at else ""
+            )})
+
+    #latest jd match
+    latest_match = JDMatchResult.objects.filter(user=user).order_by("-match_id").first()
+    if latest_match:
+        try:
+            jd_match = float(latest_match.match_percentage or 0)
+        except (TypeError, ValueError):
+            jd_match = 0
+        jd_match = max(0, min(100, jd_match))
+
+        missing_keywords = latest_match.missing_keywords or []
+        if isinstance(missing_keywords, str):
+            missing_keywords = [item.strip() for item in missing_keywords.split(",")]
+
+        if latest_match.jd:
+            target_role = latest_match.jd.target_role or "Job Description"
+
+    interview_readiness = 0
+    nav = {"avatar_initial": user_name[0].upper() if user_name else "U", "avatar_name": user_name}
+
+
+    context = {
+        "user_name": user_name,
+        "ats_score": ats_score,
+        "ats_score_offset": ats_score_offset,
+        "ats_trend": ats_trend,
+        "jd_match": jd_match,
+        "target_role": target_role,
+        "missing_keywords": missing_keywords,
+        "interview_readiness":interview_readiness,
+        "nav": nav,
+    }
+
+    return render( request, "dashboard_view/user/overview.html", context )
 
 def ats_score_generator_view(request):
     return render(request, "dashboard_view/user/ats_score_generator.html")
@@ -628,7 +708,6 @@ def generate_roadmap(request):
 
     cache.set(cache_key, roadmap, cache_seconds)
     return JsonResponse({**roadmap, "source": "ai"})
-
 
 #function to view roadmap generator page
 def roadmap_generator_view(request):

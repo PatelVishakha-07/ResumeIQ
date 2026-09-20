@@ -1,63 +1,615 @@
 {% extends "dashboard_view/base.html" %}
 
-{% block title %}Overview — ResumeIQ{% endblock %}
-{% block page_title %}Welcome back, Aisha{% endblock %}
-{% block page_desc %}Here's where your resume and interview readiness stand today.{% endblock %}
+{% load static %}
+
+
+{% block title %}
+Overview — ResumeIQ
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'css/user_dashboard_style.css' %}">
+
+{% endblock %}
+
+
 
 {% block content %}
-<div class="grid cols-3" style="margin-bottom:18px;">
-  <div class="card">
-    <div class="card-head"><h3>ATS Compatibility</h3><span class="badge good">Improving</span></div>
-    <div class="score-row">
-      <div class="ring">
-        <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="#D9D4C4" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="#2F6F4E" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="55"/></svg>
-        <div class="num">79</div>
-      </div>
-      <div class="score-meta">Up 12 points since v1.<br>3 formatting issues remain.</div>
+
+<div class="user-overview">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="user-overview-header">
+
+        <div>
+
+            <span class="user-overview-eyebrow">
+                ResumeIQ Dashboard
+            </span>
+
+            <h2>
+                Welcome back, {{ user_name }}
+            </h2>
+
+            <div class="user-overview-subtitle">
+                Here's a quick look at your resume and interview progress.
+            </div>
+
+        </div>
+
+       <!--  <div class="user-overview-user">
+
+            <div class="user-overview-avatar">
+                {{ user_name|first|upper }}
+            </div>
+
+            <span>
+                {{ user_name }}
+            </span>
+
+        </div> -->
+
     </div>
-  </div>
-  <div class="card">
-    <div class="card-head"><h3>JD Match</h3><span class="badge warn">6 gaps</span></div>
-    <div class="score-row">
-      <div class="ring">
-        <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="#D9D4C4" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="#C98A3E" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="121"/></svg>
-        <div class="num">54%</div>
-      </div>
-      <div class="score-meta">Against "Backend Engineer, Series B startup".<br>6 keywords missing.</div>
+
+
+
+    <!-- =====================================================
+         STAT CARDS
+    ====================================================== -->
+
+    <div class="user-overview-stats">
+
+
+        <!-- ATS SCORE -->
+
+        <div class="user-overview-stat">
+
+            <div class="user-overview-stat-header">
+
+                <span>
+                    ATS Score
+                </span>
+
+                <span class="user-overview-stat-icon">
+                    ◉
+                </span>
+
+            </div>
+
+
+            <div class="user-overview-stat-number">
+
+                {{ ats_score|floatformat:0 }}
+
+                <span>/100</span>
+
+            </div>
+
+
+            <div class="user-overview-stat-description">
+
+                Latest resume analysis score
+
+            </div>
+
+        </div>
+
+
+
+        <!-- JD MATCH -->
+
+        <div class="user-overview-stat">
+
+            <div class="user-overview-stat-header">
+
+                <span>
+                    JD Match
+                </span>
+
+                <span class="user-overview-stat-icon">
+                    ↗
+                </span>
+
+            </div>
+
+
+            <div class="user-overview-stat-number">
+
+                {{ jd_match|floatformat:0 }}
+
+                <span>%</span>
+
+            </div>
+
+
+            <div class="user-overview-stat-description">
+
+                Match with your latest job description
+
+            </div>
+
+        </div>
+
+
+
+        <!-- INTERVIEW READINESS -->
+
+        <div class="user-overview-stat">
+
+            <div class="user-overview-stat-header">
+
+                <span>
+                    Interview Readiness
+                </span>
+
+                <span class="user-overview-stat-icon">
+                    ✓
+                </span>
+
+            </div>
+
+
+            <div class="user-overview-stat-number">
+
+                {{ interview_readiness|floatformat:0 }}
+
+                <span>%</span>
+
+            </div>
+
+
+            <div class="user-overview-stat-description">
+
+                Based on your interview preparation
+
+            </div>
+
+        </div>
+
     </div>
-  </div>
-  <div class="card">
-    <div class="card-head"><h3>Interview Readiness</h3><span class="badge good">On track</span></div>
-    <div class="score-row">
-      <div class="ring">
-        <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="#D9D4C4" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="#2F6F4E" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="87"/></svg>
-        <div class="num">67</div>
-      </div>
-      <div class="score-meta">Based on 4 practice tests.<br>Weakest: system design.</div>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <div class="user-overview-main">
+
+
+        <!-- =================================================
+             ATS PANEL
+        ================================================== -->
+
+        <div class="user-overview-panel">
+
+            <div class="user-overview-panel-header">
+
+                <div>
+
+                    <h2 class="user-overview-panel-title">
+                        Resume ATS Performance
+                    </h2>
+
+                    <div class="user-overview-panel-subtitle">
+                        Your resume analysis and score history
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ATS CURRENT SCORE -->
+
+            <div class="user-overview-ats">
+
+                <div class="user-overview-score-ring">
+
+                    <svg viewBox="0 0 100 100">
+
+                        <!-- Background -->
+
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="42"
+                            fill="none"
+                            stroke="#DEDACC"
+                            stroke-width="8"
+                        />
+
+
+                        <!-- Score -->
+
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="42"
+                            fill="none"
+                            stroke="#3852E3"
+                            stroke-width="8"
+                            stroke-linecap="round"
+                            stroke-dasharray="263.89"
+                            stroke-dashoffset="{{ ats_score_offset }}"
+                        />
+
+                    </svg>
+
+
+                    <div class="score-number">
+
+                        {{ ats_score|floatformat:0 }}
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="user-overview-score-info">
+
+                    <strong>
+                        Latest ATS Score
+                    </strong>
+
+
+                    {% if ats_score > 0 %}
+
+                        <p>
+
+                            Your latest resume analysis produced
+                            an ATS score of
+                            <strong>
+                                {{ ats_score|floatformat:0 }}/100
+                            </strong>.
+
+                        </p>
+
+                    {% else %}
+
+                        <p>
+
+                            Upload and analyze your resume
+                            to see your ATS score.
+
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ATS TREND
+            ================================================== -->
+
+            <div class="user-overview-trend-header">
+
+                <div>
+
+                    <h3 class="user-overview-panel-title">
+                        ATS Score Trend
+                    </h3>
+
+                    <div class="user-overview-panel-subtitle">
+                        Score across your resume analyses
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            {% if ats_trend %}
+
+                <div class="user-overview-trend">
+
+                    {% for item in ats_trend %}
+
+                        <div
+                            class="user-overview-trend-column
+                            {% if forloop.last %}
+                                current
+                            {% endif %}"
+                        >
+
+                            <div class="user-overview-trend-bar-wrap">
+
+                                <div
+                                    class="user-overview-trend-bar"
+                                    style="height: {{ item.score }}%;"
+                                    title="{{ item.score|floatformat:0 }}%"
+                                >
+                                </div>
+
+                            </div>
+
+
+                            <div class="user-overview-trend-score">
+
+                                {{ item.score|floatformat:0 }}
+
+                            </div>
+
+
+                            <div class="user-overview-trend-date">
+
+                                {{ item.date }}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="user-overview-empty">
+
+                    <div class="user-overview-empty-icon">
+                        ◌
+                    </div>
+
+                    <strong>
+                        No ATS analysis history yet.
+                    </strong>
+
+                    <span>
+                        Analyze your resume to start tracking your score.
+                    </span>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- =================================================
+             JD MATCH PANEL
+        ================================================== -->
+
+        <div class="user-overview-panel">
+
+            <div class="user-overview-panel-header">
+
+                <div>
+
+                    <h2 class="user-overview-panel-title">
+                        Job Description Match
+                    </h2>
+
+                    <div class="user-overview-panel-subtitle">
+                        Your latest resume-to-job match
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- MATCH SCORE -->
+
+            <div class="user-overview-match">
+
+                <div class="user-overview-match-score">
+
+                    {{ jd_match|floatformat:0 }}%
+
+                </div>
+
+
+                <div class="user-overview-match-info">
+
+                    {% if jd_match > 0 %}
+
+                        <strong>
+                            Resume match
+                        </strong>
+
+                        <p>
+
+                            Your resume currently matches
+                            {{ jd_match|floatformat:0 }}%
+                            of the selected job description.
+
+                        </p>
+
+                    {% else %}
+
+                        <strong>
+                            No match available
+                        </strong>
+
+                        <p>
+
+                            Add a job description and run a match
+                            analysis to see your result.
+
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- TARGET ROLE -->
+
+            <div class="user-overview-role">
+
+                <span class="user-overview-role-label">
+                    Target Role
+                </span>
+
+                <div class="user-overview-role-value">
+
+                    {{ target_role }}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- MISSING KEYWORDS -->
+
+            <div class="user-overview-keywords-title">
+
+                <strong>
+                    Missing Keywords
+                </strong>
+
+                <span class="user-overview-keywords-count">
+
+                    {% if missing_keywords %}
+
+                        {{ missing_keywords|length }} found
+
+                    {% else %}
+
+                        None
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+
+            {% if missing_keywords %}
+
+                <div class="user-overview-keywords">
+
+                    {% for keyword in missing_keywords %}
+
+                        <span class="user-overview-keyword">
+                            {{ keyword }}
+                        </span>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="user-overview-no-data">
+
+                    No missing keywords found.
+
+                </div>
+
+            {% endif %}
+
+
+
+            <!-- INTERVIEW READINESS -->
+
+            <div class="user-overview-readiness">
+
+                <div class="user-overview-readiness-header">
+
+                    <strong>
+                        Interview Readiness
+                    </strong>
+
+                    <span class="user-overview-readiness-value">
+
+                        {{ interview_readiness|floatformat:0 }}%
+
+                    </span>
+
+                </div>
+
+
+                <div class="user-overview-progress">
+
+                    <div
+                        class="user-overview-progress-fill"
+                        style="width: {{ interview_readiness }}%;"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SUGGESTED NEXT STEP -->
+
+            <div class="user-overview-next">
+
+                <div class="user-overview-next-icon">
+                    →
+                </div>
+
+
+                <div class="user-overview-next-content">
+
+                    <strong>
+                        Suggested Next Step
+                    </strong>
+
+
+                    {% if jd_match == 0 %}
+
+                        <p>
+
+                            Add a job description and analyze
+                            your resume to identify missing
+                            skills and keywords.
+
+                        </p>
+
+                    {% elif missing_keywords %}
+
+                        <p>
+
+                            Review the missing keywords above
+                            and update your resume where they
+                            accurately represent your skills
+                            and experience.
+
+                        </p>
+
+                    {% else %}
+
+                        <p>
+
+                            Continue practicing interview
+                            questions based on your target role.
+
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-  </div>
+
 </div>
 
-<div class="grid cols-2">
-  <div class="card">
-    <h3>Score trend across resume versions</h3>
-    <div class="hint">ATS score by version, most recent on the right</div>
-    <div class="trend">
-      <div class="col" style="height:38%"></div>
-      <div class="col" style="height:48%"></div>
-      <div class="col" style="height:56%"></div>
-      <div class="col" style="height:70%"></div>
-      <div class="col now" style="height:88%"></div>
-    </div>
-  </div>
-  <div class="card">
-    <h3>Suggested next step</h3>
-    <p class="quote">"Your Experience section still has 4 bullet points without measurable outcomes — rewriting these is the fastest way to raise your score."</p>
-    <div class="divider"></div>
-    <div class="btn-row">
-      <a class="btn sm" href="" style="text-decoration:none;">Open Bullet Rewriter</a>
-      <button class="btn ghost sm">Dismiss</button>
-    </div>
-  </div>
-</div>
 {% endblock %}

@@ -48,19 +48,9 @@
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 {% endblock %}
-
-  <style>
-    #results {
-      display: none;
-    }
-
-    #results.show {
-      display: block;
-    }
-  </style>
 </head>
 
-<body class="font-sans text-ink">
+<body class="font-sans text-ink ats-page">
 
   <!-- ========================================= -->
   <!-- NAVIGATION -->
@@ -144,15 +134,15 @@
   <!-- ========================================= -->
 
   <section
-    class="max-w-6xl mx-auto px-6 sm:px-10 pt-14 sm:pt-20 pb-16 grid lg:grid-cols-5 gap-12 lg:gap-16 items-start"
+    class="ats-hero max-w-6xl mx-auto px-6 sm:px-10 pt-14 sm:pt-20 pb-16 grid lg:grid-cols-5 gap-12 lg:gap-16 items-start"
   >
 
     <!-- LEFT SIDE -->
 
-    <div class="lg:col-span-2 fade-up">
+    <div class="result-card lg:col-span-2 fade-up">
 
       <p
-        class="font-mono text-xs tracking-[0.25em] text-correction uppercase mb-4"
+        class="eyebrow font-mono text-xs tracking-[0.25em] text-correction uppercase mb-4"
       >
         Free ATS check
       </p>
@@ -201,7 +191,7 @@
       style="animation-delay:.1s"
     >
 
-      <div class="bg-inksoft rounded-lg p-1.5 shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
+      <div class="upload-card bg-inksoft rounded-lg p-1.5 shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
 
         <div class="bg-paper rounded-md p-6 sm:p-8">
 
@@ -440,6 +430,7 @@
 
   <section
     id="results"
+    class="results-section"
     class="max-w-6xl mx-auto px-6 sm:px-10 pb-24"
   >
 
@@ -536,7 +527,7 @@
         <!-- ================================= -->
 
         <div
-          class="lg:col-span-3 fade-up"
+          class="result-card lg:col-span-3 fade-up"
           style="animation-delay:.1s"
         >
 
@@ -544,7 +535,7 @@
 
           <div class="space-y-5">
 
-            <div>
+            <div class="breakdown-item">
 
               <div
                 class="flex items-baseline justify-between mb-1.5"
@@ -579,7 +570,7 @@
 
             <!-- FORMAT -->
 
-            <div>
+            <div class="breakdown-item">
 
               <div
                 class="flex items-baseline justify-between mb-1.5"
@@ -614,7 +605,7 @@
 
             <!-- SECTION -->
 
-            <div>
+            <div class="breakdown-item">
 
               <div
                 class="flex items-baseline justify-between mb-1.5"
@@ -1588,4 +1579,3 @@
 
 </body>
 </html>
-
