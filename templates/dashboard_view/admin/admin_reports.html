@@ -6,85 +6,92 @@
 {% block page_title %}Reports{% endblock %}
 
 {% block page_desc %}
-Generate reports from ResumeIQ database tables by weekly, monthly, yearly, or custom date range.
+Generate reports from ResumeIQ database tables by weekly, monthly,
+yearly, or custom date ranges.
 {% endblock %}
 
 {% block content %}
 
 <link rel="stylesheet" href="{% static 'css/adminreport.css' %}">
 
-<div class="report-page">
+<style>
+    /* Make sure the generated report table is always shown */
+    .rq-report-page .rq-table-container {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        overflow-x: auto;
+    }
+
+    .rq-report-page .rq-report-table {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .rq-report-page .rq-report-table th,
+    .rq-report-page .rq-report-table td {
+        padding: 10px 14px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+
+    .rq-report-page .rq-report-table th {
+        font-weight: 600;
+        background: #f9fafb;
+    }
+</style>
+
+<div class="rq-report-page">
 
     <!-- =====================================================
          REPORT GENERATOR
     ====================================================== -->
 
-    <section class="report-generator">
+    <section class="rq-generator-card">
 
-        <div class="generator-header">
+        <div class="rq-generator-header">
 
-            <div class="generator-title-area">
-
-                <div class="generator-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V5h14v14z"/>
-                        <path d="M7 14h2v3H7v-3zm4-5h2v8h-2V9zm4-3h2v11h-2V6z"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <h2>Report Generator</h2>
-                    <p>
-                        Select a database table and reporting period
-                        to generate a detailed report.
-                    </p>
-                </div>
-
+            <div class="rq-generator-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/>
+                </svg>
             </div>
 
-            <div class="report-status">
-                <span class="status-dot"></span>
-                Admin Report
+            <div>
+                <h2>Report Generator</h2>
+
+                <p>
+                    Select a database table and reporting period
+                    to generate a report.
+                </p>
             </div>
 
         </div>
 
 
-        <!-- =====================================================
-             REPORT FORM
-        ====================================================== -->
+        <!-- =================================================
+             FORM
+             (empty action submits to the current URL)
+        ================================================== -->
 
-        <form method="GET"
-              action="#"
-              class="report-form">
+        <form id="reportForm"
+              method="GET"
+              action="">
 
-            <!-- TABLE SELECTION -->
-
-            <div class="form-section">
-
-                <div class="section-heading">
-
-                    <span class="step-number">01</span>
-
-                    <div>
-                        <h3>Select Database Table</h3>
-                        <p>Choose the main ResumeIQ table you want to analyze.</p>
-                    </div>
-
-                </div>
+            <div class="rq-form-grid">
 
 
-                <div class="form-field">
+                <!-- TABLE -->
+                <div class="rq-form-group">
 
                     <label for="reportTable">
-                        Report Table
+                        Select Table
                     </label>
 
-                    <div class="select-wrapper">
-
-                        <svg class="field-icon" viewBox="0 0 24 24">
-                            <path d="M4 4h16v4H4V4zm0 6h16v4H4v-4zm0 6h16v4H4v-4z"/>
-                        </svg>
+                    <div class="rq-select-wrapper">
 
                         <select id="reportTable"
                                 name="table"
@@ -94,264 +101,116 @@ Generate reports from ResumeIQ database tables by weekly, monthly, yearly, or cu
                                 Select a table
                             </option>
 
-                            <option value="users">
-                                Users
-                            </option>
-
-                            <option value="resumes">
-                                Resumes
-                            </option>
-
-                            <option value="resume_analysis">
-                                Resume Analysis
-                            </option>
-
-                            <option value="job_descriptions">
-                                Job Descriptions
-                            </option>
-
-                            <option value="jd_matches">
-                                JD Match Results
-                            </option>
-
-                            <option value="questions">
-                                Questions
-                            </option>
-
-                            <option value="feedback">
-                                Feedback
-                            </option>
+                            {% for key, label in tables %}
+                                <option value="{{ key }}"
+                                        {% if key == selected_table %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
 
                         </select>
 
-                        <span class="select-arrow">⌄</span>
+                    </div>
+
+                    <small>
+                        Select the main database table
+                        for the report.
+                    </small>
+
+                </div>
+
+
+                <!-- REPORT PERIOD -->
+                <div class="rq-form-group">
+
+                    <label for="reportPeriod">
+                        Report Period
+                    </label>
+
+                    <div class="rq-select-wrapper">
+
+                        <select id="reportPeriod"
+                                name="period"
+                                required>
+
+                            <option value="">
+                                Select report period
+                            </option>
+
+                            {% for key, label in periods %}
+                                <option value="{{ key }}"
+                                        {% if key == selected_period %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
 
                     </div>
+
+                    <small>
+                        Choose how the records should
+                        be filtered.
+                    </small>
 
                 </div>
 
             </div>
 
 
-            <!-- =====================================================
-                 REPORT TYPE
-            ====================================================== -->
+            <!-- =================================================
+                 CUSTOM DATE RANGE
+            ================================================== -->
 
-            <div class="form-section">
+            <div class="rq-custom-date-section {% if selected_period == 'custom' %}show{% endif %}"
+                 id="customDateSection">
 
-                <div class="section-heading">
+                <div class="rq-form-group">
 
-                    <span class="step-number">02</span>
+                    <label for="reportFromDate">
+                        From Date
+                    </label>
 
-                    <div>
-                        <h3>Select Report Period</h3>
-                        <p>
-                            Choose how you want to filter the report data.
-                        </p>
-                    </div>
+                    <input type="date"
+                           id="reportFromDate"
+                           name="from_date"
+                           value="{{ from_date }}">
 
                 </div>
 
 
-                <div class="period-options">
+                <div class="rq-date-arrow">
+                    →
+                </div>
 
-                    <label class="period-card">
 
-                        <input type="radio"
-                               name="period"
-                               value="weekly"
-                               checked>
+                <div class="rq-form-group">
 
-                        <span class="period-content">
-
-                            <span class="period-icon weekly-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M7 2h2v3h6V2h2v3h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V2zm11 7H6v9h12V9z"/>
-                                </svg>
-                            </span>
-
-                            <span>
-                                <strong>Weekly</strong>
-                                <small>Last 7 days</small>
-                            </span>
-
-                        </span>
-
+                    <label for="reportToDate">
+                        To Date
                     </label>
 
-
-                    <label class="period-card">
-
-                        <input type="radio"
-                               name="period"
-                               value="monthly">
-
-                        <span class="period-content">
-
-                            <span class="period-icon monthly-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M4 19h16v2H4v-2zm2-2h2V9H6v8zm5 0h2V4h-2v13zm5 0h2V7h-2v10z"/>
-                                </svg>
-                            </span>
-
-                            <span>
-                                <strong>Monthly</strong>
-                                <small>Current month</small>
-                            </span>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="period-card">
-
-                        <input type="radio"
-                               name="period"
-                               value="yearly">
-
-                        <span class="period-content">
-
-                            <span class="period-icon yearly-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M4 19h16v2H4v-2zm2-2h2v-5H6v5zm5 0h2V8h-2v9zm5 0h2V4h-2v13z"/>
-                                </svg>
-                            </span>
-
-                            <span>
-                                <strong>Yearly</strong>
-                                <small>Current year</small>
-                            </span>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="period-card">
-
-                        <input type="radio"
-                               name="period"
-                               value="custom">
-
-                        <span class="period-content">
-
-                            <span class="period-icon custom-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M7 2h2v3h6V2h2v3h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V2zm11 7H6v9h12V9z"/>
-                                </svg>
-                            </span>
-
-                            <span>
-                                <strong>Custom</strong>
-                                <small>Select date range</small>
-                            </span>
-
-                        </span>
-
-                    </label>
+                    <input type="date"
+                           id="reportToDate"
+                           name="to_date"
+                           value="{{ to_date }}">
 
                 </div>
 
             </div>
 
 
-            <!-- =====================================================
-                 DATE RANGE
-            ====================================================== -->
+            <!-- =================================================
+                 GENERATE
+            ================================================== -->
 
-            <div class="form-section">
-
-                <div class="section-heading">
-
-                    <span class="step-number">03</span>
-
-                    <div>
-                        <h3>Select Date Range</h3>
-                        <p>
-                            Choose the start and end dates for your report.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div class="date-grid">
-
-                    <div class="form-field">
-
-                        <label for="fromDate">
-                            From Date
-                        </label>
-
-                        <div class="date-input-wrapper">
-
-                            <svg class="field-icon" viewBox="0 0 24 24">
-                                <path d="M7 2h2v3h6V2h2v3h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V2zm11 7H6v9h12V9z"/>
-                            </svg>
-
-                            <input type="date"
-                                   id="fromDate"
-                                   name="from_date">
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="date-separator">
-                        <span>TO</span>
-                    </div>
-
-
-                    <div class="form-field">
-
-                        <label for="toDate">
-                            To Date
-                        </label>
-
-                        <div class="date-input-wrapper">
-
-                            <svg class="field-icon" viewBox="0 0 24 24">
-                                <path d="M7 2h2v3h6V2h2v3h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V2zm11 7H6v9h12V9z"/>
-                            </svg>
-
-                            <input type="date"
-                                   id="toDate"
-                                   name="to_date">
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- =====================================================
-                 GENERATE ACTION
-            ====================================================== -->
-
-            <div class="generator-actions">
-
-                <div class="action-info">
-
-                    <span class="info-icon">i</span>
-
-                    <span>
-                        Your report will contain records from the
-                        selected table and date range.
-                    </span>
-
-                </div>
-
+            <div class="rq-generator-actions">
 
                 <button type="submit"
-                        class="generate-button">
+                        class="rq-generate-btn">
 
                     <svg viewBox="0 0 24 24">
-                        <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/>
                     </svg>
 
                     Generate Report
@@ -366,173 +225,58 @@ Generate reports from ResumeIQ database tables by weekly, monthly, yearly, or cu
 
 
     <!-- =====================================================
-         REPORT OUTPUT PREVIEW
+         REPORT INFORMATION
     ====================================================== -->
 
-    <section class="report-preview">
+    <section class="rq-report-info">
 
-        <div class="preview-header">
+        <div class="rq-info-item">
+
+            <span class="rq-info-number">
+                01
+            </span>
 
             <div>
-
-                <span class="preview-label">
-                    REPORT PREVIEW
-                </span>
-
-                <h2>Generated Report</h2>
-
+                <strong>Select Table</strong>
                 <p>
-                    Select a table and reporting period above to view
-                    the generated report.
+                    Choose the ResumeIQ database table
+                    you want to report on.
                 </p>
-
-            </div>
-
-
-            <div class="download-actions">
-
-                <button type="button"
-                        class="download-btn pdf-btn">
-
-                    <svg viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2
-                        2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm1
-                        7V4.5L18.5 9H15z"/>
-                    </svg>
-
-                    PDF
-
-                </button>
-
-
-                <button type="button"
-                        class="download-btn excel-btn">
-
-                    <svg viewBox="0 0 24 24">
-                        <path d="M5 3h14a2 2 0 0 1 2 2v14a2
-                        2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2
-                        2 0 0 1 2-2zm2 4v10h10V7H7zm2
-                        2h2v2H9V9zm4 0h2v2h-2V9zm-4
-                        4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
-                    </svg>
-
-                    Excel
-
-                </button>
-
-
-                <button type="button"
-                        class="download-btn csv-btn">
-
-                    CSV
-
-                </button>
-
             </div>
 
         </div>
 
 
-        <!-- SUMMARY CARDS -->
+        <div class="rq-info-item">
 
-        <div class="summary-grid">
+            <span class="rq-info-number">
+                02
+            </span>
 
-            <div class="summary-card">
-
-                <div class="summary-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 12a5 5 0 1 0 0-10
-                        5 5 0 0 0 0 10zm-7 9a7 7 0 0 1
-                        14 0H5z"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <span>Total Records</span>
-                    <strong>—</strong>
-                </div>
-
-            </div>
-
-
-            <div class="summary-card">
-
-                <div class="summary-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M4 19h16v2H4v-2zm2-2h2V9H6v8zm5
-                        0h2V4h-2v13zm5 0h2V7h-2v10z"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <span>Average</span>
-                    <strong>—</strong>
-                </div>
-
-            </div>
-
-
-            <div class="summary-card">
-
-                <div class="summary-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2a10 10 0 1 0 0
-                        20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2
-                        c0-3 2-4 2-6 0-1.1-.9-2-2-2s-2
-                        .9-2 2H7a4 4 0 1 1 8 0c0
-                        2-2 3-3 3-4v-1z"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <span>Period</span>
-                    <strong>—</strong>
-                </div>
-
-            </div>
-
-
-            <div class="summary-card">
-
-                <div class="summary-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2l2.5 6.5L21 11l-6.5
-                        2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2z"/>
-                    </svg>
-                </div>
-
-                <div>
-                    <span>Report Status</span>
-                    <strong>Ready</strong>
-                </div>
-
+            <div>
+                <strong>Select Period</strong>
+                <p>
+                    Generate weekly, monthly, yearly,
+                    or custom date reports.
+                </p>
             </div>
 
         </div>
 
 
-        <!-- EMPTY REPORT TABLE -->
+        <div class="rq-info-item">
 
-        <div class="empty-report">
+            <span class="rq-info-number">
+                03
+            </span>
 
-            <div class="empty-icon">
-
-                <svg viewBox="0 0 24 24">
-                    <path d="M5 3h14a2 2 0 0 1 2
-                    2v14a2 2 0 0 1-2 2H5a2 2
-                    0 0 1-2-2V5a2 2 0 0 1
-                    2-2zm2 4v2h10V7H7zm0
-                    4v2h10v-2H7zm0 4v2h6v-2H7z"/>
-                </svg>
-
+            <div>
+                <strong>Generate</strong>
+                <p>
+                    View the filtered database records
+                    as a report.
+                </p>
             </div>
-
-            <h3>No Report Generated Yet</h3>
-
-            <p>
-                Select a database table and reporting period,
-                then click <strong>Generate Report</strong>.
-            </p>
 
         </div>
 
@@ -540,102 +284,243 @@ Generate reports from ResumeIQ database tables by weekly, monthly, yearly, or cu
 
 
     <!-- =====================================================
-         REPORT INFORMATION
+         REPORT PREVIEW
     ====================================================== -->
 
-    <section class="report-information">
+    <section class="rq-preview-card">
 
-        <div class="information-header">
-
-            <div class="information-icon">
-
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 2a10 10 0 1 0 0 20
-                    10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2
-                    c0-3 2-4 2-6 0-1.1-.9-2-2-2s-2
-                    .9-2 2H7a4 4 0 1 1 8 0c0
-                    2-2 3-3 3-4v-1z"/>
-                </svg>
-
-            </div>
+        <div class="rq-preview-header">
 
             <div>
 
-                <h3>How Reports Work</h3>
+                <span class="rq-preview-label">
+                    REPORT PREVIEW
+                </span>
 
-                <p>
-                    Generate reports from ResumeIQ's main database
-                    tables using predefined or custom date ranges.
+                <h2 id="previewTitle">
+                    {% if generated %}{{ report_title }}{% else %}No report generated{% endif %}
+                </h2>
+
+                <p id="previewDescription">
+                    {% if generated %}
+                        {{ report_desc }}
+                    {% else %}
+                        Select a table and reporting period
+                        above to generate a report.
+                    {% endif %}
                 </p>
 
             </div>
 
-        </div>
 
+            <div class="rq-preview-actions">
 
-        <div class="information-steps">
+                <button type="button"
+                        class="rq-secondary-btn"
+                        onclick="window.print()">
 
-            <div class="info-step">
+                    Print
 
-                <span>01</span>
+                </button>
 
-                <div>
-                    <strong>Select Table</strong>
-                    <p>
-                        Choose the ResumeIQ data you want to analyze.
-                    </p>
-                </div>
+                <!-- Use "Save as PDF" in the browser's print dialog -->
+                <button type="button"
+                        class="rq-primary-btn"
+                        onclick="window.print()">
 
-            </div>
+                    Download PDF
 
-
-            <div class="info-step">
-
-                <span>02</span>
-
-                <div>
-                    <strong>Select Period</strong>
-                    <p>
-                        Choose weekly, monthly, yearly or custom dates.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="info-step">
-
-                <span>03</span>
-
-                <div>
-                    <strong>Generate</strong>
-                    <p>
-                        Generate the report from the selected data.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="info-step">
-
-                <span>04</span>
-
-                <div>
-                    <strong>Download</strong>
-                    <p>
-                        Export the generated report as PDF, Excel or CSV.
-                    </p>
-                </div>
+                </button>
 
             </div>
 
         </div>
+
+
+        {% if error %}
+
+            <!-- ERROR STATE -->
+
+            <div class="rq-empty-state">
+
+                <h3>{{ error }}</h3>
+
+            </div>
+
+        {% elif generated and rows %}
+
+            <!-- REPORT TABLE -->
+
+            <div class="rq-table-container show"
+                 id="reportTableContainer"
+                 style="display: block; visibility: visible; opacity: 1; max-height: none; height: auto; overflow-x: auto;">
+
+                <table class="rq-report-table">
+
+                    <thead>
+
+                        <tr>
+                            {% for col in columns %}
+                                <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="reportTableBody">
+
+                        {% for row in rows %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% if truncated %}
+                <p style="padding: 12px 0;">
+                    Showing first {{ max_rows }} of {{ total }} records.
+                </p>
+            {% endif %}
+
+        {% elif generated %}
+
+            <!-- NO RECORDS -->
+
+            <div class="rq-empty-state">
+
+                <h3>No records found</h3>
+
+                <p>
+                    There are no records for this table
+                    in the selected period.
+                </p>
+
+            </div>
+
+        {% else %}
+
+            <!-- INITIAL EMPTY STATE -->
+
+            <div class="rq-empty-state"
+                 id="emptyReport">
+
+                <div class="rq-empty-icon">
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 11h8v2H8v-2zm0 4h8v2H8v-2z"/>
+                    </svg>
+
+                </div>
+
+                <h3>Report data will appear here</h3>
+
+                <p>
+                    Select a table and reporting period,
+                    then click Generate Report.
+                </p>
+
+            </div>
+
+        {% endif %}
 
     </section>
 
 </div>
 
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const period =
+        document.getElementById("reportPeriod");
+
+    const customSection =
+        document.getElementById("customDateSection");
+
+    const fromDate =
+        document.getElementById("reportFromDate");
+
+    const toDate =
+        document.getElementById("reportToDate");
+
+
+    /*
+     * Show custom date fields only when
+     * Custom Date Range is selected.
+     */
+
+    function updateDateFields() {
+
+        if (period.value === "custom") {
+
+            customSection.classList.add("show");
+
+            fromDate.required = true;
+            toDate.required = true;
+
+        } else {
+
+            customSection.classList.remove("show");
+
+            fromDate.required = false;
+            toDate.required = false;
+
+        }
+
+    }
+
+
+    period.addEventListener(
+        "change",
+        updateDateFields
+    );
+
+    // Run once on load so the fields are correct after a submit.
+    updateDateFields();
+
+
+    /*
+     * Validate custom date range.
+     */
+
+    document
+        .getElementById("reportForm")
+        .addEventListener("submit", function (event) {
+
+            if (period.value === "custom") {
+
+                if (
+                    fromDate.value &&
+                    toDate.value &&
+                    fromDate.value > toDate.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "From date cannot be after To date."
+                    );
+
+                }
+
+            }
+
+        });
+
+});
+
+</script>
+
 {% endblock %}
-
-
