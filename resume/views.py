@@ -9,7 +9,11 @@ from accounts.models import User
 from .ats_scoring import compute_ats_score, extract_text
 from .models import JDMatchResult, JobDescription, Resume, ResumeAnalysis, ResumeVersion
 
-allowed_extensions = {'pdf':'pdf', 'docx':'docx', 'doc':'docx'}
+allowed_extensions = {
+    'pdf': 'pdf', 'docx': 'docx', 'doc': 'docx',
+    # pictures are accepted only so we can tell the user they score very low
+    'png': 'image', 'jpg': 'image', 'jpeg': 'image',
+}
 max_file_size = 5 * 1024 * 1024
 min_text_length = 30
 
@@ -19,16 +23,18 @@ min_text_length = 30
     Logged-in users (request.session['user_id']): the upload, its parsed
     text, and the analysis are persisted into resume / resume_version /
     resume_analysis (and job_descriptions / jd_match_results if a JD was
-    pasted), per the data dictionary. """
+    pasted), per the data dictionary.
+    Image-based resumes (scans, screenshots, jpg/png) get a very low score
+    plus an explanation, and are not persisted. """
 
 @require_http_methods(['POST'])
 def analyze_resume(request):
-    
+
     upload = request.FILES.get('resume')
-    jd_text = (request.POST.get('jd') or '' ).strip()
+    jd_text = (request.POST.get('jd') or '').strip()
 
     if not upload:
-        return JsonResponse({"error":"Please attach a resume file."}, status=400)
+        return JsonResponse({"error": "Please attach a resume file."}, status=400)
 
     ext = upload.name.rsplit('.', 1)[-1].lower() if '.' in upload.name else ""
 
@@ -43,23 +49,25 @@ def analyze_resume(request):
     raw_bytes = upload.read()
 
     try:
-        
-        resume_text, has_tables = extract_text(raw_bytes, file_type)
+        resume_text, has_tables, content_meta = extract_text(raw_bytes, file_type)
     except Exception:
-        
         return JsonResponse({"error": "We couldn't read that file. Try re-saving it and uploading again."}, status=422)
 
-    if not resume_text or len(resume_text.strip()) < min_text_length:
-        return JsonResponse({"error": "We couldn't find readable text in that file — it may be a scanned image."}, status=422)
+    resume_text = resume_text or ''
 
-    result = compute_ats_score(resume_text, jd_text or None, has_tables=has_tables)
+    # Empty text is no longer a hard error when the file contains images:
+    # that is exactly the "image resume" case and it should be scored (very low).
+    has_images = content_meta.get('image_count', 0) > 0 or content_meta.get('is_image_file')
+    if len(resume_text.strip()) < min_text_length and not has_images:
+        return JsonResponse({"error": "We couldn't find readable text in that file."}, status=422)
+
+    result = compute_ats_score(resume_text, jd_text or None, has_tables=has_tables, content_meta=content_meta)
     saved = False
-    
 
     user_id = request.session.get('user_id')
-    if user_id:
+    if user_id and not result['image_based']:
         try:
-            user = User.objects.get(user_id = user_id)
+            user = User.objects.get(user_id=user_id)
         except User.DoesNotExist:
             user = None
 
@@ -67,26 +75,26 @@ def analyze_resume(request):
             stored_path = default_storage.save(f'resumes/{user.user_id}/{upload.name}', ContentFile(raw_bytes))
 
             resume = Resume.objects.create(
-                user = user,
-                file_type = file_type,
-                file_path = stored_path,
-                parsed_text = resume_text
+                user=user,
+                file_type=file_type,
+                file_path=stored_path,
+                parsed_text=resume_text
             )
 
             next_version_number = (ResumeVersion.objects.filter(versions=resume).count()) + 1
 
             version = ResumeVersion.objects.create(
-                versions = resume,
-                version_number = next_version_number,
-                content_snapshot = resume_text
+                versions=resume,
+                version_number=next_version_number,
+                content_snapshot=resume_text
             )
 
             ResumeAnalysis.objects.create(
-                analyses = version,
-                ats_score = result['ats_score'],
-                grammar_issues = result['grammar_issues'],
-                passive_voice_flags = result['passive_voice_flags'],
-                missing_section = result['missing_sections']
+                analyses=version,
+                ats_score=result['ats_score'],
+                grammar_issues=result['grammar_issues'],
+                passive_voice_flags=result['passive_voice_flags'],
+                missing_section=result['missing_sections']
             )
 
             if jd_text:
@@ -95,14 +103,12 @@ def analyze_resume(request):
                     user=user,
                     version=version,
                     jd=jd,
-                    match_percentage = result['keyword_match'],
-                    missing_keywords = result['missing_keywords'],
-                    search_type = 'with_resume'                    
+                    match_percentage=result['keyword_match'],
+                    missing_keywords=result['missing_keywords'],
+                    search_type='with_resume'
                 )
 
             saved = True
-
-    
 
     return JsonResponse({
         'ats_score': result['ats_score'],
@@ -111,6 +117,7 @@ def analyze_resume(request):
         'keyword_match': result['keyword_match'],
         'missing_sections': result['missing_sections'],
         'missing_keywords': result['missing_keywords'],
+        'image_based': result['image_based'],
+        'image_warnings': result['image_warnings'],
         'saved': saved
     })
-

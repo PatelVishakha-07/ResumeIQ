@@ -31,10 +31,23 @@
       },
     },
   }
-
-  
 </script>
-<link rel="stylesheet" href="styles.css">
+{% load static %}
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+{% endblock %}
+<style>
+  @keyframes otpFade { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes otpRise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+  #otpModal.flex { animation: otpFade .18s ease-out; }
+  #otpModal .otp-panel { animation: otpRise .22s ease-out; }
+  button:disabled { opacity: .6; cursor: not-allowed; }
+  @media (prefers-reduced-motion: reduce) {
+    #otpModal.flex, #otpModal .otp-panel { animation: none; }
+  }
+</style>
 </head>
 <body class="font-sans">
 
@@ -96,7 +109,10 @@
           </div>
        {% endif %}
 
-      <form class="space-y-5" method="POST" action="{% url 'register' %}">
+      <div id="formError" role="alert" class="hidden mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2"></div>
+
+
+      <form id="registerForm" class="space-y-5" method="POST" action="{% url 'register' %}">
         {% csrf_token %}
         <div>
           <label for="name" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">FULL NAME</label>
@@ -133,26 +149,15 @@
         </div>
 
         <label class="flex items-start gap-2.5 text-sm text-graphite cursor-pointer select-none pt-1">
-          <input type="checkbox" class="w-4 h-4 mt-0.5 rounded-sm border-paperline text-correction focus:ring-correction accent-[#3B5BDB]" />
+          <input id="terms" type="checkbox" class="w-4 h-4 mt-0.5 rounded-sm border-paperline text-correction focus:ring-correction accent-[#3B5BDB]" />
           <span>I agree to the <a href="#" class="text-correction hover:text-correctiondark">Terms</a> and <a href="#" class="text-correction hover:text-correctiondark">Privacy Policy</a></span>
         </label>
 
-        <button type="submit"
+        <button type="submit" id="createBtn"
           class="w-full bg-ink hover:bg-inksoft text-paper text-sm font-medium py-3 rounded-md transition-colors mt-1">
           Create account
         </button>
 
-        <div class="flex items-center gap-3 py-1">
-          <span class="h-px flex-1 bg-paperline"></span>
-          <span class="text-xs text-graphitesoft font-mono">OR</span>
-          <span class="h-px flex-1 bg-paperline"></span>
-        </div>
-
-        <button type="button"
-          class="w-full border border-paperline hover:border-graphite text-ink text-sm font-medium py-3 rounded-md transition-colors flex items-center justify-center gap-2.5">
-          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.85.86-3.05.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.71A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.17.29-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
-          Continue with Google
-        </button>
       </form>
 
       <p class="text-sm text-graphite mt-8">
@@ -189,6 +194,283 @@
       else bar.classList.remove('bg-paperline');
     });
     label.textContent = v.length > 0 ? labels[Math.max(score - 1, 0)] : '\u00A0';
+  });
+</script>
+
+<script>
+  // Reads Django's CSRF cookie for the fetch() calls below
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+    return null;
+  }
+</script>
+
+<!-- EMAIL VERIFICATION MODAL -->
+<div id="otpModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-ink/70 px-4" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
+  <div class="otp-panel relative w-full max-w-[400px] bg-paper rounded-lg px-7 py-8 shadow-2xl">
+    <button type="button" id="otpClose" aria-label="Close" class="absolute top-4 right-4 text-graphite hover:text-ink transition-colors">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l10 10M14 4L4 14"/></svg>
+    </button>
+
+    <h3 id="otpTitle" class="font-display text-2xl text-ink">Check your email</h3>
+    <p class="text-sm text-graphite mt-2 leading-relaxed">
+      We sent a 6-digit code to <span id="otpEmail" class="text-ink font-medium break-all"></span>. It expires in 10 minutes.
+    </p>
+
+    <div id="otpBoxes" class="flex justify-between gap-2 mt-6">
+        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Digit 1 of 6" />
+        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 2 of 6" />
+        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 3 of 6" />
+        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 4 of 6" />
+        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 5 of 6" />
+        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 6 of 6" />
+    </div>
+
+    <p id="otpMessage" role="alert" class="hidden mt-3 text-sm"></p>
+
+    <button type="button" id="verifyBtn"
+      class="w-full bg-ink hover:bg-inksoft text-paper text-sm font-medium py-3 rounded-md transition-colors mt-6">
+      Verify and create account
+    </button>
+
+    <div class="flex items-center justify-between mt-5 text-sm">
+      <button type="button" id="resendBtn" class="text-correction hover:text-correctiondark font-medium transition-colors">Resend code</button>
+      <button type="button" id="otpEdit" class="text-graphite hover:text-ink transition-colors">Edit details</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Email verification: "Create account" sends a code, then the modal collects it ----
+  const SEND_OTP_URL   = "{% url 'register_send_otp' %}";
+  const VERIFY_OTP_URL = "{% url 'register_verify_otp' %}";
+  const RESEND_OTP_URL = "{% url 'register_resend_otp' %}";
+
+  const registerForm = document.getElementById('registerForm');
+  const createBtn    = document.getElementById('createBtn');
+  const formError    = document.getElementById('formError');
+  const termsBox     = document.getElementById('terms');
+
+  const otpModal   = document.getElementById('otpModal');
+  const otpEmail   = document.getElementById('otpEmail');
+  const otpInputs  = Array.from(document.querySelectorAll('.otp-input'));
+  const otpMessage = document.getElementById('otpMessage');
+  const verifyBtn  = document.getElementById('verifyBtn');
+  const resendBtn  = document.getElementById('resendBtn');
+
+  let resendTimerId = null;
+  let verifying = false;
+
+  function postJSON(url, payload) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify(payload),
+    }).then(r => r.json().catch(() => ({})).then(data => ({ status: r.status, data })));
+  }
+
+  // ----- form errors -----
+  function showFormError(msg) { formError.textContent = msg; formError.classList.remove('hidden'); }
+  function hideFormError() { formError.classList.add('hidden'); }
+
+  // ----- modal open / close -----
+  function openOtpModal(email, resendIn) {
+    otpEmail.textContent = email;
+    clearOtpInputs();
+    hideOtpMessage();
+    otpModal.classList.remove('hidden');
+    otpModal.classList.add('flex');
+    document.body.classList.add('overflow-hidden');
+    startResendCountdown(resendIn);
+    setTimeout(() => otpInputs[0].focus(), 60);
+  }
+
+  function closeOtpModal() {
+    otpModal.classList.add('hidden');
+    otpModal.classList.remove('flex');
+    document.body.classList.remove('overflow-hidden');
+    clearInterval(resendTimerId);
+  }
+
+  document.getElementById('otpClose').addEventListener('click', closeOtpModal);
+  document.getElementById('otpEdit').addEventListener('click', closeOtpModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !otpModal.classList.contains('hidden')) closeOtpModal();
+  });
+
+  // ----- modal messages -----
+  function showOtpMessage(msg, isError = true) {
+    otpMessage.textContent = msg;
+    otpMessage.className = 'mt-3 text-sm ' + (isError ? 'text-red-600' : 'text-good');
+  }
+  function hideOtpMessage() { otpMessage.className = 'hidden mt-3 text-sm'; }
+
+  // ----- code boxes -----
+  function clearOtpInputs() { otpInputs.forEach(i => { i.value = ''; }); }
+
+  function fillFrom(start, digits) {
+    let i = digits.length >= 6 ? 0 : start;     // a full 6-digit paste/autofill always starts at box 1
+    for (const d of digits) {
+      if (i > 5) break;
+      otpInputs[i].value = d;
+      i++;
+    }
+    otpInputs[Math.min(i, 5)].focus();
+    if (otpInputs.every(inp => inp.value)) verifyOtp();
+  }
+
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      const digits = input.value.replace(/\D/g, '');
+      if (!digits) { input.value = ''; return; }
+      fillFrom(idx, digits);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) {
+        otpInputs[idx - 1].value = '';
+        otpInputs[idx - 1].focus();
+      } else if (e.key === 'ArrowLeft' && idx > 0) {
+        otpInputs[idx - 1].focus();
+      } else if (e.key === 'ArrowRight' && idx < 5) {
+        otpInputs[idx + 1].focus();
+      } else if (e.key === 'Enter') {
+        verifyOtp();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const digits = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '');
+      if (digits) fillFrom(idx, digits);
+    });
+
+    input.addEventListener('focus', () => input.select());
+  });
+
+  // ----- resend countdown -----
+  function startResendCountdown(seconds) {
+    clearInterval(resendTimerId);
+    let remaining = Math.max(0, Math.ceil(seconds || 0));
+    const render = () => {
+      if (remaining > 0) {
+        resendBtn.disabled = true;
+        resendBtn.textContent = `Resend code in ${remaining}s`;
+      } else {
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend code';
+        clearInterval(resendTimerId);
+      }
+    };
+    render();
+    resendTimerId = setInterval(() => { remaining--; render(); }, 1000);
+  }
+
+  // ----- step 1: Create account -> send code -----
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideFormError();
+
+    const payload = {
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value,
+      confirm_password: document.getElementById('confirm').value,
+    };
+
+    if (!payload.name) return showFormError('Please enter your full name.');
+    if (!payload.email) return showFormError('Please enter your email address.');
+    if (payload.password.length < 8) return showFormError('Password must be at least 8 characters.');
+    if (payload.password !== payload.confirm_password) return showFormError('Password and Confirm Password do not match.');
+    if (!termsBox.checked) return showFormError('Please accept the Terms and Privacy Policy to continue.');
+
+    const label = createBtn.textContent;
+    createBtn.disabled = true;
+    createBtn.textContent = 'Sending code…';
+
+    try {
+      const { status, data } = await postJSON(SEND_OTP_URL, payload);
+      if (status === 200 && data.ok) {
+        openOtpModal(data.email, data.resend_in);
+      } else {
+        showFormError(data.error || 'Could not send the verification code. Try again.');
+      }
+    } catch (err) {
+      showFormError('Network error — please try again.');
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = label;
+    }
+  });
+
+  // ----- step 2: verify the code -----
+  async function verifyOtp() {
+    if (verifying) return;
+
+    const code = otpInputs.map(i => i.value).join('');
+    if (code.length !== 6) { showOtpMessage('Enter the 6-digit code.'); return; }
+
+    verifying = true;
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying…';
+    hideOtpMessage();
+
+    try {
+      const { status, data } = await postJSON(VERIFY_OTP_URL, { code });
+
+      if (status === 200 && data.redirect) {
+        window.location.href = data.redirect;
+        return;   // leave the button in its "Verifying…" state while the page changes
+      }
+
+      if (data.expired) {
+        closeOtpModal();
+        showFormError(data.error);
+      } else {
+        showOtpMessage(data.error || 'Verification failed. Try again.');
+        clearOtpInputs();
+        otpInputs[0].focus();
+      }
+    } catch (err) {
+      showOtpMessage('Network error — please try again.');
+    }
+
+    verifying = false;
+    verifyBtn.disabled = false;
+    verifyBtn.textContent = 'Verify and create account';
+  }
+
+  verifyBtn.addEventListener('click', verifyOtp);
+
+  // ----- resend -----
+  resendBtn.addEventListener('click', async () => {
+    resendBtn.disabled = true;
+    hideOtpMessage();
+
+    try {
+      const { status, data } = await postJSON(RESEND_OTP_URL, {});
+
+      if (status === 200 && data.ok) {
+        clearOtpInputs();
+        otpInputs[0].focus();
+        showOtpMessage('A new code is on its way.', false);
+        startResendCountdown(data.resend_in);
+      } else if (data.expired) {
+        closeOtpModal();
+        showFormError(data.error);
+      } else if (data.retry_after) {
+        showOtpMessage(data.error);
+        startResendCountdown(data.retry_after);
+      } else {
+        showOtpMessage(data.error || 'Could not resend the code. Try again.');
+        resendBtn.disabled = false;
+      }
+    } catch (err) {
+      showOtpMessage('Network error — please try again.');
+      resendBtn.disabled = false;
+    }
   });
 </script>
 </body>
