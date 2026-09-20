@@ -1,477 +1,1961 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Create account — ResumeIQ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,560&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          ink: '#14171F',
-          inksoft: '#1D212B',
-          paper: '#F5F3EE',
-          paperline: '#E3DFD3',
-          graphite: '#6B6F76',
-          graphitesoft: '#9A9DA3',
-          highlighter: '#F2C94C',
-          correction: '#3B5BDB',
-          correctiondark: '#2A44B8',
-          good: '#3C9A5F',
-        },
-        fontFamily: {
-          display: ['"Fraunces"', 'serif'],
-          sans: ['"IBM Plex Sans"', 'sans-serif'],
-          mono: ['"IBM Plex Mono"', 'monospace'],
-        },
-      },
-    },
-  }
-</script>
-{% load static %}
-{% block extra_css %}
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Create Account — ResumeIQ</title>
 
-{% endblock %}
-<style>
-  @keyframes otpFade { from { opacity: 0 } to { opacity: 1 } }
-  @keyframes otpRise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
-  #otpModal.flex { animation: otpFade .18s ease-out; }
-  #otpModal .otp-panel { animation: otpRise .22s ease-out; }
-  button:disabled { opacity: .6; cursor: not-allowed; }
-  @media (prefers-reduced-motion: reduce) {
-    #otpModal.flex, #otpModal .otp-panel { animation: none; }
-  }
-</style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: "#F7F4EE",
+                        paperdark: "#EEE9DF",
+                        ink: "#171717",
+                        inksoft: "#292929",
+                        graphite: "#68645E",
+                        correction: "#B84A3A",
+                        correctiondark: "#92392E",
+                        paperline: "#DCD5C9"
+                    },
+                    fontFamily: {
+                        display: ["Georgia", "serif"],
+                        sans: ["Inter", "system-ui", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-width: 280px;
+            background: #F7F4EE;
+            color: #171717;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+                         "Segoe UI", sans-serif;
+        }
+
+        /* --------------------------------------------------
+           BACKGROUND
+        -------------------------------------------------- */
+
+        .page-background {
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(184, 74, 58, .055),
+                    transparent 28rem
+                ),
+                radial-gradient(
+                    circle at 90% 90%,
+                    rgba(23, 23, 23, .045),
+                    transparent 30rem
+                ),
+                #F7F4EE;
+        }
+
+        .paper-card {
+            background: rgba(255, 255, 255, .72);
+            border: 1px solid #DCD5C9;
+            box-shadow:
+                0 25px 70px rgba(23, 23, 23, .08),
+                0 4px 12px rgba(23, 23, 23, .04);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* --------------------------------------------------
+           BRAND MARK
+        -------------------------------------------------- */
+
+        .brand-mark {
+            position: relative;
+            width: clamp(2.6rem, 4vw, 3.3rem);
+            height: clamp(2.6rem, 4vw, 3.3rem);
+            border: 1px solid #171717;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F7F4EE;
+        }
+
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: #B84A3A;
+            bottom: -4px;
+            right: -4px;
+        }
+
+        /* --------------------------------------------------
+           INPUTS
+        -------------------------------------------------- */
+
+        .field {
+            width: 100%;
+            min-height: 3.15rem;
+            background: rgba(255,255,255,.65);
+            border: 1px solid #DCD5C9;
+            color: #171717;
+            border-radius: .55rem;
+            padding: .8rem .95rem;
+            outline: none;
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease,
+                background .2s ease;
+        }
+
+        .field:hover {
+            background: rgba(255,255,255,.9);
+        }
+
+        .field:focus {
+            background: #fff;
+            border-color: #B84A3A;
+            box-shadow: 0 0 0 3px rgba(184,74,58,.09);
+        }
+
+        .field::placeholder {
+            color: #9A958D;
+        }
+
+        /* --------------------------------------------------
+           MAIN BUTTON
+        -------------------------------------------------- */
+
+        .primary-button {
+            min-height: 3.2rem;
+            background: #171717;
+            color: #F7F4EE;
+            border: 1px solid #171717;
+            border-radius: .55rem;
+            transition:
+                transform .18s ease,
+                background .18s ease,
+                box-shadow .18s ease;
+        }
+
+        .primary-button:hover {
+            background: #292929;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(23,23,23,.15);
+        }
+
+        .primary-button:active {
+            transform: translateY(0);
+        }
+
+        .primary-button:disabled {
+            opacity: .65;
+            cursor: wait;
+            transform: none;
+        }
+
+        /* --------------------------------------------------
+           SIDE PANEL
+        -------------------------------------------------- */
+
+        .manifesto {
+            border-left: 2px solid #B84A3A;
+            padding-left: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .feature-line {
+            display: flex;
+            align-items: flex-start;
+            gap: .8rem;
+        }
+
+        .feature-number {
+            flex: 0 0 auto;
+            width: 1.8rem;
+            height: 1.8rem;
+            border: 1px solid #CFC7BA;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #68645E;
+            font-size: .72rem;
+        }
+
+        /* --------------------------------------------------
+           OTP MODAL
+        -------------------------------------------------- */
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            padding: clamp(.75rem, 3vw, 2rem);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(23,23,23,.62);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+
+        .otp-card {
+            width: min(100%, 31rem);
+            max-height: min(90vh, 42rem);
+            overflow-y: auto;
+
+            background: #F7F4EE;
+            border: 1px solid #DCD5C9;
+            box-shadow: 0 30px 100px rgba(0,0,0,.25);
+
+            border-radius: .75rem;
+            padding: clamp(1.25rem, 4vw, 2rem);
+
+            animation: modalIn .2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(.985);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .otp-input {
+            width: clamp(2.5rem, 10vw, 3.35rem);
+            height: clamp(3rem, 11vw, 3.8rem);
+
+            flex: 1 1 0;
+            max-width: 3.35rem;
+
+            text-align: center;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: clamp(1.15rem, 4vw, 1.5rem);
+            font-weight: 600;
+
+            color: #171717;
+            background: rgba(255,255,255,.65);
+
+            border: 1px solid #DCD5C9;
+            border-radius: .55rem;
+            outline: none;
+
+            transition: .18s ease;
+        }
+
+        .otp-input:focus {
+            background: #fff;
+            border-color: #B84A3A;
+            box-shadow: 0 0 0 3px rgba(184,74,58,.09);
+        }
+
+        /* --------------------------------------------------
+           RESPONSIVE
+        -------------------------------------------------- */
+
+        @media (max-width: 900px) {
+            .desktop-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                border-left: 0;
+                border-right: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .page-wrapper {
+                padding: 0;
+            }
+
+            .otp-row {
+                gap: .35rem;
+            }
+        }
+
+        @media (min-width: 901px) {
+            .auth-grid {
+                grid-template-columns:
+                    minmax(18rem, .85fr)
+                    minmax(25rem, 1.15fr);
+            }
+        }
+
+        /* Browser zoom / accessibility */
+        @media (min-resolution: 1.5dppx) {
+            .paper-card {
+                box-shadow:
+                    0 15px 45px rgba(23,23,23,.07),
+                    0 3px 10px rgba(23,23,23,.035);
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
 </head>
-<body class="font-sans">
 
-<div class="min-h-screen lg:grid lg:grid-cols-5">
+<body>
 
-  <!-- INK PANEL -->
-  <div class="lg:col-span-2 bg-ink text-paper relative overflow-hidden px-8 py-10 sm:px-14 sm:py-14 flex flex-col justify-between">
-    <div class="relative z-10">
-      <p class="font-mono text-xs tracking-[0.25em] text-highlighter uppercase">ResumeIQ</p>
-      <h1 class="font-display text-[2.15rem] sm:text-[2.65rem] leading-[1.08] mt-6 max-w-sm">
-        Turn feedback<br/>into a stronger draft.
-      </h1>
-      <p class="font-sans text-sm text-graphitesoft mt-5 max-w-xs leading-relaxed">
-        Create an account to get your first ATS score in minutes.
-      </p>
+<div class="page-background min-h-screen">
+
+    <div class="page-wrapper min-h-screen flex items-center justify-center px-0 sm:px-6 lg:px-8 py-0 sm:py-8 lg:py-12">
+
+        <main class="auth-grid w-full max-w-6xl grid bg-transparent">
+
+            <!-- =================================================
+                 LEFT BRAND PANEL
+            ================================================== -->
+
+            <section class="desktop-panel hidden lg:flex flex-col justify-between bg-ink text-paper rounded-l-xl px-8 xl:px-12 py-9 xl:py-12">
+
+                <div>
+
+                    <!-- Brand -->
+
+                    <div class="flex items-center gap-4">
+                        <div class="brand-mark text-ink">
+                            <span class="font-display text-2xl"> R </span>
+                        </div>
+
+                        <div>
+                            <div class="font-display text-2xl"> ResumeIQ </div>
+
+                            <div class="text-xs tracking-[.18em] uppercase text-paper/50
+                                       mt-0.5"> Career Intelligence </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Editorial heading -->
+
+                    <div class="mt-20 xl:mt-28">
+
+                        <div class="text-xs uppercase tracking-[.2em] text-paper/45 mb-5">
+                            Your professional workspace
+                        </div>
+
+                        <h1 class="font-display
+                                   text-4xl xl:text-5xl
+                                   leading-[1.05]
+                                   font-normal">
+
+                            Build a career
+                            <span class="text-paper/50">
+                                worth remembering.
+                            </span>
+
+                        </h1>
+
+                        <div class="manifesto mt-7">
+
+                            <p class="text-paper/70
+                                      leading-relaxed
+                                      max-w-md">
+
+                                ResumeIQ brings your resume,
+                                interview preparation and
+                                career development into one
+                                intelligent workspace.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Features -->
+
+                    <div class="mt-12 space-y-6">
+
+                        <div class="feature-line">
+
+                            <div class="feature-number">
+                                01
+                            </div>
+
+                            <div>
+                                <div class="text-sm font-medium">
+                                    Intelligent preparation
+                                </div>
+
+                                <div class="text-xs
+                                            text-paper/45
+                                            mt-1
+                                            leading-relaxed">
+                                    Prepare for interviews with
+                                    focused AI-assisted practice.
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="feature-line">
+
+                            <div class="feature-number">
+                                02
+                            </div>
+
+                            <div>
+                                <div class="text-sm font-medium">
+                                    Professional identity
+                                </div>
+
+                                <div class="text-xs
+                                            text-paper/45
+                                            mt-1
+                                            leading-relaxed">
+                                    Keep your professional profile
+                                    clear and career-ready.
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="feature-line">
+
+                            <div class="feature-number">
+                                03
+                            </div>
+
+                            <div>
+                                <div class="text-sm font-medium">
+                                    One focused workspace
+                                </div>
+
+                                <div class="text-xs
+                                            text-paper/45
+                                            mt-1
+                                            leading-relaxed">
+                                    Everything you need to move
+                                    your career forward.
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="text-xs text-paper/35
+                            flex items-center justify-between">
+
+                    <span>
+                        ResumeIQ
+                    </span>
+
+                    <span>
+                        © 2026
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 REGISTER FORM
+            ================================================== -->
+
+            <section class="auth-card
+                            paper-card
+                            rounded-none lg:rounded-r-xl
+                            min-h-screen lg:min-h-0
+                            flex items-center">
+
+                <div class="w-full
+                            max-w-xl
+                            mx-auto
+                            px-6 sm:px-10 xl:px-14
+                            py-8 sm:py-10 lg:py-12">
+
+
+                    <!-- Mobile brand -->
+
+                    <div class="lg:hidden mb-10">
+
+                        <div class="flex items-center gap-3">
+
+                            <div class="brand-mark">
+
+                                <span class="font-display text-xl">
+                                    R
+                                </span>
+
+                            </div>
+
+                            <div>
+
+                                <div class="font-display text-xl">
+                                    ResumeIQ
+                                </div>
+
+                                <div class="text-[10px]
+                                            uppercase
+                                            tracking-[.18em]
+                                            text-graphite">
+                                    Career Intelligence
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Heading -->
+
+                    <div class="mb-8">
+
+                        <div class="flex items-center gap-2
+                                    text-xs uppercase
+                                    tracking-[.18em]
+                                    text-correction
+                                    mb-4">
+
+                            <span class="w-5 h-px bg-correction"></span>
+
+                            Create your account
+
+                        </div>
+
+
+                        <h2 class="font-display
+                                   text-3xl sm:text-4xl
+                                   font-normal
+                                   leading-tight">
+
+                            Start with ResumeIQ.
+
+                        </h2>
+
+
+                        <p class="mt-3
+                                  text-sm
+                                  text-graphite
+                                  leading-relaxed
+                                  max-w-md">
+
+                            Create your account to access your
+                            personalized career workspace.
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- Error -->
+
+                    <div id="formError"
+                         role="alert"
+                         class="hidden mb-5
+                                rounded-md
+                                border border-red-200
+                                bg-red-50
+                                px-4 py-3
+                                text-sm text-red-700">
+                    </div>
+
+
+                    <!-- FORM -->
+
+                    <form id="registerForm"
+                          method="POST"
+                          action="{% url 'register' %}"
+                          class="space-y-5">
+
+                        {% csrf_token %}
+
+
+                        <!-- NAME -->
+
+                        <div>
+
+                            <label for="name"
+                                   class="block text-xs
+                                          font-medium
+                                          uppercase
+                                          tracking-[.12em]
+                                          text-graphite
+                                          mb-2">
+
+                                Full name
+
+                            </label>
+
+                            <input
+                                id="name"
+                                type="text"
+                                autocomplete="name"
+                                placeholder="Your full name"
+                                class="field"
+                                required>
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+
+                        <div>
+
+                            <label for="email"
+                                   class="block text-xs
+                                          font-medium
+                                          uppercase
+                                          tracking-[.12em]
+                                          text-graphite
+                                          mb-2">
+
+                                Email address
+
+                            </label>
+
+                            <input
+                                id="email"
+                                type="email"
+                                autocomplete="email"
+                                placeholder="you@example.com"
+                                class="field"
+                                required>
+
+                        </div>
+
+
+                        <!-- PASSWORD -->
+
+                        <div>
+
+                            <div class="flex items-center
+                                        justify-between mb-2">
+
+                                <label for="password"
+                                       class="block text-xs
+                                              font-medium
+                                              uppercase
+                                              tracking-[.12em]
+                                              text-graphite">
+
+                                    Password
+
+                                </label>
+
+                                <span id="passwordHint"
+                                      class="text-[11px]
+                                             text-graphite/70">
+                                    Minimum 8 characters
+                                </span>
+
+                            </div>
+
+
+                            <div class="relative">
+
+                                <input
+                                    id="password"
+                                    type="password"
+                                    autocomplete="new-password"
+                                    placeholder="Create a password"
+                                    class="field pr-12"
+                                    required>
+
+
+                                <button
+                                    type="button"
+                                    id="togglePassword"
+                                    aria-label="Show password"
+                                    class="absolute
+                                           right-3
+                                           top-1/2
+                                           -translate-y-1/2
+                                           text-graphite
+                                           hover:text-ink">
+
+                                    <svg id="eyeOpen"
+                                         width="19"
+                                         height="19"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="1.7"
+                                         viewBox="0 0 24 24">
+
+                                        <path d="M2 12s3.5-7 10-7
+                                                 10 7 10 7-3.5 7-10 7
+                                                 S2 12 2 12z"/>
+
+                                        <circle cx="12"
+                                                cy="12"
+                                                r="3"/>
+
+                                    </svg>
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Strength -->
+
+                            <div class="flex gap-1 mt-2">
+
+                                <span id="strength1"
+                                      class="h-1 flex-1
+                                             rounded-full
+                                             bg-paperline">
+                                </span>
+
+                                <span id="strength2"
+                                      class="h-1 flex-1
+                                             rounded-full
+                                             bg-paperline">
+                                </span>
+
+                                <span id="strength3"
+                                      class="h-1 flex-1
+                                             rounded-full
+                                             bg-paperline">
+                                </span>
+
+                                <span id="strength4"
+                                      class="h-1 flex-1
+                                             rounded-full
+                                             bg-paperline">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CONFIRM -->
+
+                        <div>
+
+                            <label for="confirm"
+                                   class="block text-xs
+                                          font-medium
+                                          uppercase
+                                          tracking-[.12em]
+                                          text-graphite
+                                          mb-2">
+
+                                Confirm password
+
+                            </label>
+
+                            <input
+                                id="confirm"
+                                type="password"
+                                autocomplete="new-password"
+                                placeholder="Repeat your password"
+                                class="field"
+                                required>
+
+                        </div>
+
+
+                        <!-- TERMS -->
+
+                        <label class="flex items-start
+                                      gap-3 cursor-pointer
+                                      pt-1">
+
+                            <input
+                                id="terms"
+                                type="checkbox"
+                                class="mt-1
+                                       w-4 h-4
+                                       accent-[#B84A3A]">
+
+                            <span class="text-xs
+                                         text-graphite
+                                         leading-relaxed">
+
+                                I agree to the
+                                <a href="#"
+                                   class="text-ink
+                                          underline
+                                          underline-offset-2">
+                                    Terms of Service
+                                </a>
+                                and
+                                <a href="#"
+                                   class="text-ink
+                                          underline
+                                          underline-offset-2">
+                                    Privacy Policy
+                                </a>.
+
+                            </span>
+
+                        </label>
+
+
+                        <!-- CREATE BUTTON -->
+
+                        <button
+                            type="submit"
+                            id="createBtn"
+                            class="primary-button
+                                   w-full
+                                   flex items-center
+                                   justify-center
+                                   gap-2
+                                   font-medium">
+
+                            <span id="createText">
+                                Create account
+                            </span>
+
+                            <svg id="createLoader"
+                                 class="hidden animate-spin"
+                                 width="17"
+                                 height="17"
+                                 fill="none"
+                                 viewBox="0 0 24 24">
+
+                                <circle cx="12"
+                                        cy="12"
+                                        r="9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        opacity=".3"/>
+
+                                <path d="M21 12a9 9 0 0 1-9 9"
+                                      stroke="currentColor"
+                                      stroke-width="2"/>
+
+                            </svg>
+
+                        </button>
+
+                    </form>
+
+
+                    <!-- LOGIN LINK -->
+
+                    <div class="mt-8
+                                pt-6
+                                border-t border-paperline
+                                text-center">
+
+                        <p class="text-sm text-graphite">
+
+                            Already have an account?
+
+                            <a href="{% url 'login' %}"
+                               class="font-medium
+                                      text-ink
+                                      hover:text-correction
+                                      transition-colors">
+
+                                Sign in
+
+                            </a>
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="mt-6
+                                text-center
+                                text-[10px]
+                                uppercase
+                                tracking-[.15em]
+                                text-graphite/50">
+
+                        Secure email verification
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
     </div>
 
-    <!-- Signature illustration: resume with upward score trend -->
-    <div class="relative z-10 mt-12 hidden sm:block">
-      <svg width="280" height="220" viewBox="0 0 280 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="18" y="10" width="180" height="200" rx="6" fill="#1D212B" stroke="#333844" stroke-width="1"/>
-        <rect x="36" y="34" width="90" height="10" rx="2" fill="#3A3F4B"/>
-        <rect x="36" y="52" width="60" height="7" rx="2" fill="#2C303A"/>
-        <rect x="36" y="80" width="144" height="6" rx="2" fill="#2C303A"/>
-        <rect x="36" y="94" width="120" height="6" rx="2" fill="#2C303A"/>
-        <rect x="36" y="112" width="130" height="6" rx="2" fill="#2C303A"/>
-        <rect x="34" y="125" width="126" height="12" fill="#F2C94C" opacity="0.28"/>
-        <rect x="36" y="128" width="122" height="6" rx="2" fill="#3A3F4B"/>
-        <rect x="36" y="146" width="90" height="6" rx="2" fill="#2C303A"/>
-
-        <ellipse class="mark-circle" cx="88" cy="97" rx="58" ry="10" stroke="#F2C94C" stroke-width="1.6" fill="none"/>
-
-        <!-- upward trend line -->
-        <path class="mark-path" d="M206 172 L222 158 L236 166 L256 138" stroke="#3B5BDB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle class="mark-dot" cx="206" cy="172" r="2.6" fill="#3B5BDB"/>
-        <circle class="mark-dot" cx="222" cy="158" r="2.6" fill="#3B5BDB"/>
-        <circle class="mark-dot" cx="236" cy="166" r="2.6" fill="#3B5BDB"/>
-        <circle class="mark-dot" cx="256" cy="138" r="3.2" fill="#F2C94C"/>
-      </svg>
-    </div>
-
-    <p class="relative z-10 font-mono text-[11px] tracking-wide text-graphite mt-10">
-      Analysis&nbsp;&nbsp;·&nbsp;&nbsp;Interview prep&nbsp;&nbsp;·&nbsp;&nbsp;Version history
-    </p>
-  </div>
-
-  <!-- PAPER PANEL -->
-  <div class="lg:col-span-3 flex items-center justify-center px-6 py-14 sm:px-10">
-    <div class="w-full max-w-[380px] fade-up">
-      <h2 class="font-display text-3xl text-ink">Create your account</h2>
-      <p class="text-graphite text-sm mt-2 mb-8">Free to start — no credit card needed.</p>
-
-      <!-- To Show Error Messages -->
-       {% if messages %}
-          <div class="mb-4">
-            {% for m in messages %}
-              <div class="alert alert-{{m.tags}}">  {{m}} </div>
-            {% endfor %}
-          </div>
-       {% endif %}
-
-      <div id="formError" role="alert" class="hidden mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2"></div>
+</div>
 
 
-      <form id="registerForm" class="space-y-5" method="POST" action="{% url 'register' %}">
-        {% csrf_token %}
-        <div>
-          <label for="name" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">FULL NAME</label>
-          <input id="name" type="text" placeholder="Jordan Patel" autocomplete="name"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="name" />
-        </div>
+<!-- ============================================================
+     OTP MODAL
+============================================================ -->
 
-        <div>
-          <label for="email" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">EMAIL</label>
-          <input id="email" type="email" placeholder="you@example.com" autocomplete="email"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="email" />
-        </div>
+<div id="otpModal"
+     class="hidden modal-backdrop">
 
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="password" class="block text-xs font-medium tracking-wide text-graphite">PASSWORD</label>
-            <button type="button" id="togglePw" class="text-xs text-graphite hover:text-correction transition-colors">Show</button>
-          </div>
-          <input id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="password" />
-          <div class="flex gap-1.5 mt-2.5" id="strengthBars">
-            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
-            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
-            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
-            <span class="bar h-1 flex-1 rounded-full bg-paperline"></span>
-          </div>
-          <p id="strengthLabel" class="text-xs text-graphitesoft mt-1.5 font-mono">&nbsp;</p>
-        </div>
+    <div class="otp-card">
 
-        <div>
-          <label for="confirm" class="block text-xs font-medium tracking-wide text-graphite mb-1.5">CONFIRM PASSWORD</label>
-          <input id="confirm" type="password" placeholder="Re-enter your password" autocomplete="new-password"
-            class="w-full bg-transparent border-b border-paperline focus:border-correction text-ink placeholder-graphitesoft py-2 text-[15px] transition-colors" name="confirm_password" />
-        </div>
+        <!-- Close -->
 
-        <label class="flex items-start gap-2.5 text-sm text-graphite cursor-pointer select-none pt-1">
-          <input id="terms" type="checkbox" class="w-4 h-4 mt-0.5 rounded-sm border-paperline text-correction focus:ring-correction accent-[#3B5BDB]" />
-          <span>I agree to the <a href="#" class="text-correction hover:text-correctiondark">Terms</a> and <a href="#" class="text-correction hover:text-correctiondark">Privacy Policy</a></span>
-        </label>
+        <button id="otpClose"
+                type="button"
+                aria-label="Close"
+                class="float-right
+                       w-8 h-8
+                       flex items-center justify-center
+                       text-graphite
+                       hover:text-ink">
 
-        <button type="submit" id="createBtn"
-          class="w-full bg-ink hover:bg-inksoft text-paper text-sm font-medium py-3 rounded-md transition-colors mt-1">
-          Create account
+            ×
+
         </button>
 
-      </form>
 
-      <p class="text-sm text-graphite mt-8">
-        Already have an account? <a href="{% url 'login' %}" class="text-correction hover:text-correctiondark font-medium">Sign in</a>
-      </p>
+        <div class="clear-both"></div>
+
+
+        <!-- Icon -->
+
+        <div class="w-12 h-12
+                    border border-paperline
+                    rounded-full
+                    flex items-center justify-center
+                    text-correction
+                    mx-auto mt-2">
+
+            <svg width="22"
+                 height="22"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.6"
+                 viewBox="0 0 24 24">
+
+                <rect x="3"
+                      y="5"
+                      width="18"
+                      height="14"
+                      rx="2"/>
+
+                <path d="m3 7 9 6 9-6"/>
+
+            </svg>
+
+        </div>
+
+
+        <!-- Heading -->
+
+        <div class="text-center mt-5">
+
+            <div class="text-xs
+                        uppercase
+                        tracking-[.18em]
+                        text-correction">
+
+                Email verification
+
+            </div>
+
+            <h3 id="otpTitle"
+                class="font-display
+                       text-2xl
+                       sm:text-3xl
+                       mt-2">
+
+                Check your email
+
+            </h3>
+
+            <p class="text-sm
+                      text-graphite
+                      mt-3
+                      leading-relaxed">
+
+                We sent a 6-digit verification code to
+
+            </p>
+
+            <p id="otpEmail"
+               class="text-sm
+                      font-medium
+                      text-ink
+                      mt-1
+                      break-all">
+            </p>
+
+            <p class="text-xs
+                      text-graphite/70
+                      mt-2">
+
+                This code expires in 10 minutes.
+
+            </p>
+
+        </div>
+
+
+        <!-- OTP -->
+
+        <div id="otpBoxes"
+             class="otp-row
+                    flex
+                    justify-center
+                    gap-2
+                    mt-7">
+
+            <input class="otp-input"
+                   maxlength="1"
+                   inputmode="numeric"
+                   autocomplete="one-time-code"
+                   aria-label="Digit 1">
+
+            <input class="otp-input"
+                   maxlength="1"
+                   inputmode="numeric"
+                   aria-label="Digit 2">
+
+            <input class="otp-input"
+                   maxlength="1"
+                   inputmode="numeric"
+                   aria-label="Digit 3">
+
+            <input class="otp-input"
+                   maxlength="1"
+                   inputmode="numeric"
+                   aria-label="Digit 4">
+
+            <input class="otp-input"
+                   maxlength="1"
+                   inputmode="numeric"
+                   aria-label="Digit 5">
+
+            <input class="otp-input"
+                   maxlength="1"
+                   inputmode="numeric"
+                   aria-label="Digit 6">
+
+        </div>
+
+
+        <p id="otpMessage"
+           role="alert"
+           class="hidden text-center
+                  text-sm mt-4">
+        </p>
+
+
+        <!-- Verify -->
+
+        <button type="button"
+                id="verifyBtn"
+                class="primary-button
+                       w-full
+                       mt-6
+                       font-medium">
+
+            Verify and create account
+
+        </button>
+
+
+        <!-- Bottom -->
+
+        <div class="flex
+                    items-center
+                    justify-between
+                    gap-4
+                    mt-5
+                    text-sm">
+
+            <button type="button"
+                    id="resendBtn"
+                    class="text-correction
+                           hover:text-correctiondark
+                           font-medium">
+
+                Resend code
+
+            </button>
+
+            <button type="button"
+                    id="otpEdit"
+                    class="text-graphite
+                           hover:text-ink">
+
+                Edit details
+
+            </button>
+
+        </div>
+
     </div>
-  </div>
+
 </div>
 
+
 <script>
-  const pwInput = document.getElementById('password');
-  const toggle = document.getElementById('togglePw');
-  toggle.addEventListener('click', () => {
-    const isPw = pwInput.type === 'password';
-    pwInput.type = isPw ? 'text' : 'password';
-    toggle.textContent = isPw ? 'Hide' : 'Show';
-  });
 
-  const bars = document.querySelectorAll('#strengthBars .bar');
-  const label = document.getElementById('strengthLabel');
-  const colors = ['#D64545', '#E0A23B', '#3B5BDB', '#3C9A5F'];
-  const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+/* ============================================================
+   URLS
+============================================================ */
 
-  pwInput.addEventListener('input', () => {
-    const v = pwInput.value;
+const SEND_OTP_URL   = "{% url 'register_send_otp' %}";
+const VERIFY_OTP_URL = "{% url 'register_verify_otp' %}";
+const RESEND_OTP_URL = "{% url 'register_resend_otp' %}";
+
+
+/* ============================================================
+   ELEMENTS
+============================================================ */
+
+const registerForm =
+    document.getElementById("registerForm");
+
+const createBtn =
+    document.getElementById("createBtn");
+
+const createText =
+    document.getElementById("createText");
+
+const createLoader =
+    document.getElementById("createLoader");
+
+const formError =
+    document.getElementById("formError");
+
+const password =
+    document.getElementById("password");
+
+const confirmPassword =
+    document.getElementById("confirm");
+
+const otpModal =
+    document.getElementById("otpModal");
+
+const otpEmail =
+    document.getElementById("otpEmail");
+
+const otpInputs =
+    [...document.querySelectorAll(".otp-input")];
+
+const otpMessage =
+    document.getElementById("otpMessage");
+
+const verifyBtn =
+    document.getElementById("verifyBtn");
+
+const resendBtn =
+    document.getElementById("resendBtn");
+
+
+let resendTimerId = null;
+
+
+/* ============================================================
+   CSRF
+============================================================ */
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie) {
+
+        const cookies =
+            document.cookie.split(";");
+
+        for (let cookie of cookies) {
+
+            cookie = cookie.trim();
+
+            if (cookie.startsWith(name + "=")) {
+
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(name.length + 1)
+                    );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+
+/* ============================================================
+   API
+============================================================ */
+
+async function postJSON(url, payload) {
+
+    const response =
+        await fetch(url, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+
+            body: JSON.stringify(payload)
+
+        });
+
+    const data =
+        await response
+            .json()
+            .catch(() => ({}));
+
+    return {
+        status: response.status,
+        data: data
+    };
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+function showFormError(message) {
+
+    formError.textContent = message;
+
+    formError.classList.remove("hidden");
+
+}
+
+
+function clearFormError() {
+
+    formError.classList.add("hidden");
+
+    formError.textContent = "";
+
+}
+
+
+/* ============================================================
+   PASSWORD VISIBILITY
+============================================================ */
+
+document
+    .getElementById("togglePassword")
+    .addEventListener("click", function () {
+
+        const isPassword =
+            password.type === "password";
+
+        password.type =
+            isPassword ? "text" : "password";
+
+        this.setAttribute(
+            "aria-label",
+            isPassword
+                ? "Hide password"
+                : "Show password"
+        );
+
+    });
+
+
+/* ============================================================
+   PASSWORD STRENGTH
+============================================================ */
+
+password.addEventListener("input", function () {
+
+    const value = this.value;
+
     let score = 0;
-    if (v.length >= 8) score++;
-    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
-    if (/[0-9]/.test(v)) score++;
-    if (/[^A-Za-z0-9]/.test(v)) score++;
-    bars.forEach((bar, i) => {
-      bar.style.backgroundColor = (v.length > 0 && i < score) ? colors[score - 1] : '';
-      if (!(v.length > 0 && i < score)) bar.classList.add('bg-paperline');
-      else bar.classList.remove('bg-paperline');
-    });
-    label.textContent = v.length > 0 ? labels[Math.max(score - 1, 0)] : '\u00A0';
-  });
-</script>
 
-<script>
-  // Reads Django's CSRF cookie for the fetch() calls below
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
-    return null;
-  }
-</script>
+    if (value.length >= 8)
+        score++;
 
-<!-- EMAIL VERIFICATION MODAL -->
-<div id="otpModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-ink/70 px-4" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
-  <div class="otp-panel relative w-full max-w-[400px] bg-paper rounded-lg px-7 py-8 shadow-2xl">
-    <button type="button" id="otpClose" aria-label="Close" class="absolute top-4 right-4 text-graphite hover:text-ink transition-colors">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l10 10M14 4L4 14"/></svg>
-    </button>
+    if (/[A-Z]/.test(value))
+        score++;
 
-    <h3 id="otpTitle" class="font-display text-2xl text-ink">Check your email</h3>
-    <p class="text-sm text-graphite mt-2 leading-relaxed">
-      We sent a 6-digit code to <span id="otpEmail" class="text-ink font-medium break-all"></span>. It expires in 10 minutes.
-    </p>
+    if (/[0-9]/.test(value))
+        score++;
 
-    <div id="otpBoxes" class="flex justify-between gap-2 mt-6">
-        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Digit 1 of 6" />
-        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 2 of 6" />
-        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 3 of 6" />
-        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 4 of 6" />
-        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 5 of 6" />
-        <input class="otp-input w-11 h-14 text-center font-mono text-xl text-ink bg-white/60 border border-paperline rounded-md focus:outline-none focus:border-correction focus:ring-1 focus:ring-correction transition-colors" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Digit 6 of 6" />
-    </div>
+    if (/[^A-Za-z0-9]/.test(value))
+        score++;
 
-    <p id="otpMessage" role="alert" class="hidden mt-3 text-sm"></p>
 
-    <button type="button" id="verifyBtn"
-      class="w-full bg-ink hover:bg-inksoft text-paper text-sm font-medium py-3 rounded-md transition-colors mt-6">
-      Verify and create account
-    </button>
+    for (let i = 1; i <= 4; i++) {
 
-    <div class="flex items-center justify-between mt-5 text-sm">
-      <button type="button" id="resendBtn" class="text-correction hover:text-correctiondark font-medium transition-colors">Resend code</button>
-      <button type="button" id="otpEdit" class="text-graphite hover:text-ink transition-colors">Edit details</button>
-    </div>
-  </div>
-</div>
+        const bar =
+            document.getElementById(
+                "strength" + i
+            );
 
-<script>
-  // ---- Email verification: "Create account" sends a code, then the modal collects it ----
-  const SEND_OTP_URL   = "{% url 'register_send_otp' %}";
-  const VERIFY_OTP_URL = "{% url 'register_verify_otp' %}";
-  const RESEND_OTP_URL = "{% url 'register_resend_otp' %}";
+        bar.className =
+            "h-1 flex-1 rounded-full " +
+            (i <= score
+                ? "bg-correction"
+                : "bg-paperline");
 
-  const registerForm = document.getElementById('registerForm');
-  const createBtn    = document.getElementById('createBtn');
-  const formError    = document.getElementById('formError');
-  const termsBox     = document.getElementById('terms');
+    }
 
-  const otpModal   = document.getElementById('otpModal');
-  const otpEmail   = document.getElementById('otpEmail');
-  const otpInputs  = Array.from(document.querySelectorAll('.otp-input'));
-  const otpMessage = document.getElementById('otpMessage');
-  const verifyBtn  = document.getElementById('verifyBtn');
-  const resendBtn  = document.getElementById('resendBtn');
 
-  let resendTimerId = null;
-  let verifying = false;
+    const hint =
+        document.getElementById(
+            "passwordHint"
+        );
 
-  function postJSON(url, payload) {
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-      body: JSON.stringify(payload),
-    }).then(r => r.json().catch(() => ({})).then(data => ({ status: r.status, data })));
-  }
+    if (!value) {
 
-  // ----- form errors -----
-  function showFormError(msg) { formError.textContent = msg; formError.classList.remove('hidden'); }
-  function hideFormError() { formError.classList.add('hidden'); }
+        hint.textContent =
+            "Minimum 8 characters";
 
-  // ----- modal open / close -----
-  function openOtpModal(email, resendIn) {
+    } else if (score <= 1) {
+
+        hint.textContent =
+            "Weak password";
+
+    } else if (score === 2) {
+
+        hint.textContent =
+            "Fair password";
+
+    } else if (score === 3) {
+
+        hint.textContent =
+            "Good password";
+
+    } else {
+
+        hint.textContent =
+            "Strong password";
+
+    }
+
+});
+
+
+/* ============================================================
+   OPEN OTP
+============================================================ */
+
+function openOtpModal(
+    email,
+    resendIn = 30
+) {
+
     otpEmail.textContent = email;
-    clearOtpInputs();
-    hideOtpMessage();
-    otpModal.classList.remove('hidden');
-    otpModal.classList.add('flex');
-    document.body.classList.add('overflow-hidden');
-    startResendCountdown(resendIn);
-    setTimeout(() => otpInputs[0].focus(), 60);
-  }
 
-  function closeOtpModal() {
-    otpModal.classList.add('hidden');
-    otpModal.classList.remove('flex');
-    document.body.classList.remove('overflow-hidden');
-    clearInterval(resendTimerId);
-  }
+    otpInputs.forEach(
+        input => input.value = ""
+    );
 
-  document.getElementById('otpClose').addEventListener('click', closeOtpModal);
-  document.getElementById('otpEdit').addEventListener('click', closeOtpModal);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !otpModal.classList.contains('hidden')) closeOtpModal();
-  });
+    otpMessage.classList.add(
+        "hidden"
+    );
 
-  // ----- modal messages -----
-  function showOtpMessage(msg, isError = true) {
-    otpMessage.textContent = msg;
-    otpMessage.className = 'mt-3 text-sm ' + (isError ? 'text-red-600' : 'text-good');
-  }
-  function hideOtpMessage() { otpMessage.className = 'hidden mt-3 text-sm'; }
+    otpModal.classList.remove(
+        "hidden"
+    );
 
-  // ----- code boxes -----
-  function clearOtpInputs() { otpInputs.forEach(i => { i.value = ''; }); }
+    document.body.style.overflow =
+        "hidden";
 
-  function fillFrom(start, digits) {
-    let i = digits.length >= 6 ? 0 : start;     // a full 6-digit paste/autofill always starts at box 1
-    for (const d of digits) {
-      if (i > 5) break;
-      otpInputs[i].value = d;
-      i++;
-    }
-    otpInputs[Math.min(i, 5)].focus();
-    if (otpInputs.every(inp => inp.value)) verifyOtp();
-  }
-
-  otpInputs.forEach((input, idx) => {
-    input.addEventListener('input', () => {
-      const digits = input.value.replace(/\D/g, '');
-      if (!digits) { input.value = ''; return; }
-      fillFrom(idx, digits);
-    });
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !input.value && idx > 0) {
-        otpInputs[idx - 1].value = '';
-        otpInputs[idx - 1].focus();
-      } else if (e.key === 'ArrowLeft' && idx > 0) {
-        otpInputs[idx - 1].focus();
-      } else if (e.key === 'ArrowRight' && idx < 5) {
-        otpInputs[idx + 1].focus();
-      } else if (e.key === 'Enter') {
-        verifyOtp();
-      }
-    });
-
-    input.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const digits = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '');
-      if (digits) fillFrom(idx, digits);
-    });
-
-    input.addEventListener('focus', () => input.select());
-  });
-
-  // ----- resend countdown -----
-  function startResendCountdown(seconds) {
-    clearInterval(resendTimerId);
-    let remaining = Math.max(0, Math.ceil(seconds || 0));
-    const render = () => {
-      if (remaining > 0) {
-        resendBtn.disabled = true;
-        resendBtn.textContent = `Resend code in ${remaining}s`;
-      } else {
-        resendBtn.disabled = false;
-        resendBtn.textContent = 'Resend code';
-        clearInterval(resendTimerId);
-      }
-    };
-    render();
-    resendTimerId = setInterval(() => { remaining--; render(); }, 1000);
-  }
-
-  // ----- step 1: Create account -> send code -----
-  registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideFormError();
-
-    const payload = {
-      name: document.getElementById('name').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      password: document.getElementById('password').value,
-      confirm_password: document.getElementById('confirm').value,
-    };
-
-    if (!payload.name) return showFormError('Please enter your full name.');
-    if (!payload.email) return showFormError('Please enter your email address.');
-    if (payload.password.length < 8) return showFormError('Password must be at least 8 characters.');
-    if (payload.password !== payload.confirm_password) return showFormError('Password and Confirm Password do not match.');
-    if (!termsBox.checked) return showFormError('Please accept the Terms and Privacy Policy to continue.');
-
-    const label = createBtn.textContent;
-    createBtn.disabled = true;
-    createBtn.textContent = 'Sending code…';
-
-    try {
-      const { status, data } = await postJSON(SEND_OTP_URL, payload);
-      if (status === 200 && data.ok) {
-        openOtpModal(data.email, data.resend_in);
-      } else {
-        showFormError(data.error || 'Could not send the verification code. Try again.');
-      }
-    } catch (err) {
-      showFormError('Network error — please try again.');
-    } finally {
-      createBtn.disabled = false;
-      createBtn.textContent = label;
-    }
-  });
-
-  // ----- step 2: verify the code -----
-  async function verifyOtp() {
-    if (verifying) return;
-
-    const code = otpInputs.map(i => i.value).join('');
-    if (code.length !== 6) { showOtpMessage('Enter the 6-digit code.'); return; }
-
-    verifying = true;
-    verifyBtn.disabled = true;
-    verifyBtn.textContent = 'Verifying…';
-    hideOtpMessage();
-
-    try {
-      const { status, data } = await postJSON(VERIFY_OTP_URL, { code });
-
-      if (status === 200 && data.redirect) {
-        window.location.href = data.redirect;
-        return;   // leave the button in its "Verifying…" state while the page changes
-      }
-
-      if (data.expired) {
-        closeOtpModal();
-        showFormError(data.error);
-      } else {
-        showOtpMessage(data.error || 'Verification failed. Try again.');
-        clearOtpInputs();
+    setTimeout(() => {
         otpInputs[0].focus();
-      }
-    } catch (err) {
-      showOtpMessage('Network error — please try again.');
+    }, 100);
+
+    startResendTimer(resendIn);
+}
+
+
+/* ============================================================
+   CLOSE OTP
+============================================================ */
+
+function closeOtpModal() {
+
+    otpModal.classList.add(
+        "hidden"
+    );
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+document
+    .getElementById("otpClose")
+    .addEventListener(
+        "click",
+        closeOtpModal
+    );
+
+
+document
+    .getElementById("otpEdit")
+    .addEventListener(
+        "click",
+        closeOtpModal
+    );
+
+
+/* ============================================================
+   OTP INPUT
+============================================================ */
+
+otpInputs.forEach(
+    (input, index) => {
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                this.value =
+                    this.value
+                        .replace(/\D/g, "")
+                        .slice(0, 1);
+
+                if (
+                    this.value &&
+                    index < otpInputs.length - 1
+                ) {
+
+                    otpInputs[
+                        index + 1
+                    ].focus();
+
+                }
+
+            }
+        );
+
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Backspace" &&
+                    !this.value &&
+                    index > 0
+                ) {
+
+                    otpInputs[
+                        index - 1
+                    ].focus();
+
+                }
+
+            }
+        );
+
     }
+);
 
-    verifying = false;
-    verifyBtn.disabled = false;
-    verifyBtn.textContent = 'Verify and create account';
-  }
 
-  verifyBtn.addEventListener('click', verifyOtp);
+/* ============================================================
+   OTP PASTE
+============================================================ */
 
-  // ----- resend -----
-  resendBtn.addEventListener('click', async () => {
-    resendBtn.disabled = true;
-    hideOtpMessage();
+document
+    .getElementById("otpBoxes")
+    .addEventListener(
+        "paste",
+        function (event) {
 
-    try {
-      const { status, data } = await postJSON(RESEND_OTP_URL, {});
+            event.preventDefault();
 
-      if (status === 200 && data.ok) {
-        clearOtpInputs();
-        otpInputs[0].focus();
-        showOtpMessage('A new code is on its way.', false);
-        startResendCountdown(data.resend_in);
-      } else if (data.expired) {
-        closeOtpModal();
-        showFormError(data.error);
-      } else if (data.retry_after) {
-        showOtpMessage(data.error);
-        startResendCountdown(data.retry_after);
-      } else {
-        showOtpMessage(data.error || 'Could not resend the code. Try again.');
-        resendBtn.disabled = false;
-      }
-    } catch (err) {
-      showOtpMessage('Network error — please try again.');
-      resendBtn.disabled = false;
+            const pasted =
+                (
+                    event.clipboardData ||
+                    window.clipboardData
+                )
+                .getData("text")
+                .replace(/\D/g, "")
+                .slice(0, 6);
+
+
+            pasted
+                .split("")
+                .forEach(
+                    (digit, index) => {
+
+                        if (otpInputs[index]) {
+
+                            otpInputs[index]
+                                .value = digit;
+
+                        }
+
+                    }
+                );
+
+
+            if (pasted.length === 6) {
+
+                otpInputs[5].focus();
+
+            }
+
+        }
+    );
+
+
+function getOTP() {
+
+    return otpInputs
+        .map(input => input.value)
+        .join("");
+
+}
+
+
+/* ============================================================
+   OTP MESSAGE
+============================================================ */
+
+function showOTPMessage(
+    message,
+    isError = true
+) {
+
+    otpMessage.textContent =
+        message;
+
+    otpMessage.className =
+        "text-center text-sm mt-4 " +
+        (
+            isError
+                ? "text-correction"
+                : "text-green-700"
+        );
+
+}
+
+
+/* ============================================================
+   RESEND TIMER
+============================================================ */
+
+function startResendTimer(seconds) {
+
+    clearInterval(resendTimerId);
+
+    let remaining =
+        Number(seconds) || 30;
+
+    resendBtn.disabled =
+        true;
+
+    resendBtn.classList.add(
+        "opacity-50",
+        "cursor-not-allowed"
+    );
+
+
+    resendBtn.textContent =
+        `Resend in ${remaining}s`;
+
+
+    resendTimerId =
+        setInterval(
+            () => {
+
+                remaining--;
+
+                if (remaining <= 0) {
+
+                    clearInterval(
+                        resendTimerId
+                    );
+
+                    resendBtn.disabled =
+                        false;
+
+                    resendBtn.classList.remove(
+                        "opacity-50",
+                        "cursor-not-allowed"
+                    );
+
+                    resendBtn.textContent =
+                        "Resend code";
+
+                    return;
+                }
+
+
+                resendBtn.textContent =
+                    `Resend in ${remaining}s`;
+
+            },
+            1000
+        );
+
+}
+
+
+/* ============================================================
+   REGISTER
+============================================================ */
+
+registerForm.addEventListener(
+    "submit",
+    async function (event) {
+
+        event.preventDefault();
+
+        clearFormError();
+
+
+        const name =
+            document
+                .getElementById("name")
+                .value
+                .trim();
+
+
+        const email =
+            document
+                .getElementById("email")
+                .value
+                .trim();
+
+
+        const pass =
+            password.value;
+
+
+        const confirm =
+            confirmPassword.value;
+
+
+        const terms =
+            document
+                .getElementById("terms")
+                .checked;
+
+
+        if (!name) {
+
+            showFormError(
+                "Please enter your full name."
+            );
+
+            return;
+        }
+
+
+        if (!email) {
+
+            showFormError(
+                "Please enter your email address."
+            );
+
+            return;
+        }
+
+
+        if (pass.length < 8) {
+
+            showFormError(
+                "Password must be at least 8 characters."
+            );
+
+            return;
+        }
+
+
+        if (pass !== confirm) {
+
+            showFormError(
+                "Passwords do not match."
+            );
+
+            return;
+        }
+
+
+        if (!terms) {
+
+            showFormError(
+                "Please accept the Terms of Service and Privacy Policy."
+            );
+
+            return;
+        }
+
+
+        createBtn.disabled =
+            true;
+
+        createText.textContent =
+            "Sending verification code...";
+
+        createLoader.classList.remove(
+            "hidden"
+        );
+
+
+        try {
+
+            const result =
+                await postJSON(
+                    SEND_OTP_URL,
+                    {
+                        name: name,
+                        email: email,
+                        password: pass,
+                        confirm_password: confirm
+                    }
+                );
+
+
+            if (
+                result.status === 200 &&
+                result.data.ok
+            ) {
+
+                openOtpModal(
+                    result.data.email,
+                    result.data.resend_in
+                );
+
+            } else {
+
+                showFormError(
+                    result.data.error ||
+                    "Could not send the verification code."
+                );
+
+            }
+
+        } catch (error) {
+
+            showFormError(
+                "Unable to connect to the server. Please try again."
+            );
+
+        } finally {
+
+            createBtn.disabled =
+                false;
+
+            createText.textContent =
+                "Create account";
+
+            createLoader.classList.add(
+                "hidden"
+            );
+
+        }
+
     }
-  });
+);
+
+
+/* ============================================================
+   VERIFY OTP
+============================================================ */
+
+verifyBtn.addEventListener(
+    "click",
+    async function () {
+
+        const code =
+            getOTP();
+
+
+        if (code.length !== 6) {
+
+            showOTPMessage(
+                "Please enter the complete 6-digit code."
+            );
+
+            return;
+        }
+
+
+        verifyBtn.disabled =
+            true;
+
+        verifyBtn.textContent =
+            "Verifying...";
+
+
+        try {
+
+            const result =
+                await postJSON(
+                    VERIFY_OTP_URL,
+                    {
+                        code: code
+                    }
+                );
+
+
+            if (
+                result.status === 200 &&
+                result.data.redirect
+            ) {
+
+                window.location.href =
+                    result.data.redirect;
+
+            } else {
+
+                showOTPMessage(
+                    result.data.error ||
+                    "Invalid verification code."
+                );
+
+            }
+
+        } catch (error) {
+
+            showOTPMessage(
+                "Unable to connect to the server."
+            );
+
+        } finally {
+
+            verifyBtn.disabled =
+                false;
+
+            verifyBtn.textContent =
+                "Verify and create account";
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   RESEND
+============================================================ */
+
+resendBtn.addEventListener(
+    "click",
+    async function () {
+
+        resendBtn.disabled =
+            true;
+
+        resendBtn.textContent =
+            "Sending...";
+
+
+        try {
+
+            const result =
+                await postJSON(
+                    RESEND_OTP_URL,
+                    {}
+                );
+
+
+            if (
+                result.status === 200 &&
+                result.data.ok
+            ) {
+
+                showOTPMessage(
+                    "A new verification code has been sent.",
+                    false
+                );
+
+                startResendTimer(
+                    result.data.resend_in
+                );
+
+            } else {
+
+                showOTPMessage(
+                    result.data.error ||
+                    "Could not resend the code."
+                );
+
+                startResendTimer(
+                    result.data.retry_after || 5
+                );
+
+            }
+
+        } catch (error) {
+
+            showOTPMessage(
+                "Unable to connect to the server."
+            );
+
+            resendBtn.disabled =
+                false;
+
+            resendBtn.textContent =
+                "Resend code";
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   ESCAPE CLOSE
+============================================================ */
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape" &&
+            !otpModal.classList.contains("hidden")
+        ) {
+
+            closeOtpModal();
+
+        }
+
+    }
+);
+
 </script>
+
 </body>
 </html>
