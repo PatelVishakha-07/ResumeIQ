@@ -1,143 +1,668 @@
+/* ============================================================
+   ResumeIQ — Premium ATS UI
+   Global stylesheet
+   Keeps the original editorial / paper theme
+============================================================ */
+
+/* ---------- Base page ---------- */
+
 html {
-  -webkit-font-smoothing: antialiased;
-  scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
 }
 
-/* Common page background — a fine paper dot-grid on the paper tone.
-   Every page in the product shares this so the "editorial paper" feel
-   is consistent whether you're signing in or reading your ATS report. */
 body {
-  background-color: #F5F3EE;
-  background-image: radial-gradient(#E3DFD3 0.9px, transparent 0.9px);
-  background-size: 22px 22px;
+    background-color: #F5F3EE;
+    background-image:
+        radial-gradient(#E3DFD3 0.9px, transparent 0.9px);
+    background-size: 22px 22px;
+    color: #14171F;
 }
 
-/* Accessible focus ring, tuned to the correction-blue accent */
+/* ---------- Accessible focus ---------- */
+
 input:focus-visible,
+textarea:focus-visible,
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #3B5BDB;
-  outline-offset: 2px;
+    outline: 2px solid #3B5BDB;
+    outline-offset: 3px;
 }
 
-/* ---------- Entrance animation ---------- */
+/* ============================================================
+   PAGE ENTRANCE
+============================================================ */
+
 .fade-up {
-  opacity: 0;
-  transform: translateY(8px);
-  animation: fadeUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 0.6s ease-out forwards;
 }
+
 @keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* ---------- Hand-drawn "pen mark" illustration strokes ---------- */
+
+/* ============================================================
+   HAND-DRAWN / EDITORIAL MARKS
+============================================================ */
+
 .mark-path {
-  stroke-dasharray: 340;
-  stroke-dashoffset: 340;
-  animation: draw 1.4s 0.3s ease-out forwards;
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    animation: draw 1.4s 0.3s ease-out forwards;
 }
+
 .mark-circle {
-  stroke-dasharray: 220;
-  stroke-dashoffset: 220;
-  animation: draw 1.1s 0.7s ease-out forwards;
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    animation: draw 1.1s 0.7s ease-out forwards;
 }
+
 .mark-check {
-  stroke-dasharray: 40;
-  stroke-dashoffset: 40;
-  animation: draw 0.5s 1.4s ease-out forwards;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: draw 0.5s 1.4s ease-out forwards;
 }
+
 .mark-dot {
-  opacity: 0;
-  animation: pop 0.4s 1.5s ease-out forwards;
+    opacity: 0;
+    animation: pop 0.4s 1.5s ease-out forwards;
 }
+
 @keyframes draw {
-  to { stroke-dashoffset: 0; }
+    to {
+        stroke-dashoffset: 0;
+    }
 }
+
 @keyframes pop {
-  to { opacity: 1; }
+    to {
+        opacity: 1;
+    }
 }
 
-/* ---------- ATS score dial (home page) ---------- */
+
+/* ============================================================
+   ATS SCORE DIAL
+============================================================ */
+
 .dial-track {
-  stroke-dasharray: 691;
-  stroke-dashoffset: 0;
+    stroke-dasharray: 691;
+    stroke-dashoffset: 0;
 }
+
 .dial-fill {
-  stroke-dasharray: 691;
-  transition: stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1) .15s;
+    stroke-dasharray: 691;
+    stroke-dashoffset: 691;
+    transition:
+        stroke-dashoffset 1.4s cubic-bezier(.2, .8, .2, 1) .15s;
+    filter: drop-shadow(0 4px 7px rgba(59, 91, 219, 0.18));
 }
 
-/* ---------- Generic stroke-draw utility ---------- */
+
+/* ============================================================
+   GENERIC STROKE ANIMATION
+============================================================ */
+
 .stroke-in {
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  animation: strokeIn 1s ease-out forwards;
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: strokeIn 1s ease-out forwards;
 }
+
 @keyframes strokeIn {
-  to { stroke-dashoffset: 0; }
+    to {
+        stroke-dashoffset: 0;
+    }
 }
 
-/* ---------- Progress / breakdown bars ---------- */
-.bar-fill {
-  width: 0%;
-  transition: width 1s cubic-bezier(.2,.8,.2,1);
-}
+
+/* ============================================================
+   PROGRESS / BREAKDOWN BARS
+============================================================ */
+
 .bar {
-  transition: background-color .25s ease;
+    transition:
+        background-color 0.25s ease,
+        transform 0.2s ease;
 }
 
-/* ---------- Locked report content (home page) ---------- */
+.bar-fill {
+    width: 0%;
+    min-width: 0;
+    transition:
+        width 1s cubic-bezier(.2, .8, .2, 1);
+    box-shadow: 0 2px 7px rgba(20, 23, 31, 0.08);
+}
+
+
+/* ============================================================
+   LOCKED REPORT
+============================================================ */
+
 .locked-blur {
-  filter: blur(6px);
-  user-select: none;
-  pointer-events: none;
+    filter: blur(6px);
+    user-select: none;
+    pointer-events: none;
 }
 
-/* ---------- Upload drop zone (home page) ---------- */
+
+/* ============================================================
+   UPLOAD DROP ZONE
+============================================================ */
+
 .drop-zone {
-  transition: border-color .2s ease, background-color .2s ease;
-}
-.drop-zone.drag {
-  border-color: #3B5BDB;
-  background-color: rgba(59, 91, 219, 0.05);
+    position: relative;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 }
 
-/* ---------- Reduced motion ---------- */
-@media (prefers-reduced-motion: reduce) {
-  .fade-up,
-  .mark-path,
-  .mark-circle,
-  .mark-check,
-  .mark-dot,
-  .stroke-in {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-    stroke-dashoffset: 0 !important;
-  }
-  .dial-fill,
-  .bar-fill {
-    transition: none !important;
-  }
+.drop-zone.drag {
+    border-color: #3B5BDB;
+    background-color: rgba(59, 91, 219, 0.05);
+    box-shadow:
+        0 0 0 4px rgba(59, 91, 219, 0.06),
+        inset 0 0 0 1px rgba(59, 91, 219, 0.12);
+    transform: translateY(-1px);
 }
+
+
+/* ============================================================
+   PREMIUM ATS PAGE
+============================================================ */
+
+/* Main page background enhancement */
+
+.ats-page {
+    position: relative;
+}
+
+.ats-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background:
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(59, 91, 219, 0.065),
+            transparent 28rem
+        ),
+        radial-gradient(
+            circle at 95% 15%,
+            rgba(242, 201, 76, 0.065),
+            transparent 25rem
+        );
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.ats-page header {
+    background: rgba(245, 243, 238, 0.84);
+    border-bottom: 1px solid rgba(20, 23, 31, 0.09);
+    box-shadow: 0 10px 35px rgba(20, 23, 31, 0.045);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.ats-page header .font-mono {
+    font-weight: 700;
+}
+
+.ats-page header nav a {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.ats-page header nav a:last-child {
+    background:
+        linear-gradient(
+            135deg,
+            #14171F,
+            #292E39
+        ) !important;
+
+    box-shadow:
+        0 8px 22px rgba(20, 23, 31, 0.16) !important;
+}
+
+.ats-page header nav a:last-child:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 12px 28px rgba(20, 23, 31, 0.20) !important;
+}
+
+
+/* ============================================================
+   ATS HERO
+============================================================ */
+
+.ats-page .ats-hero {
+    position: relative;
+}
+
+.ats-page .ats-hero::before {
+    content: "01";
+    position: absolute;
+    top: 2rem;
+    left: 0;
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: clamp(4rem, 8vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1;
+
+    letter-spacing: -0.08em;
+
+    color: rgba(20, 23, 31, 0.035);
+
+    pointer-events: none;
+}
+
+.ats-page .ats-hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+}
+
+.ats-page .ats-hero .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+
+    padding: 0.42rem 0.7rem;
+
+    border: 1px solid rgba(59, 91, 219, 0.18);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.42);
+
+    box-shadow:
+        0 4px 15px rgba(20, 23, 31, 0.035);
+}
+
+.ats-page .ats-hero .eyebrow::before {
+    content: "";
+
+    width: 0.4rem;
+    height: 0.4rem;
+
+    border-radius: 50%;
+
+    background: #3B5BDB;
+
+    box-shadow:
+        0 0 0 4px rgba(59, 91, 219, 0.10);
+}
+
+
+/* ============================================================
+   UPLOAD CARD
+============================================================ */
+
+.ats-page .upload-card {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 0.45rem;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.1rem;
+
+    background:
+        linear-gradient(
+            145deg,
+            #151820,
+            #242A35 70%,
+            #171A22
+        );
+
+    box-shadow:
+        0 30px 75px rgba(20, 23, 31, 0.16),
+        0 3px 10px rgba(20, 23, 31, 0.08);
+}
+
+.ats-page .upload-card::before {
+    content: "ATS ANALYZER  /  RESUMEIQ";
+
+    position: absolute;
+    top: 0.72rem;
+    left: 1.1rem;
+
+    z-index: 2;
+
+    color: rgba(245, 243, 238, 0.43);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.57rem;
+    font-weight: 600;
+
+    letter-spacing: 0.16em;
+}
+
+.ats-page .upload-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 11rem;
+    height: 11rem;
+
+    right: -5rem;
+    top: -6rem;
+
+    border-radius: 50%;
+
+    background: rgba(59, 91, 219, 0.13);
+}
+
+
+/* ============================================================
+   DROP ZONE
+============================================================ */
+
+.ats-page #dropZone {
+    position: relative;
+
+    min-height: clamp(16rem, 30vw, 21rem);
+
+    border-width: 1.5px !important;
+    border-color: #D8D3C7 !important;
+    border-style: dashed;
+
+    border-radius: 0.8rem;
+
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(59, 91, 219, 0.055),
+            transparent 9rem
+        ),
+        rgba(255, 255, 255, 0.30);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.40);
+}
+
+.ats-page #dropZone::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0.7rem;
+
+    border: 1px dashed rgba(59, 91, 219, 0.15);
+    border-radius: 0.65rem;
+
+    pointer-events: none;
+}
+
+.ats-page #dropZone::after {
+    content: "DROP  •  SCAN  •  IMPROVE";
+
+    position: absolute;
+
+    bottom: 0.85rem;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    color: rgba(20, 23, 31, 0.28);
+
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.54rem;
+    font-weight: 600;
+
+    letter-spacing: 0.18em;
+
+    white-space: nowrap;
+}
+
+.ats-page #dropZone svg {
+    padding: 0.8rem;
+
+    box-sizing: content-box;
+
+    border-radius: 1rem;
+
+    background: rgba(59, 91, 219, 0.075);
+
+    box-shadow:
+        0 0 0 1px rgba(59, 91, 219, 0.08);
+}
+
+
+/* ============================================================
+   FILE ROW
+============================================================ */
+
+.ats-page #fileRow {
+    border-color: #D8D3C7 !important;
+
+    background:
+        rgba(255, 255, 255, 0.46) !important;
+
+    box-shadow:
+        0 8px 24px rgba(20, 23, 31, 0.05) !important;
+}
+
+.ats-page #removeFile {
+    padding: 0.42rem 0.62rem;
+
+    border: 1px solid rgba(201, 71, 71, 0.16);
+    border-radius: 0.45rem;
+
+    background: rgba(201, 71, 71, 0.045);
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.ats-page #removeFile:hover {
+    background: rgba(201, 71, 71, 0.09);
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   JOB DESCRIPTION
+============================================================ */
+
+.ats-page #jd {
+    min-height: 7rem;
+
+    border-color: #D8D3C7 !important;
+
+    background:
+        rgba(255, 255, 255, 0.25);
+
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.ats-page #jd:focus {
+    border-color: #3B5BDB !important;
+
+    background:
+        rgba(255, 255, 255, 0.55);
+
+    box-shadow:
+        0 0 0 4px rgba(59, 91, 219, 0.075) !important;
+}
+
+
+/* ============================================================
+   SCORE BUTTON
+============================================================ */
+
+.ats-page #scoreBtn {
+    min-height: 3.6rem;
+
+    border-radius: 0.65rem;
+
+    background:
+        linear-gradient(
+            135deg,
+            #14171F,
+            #292E39
+        ) !important;
+
+    box-shadow:
+        0 12px 30px rgba(20, 23, 31, 0.17) !important;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.ats-page #scoreBtn:not(:disabled):hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 17px 34px rgba(20, 23, 31, 0.22) !important;
+}
+
+.ats-page #scoreBtn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   RESULTS SECTION
+============================================================ */
+
+.ats-page #results {
+    scroll-margin-top: 6rem;
+}
+
+.ats-page #results .result-card {
+    border: 1px solid rgba(20, 23, 31, 0.075);
+
+    border-radius: 1rem;
+
+    background:
+        rgba(255, 255, 255, 0.28);
+
+    box-shadow:
+        0 15px 45px rgba(20, 23, 31, 0.055);
+}
+
+.ats-page #results .result-card:hover {
+    box-shadow:
+        0 18px 50px rgba(20, 23, 31, 0.075);
+}
+
+
+/* ============================================================
+   SCORE DIAL
+============================================================ */
+
+.ats-page #scoreNum {
+    font-size: clamp(4rem, 7vw, 5.4rem) !important;
+
+    font-weight: 500;
+
+    letter-spacing: -0.07em;
+}
+
+.ats-page #scoreVerdict {
+    display: inline-block;
+
+    padding: 0.42rem 0.7rem;
+
+    border: 1px solid rgba(59, 91, 219, 0.12);
+    border-radius: 999px;
+
+    background:
+        rgba(59, 91, 219, 0.075);
+}
+
+
+/* ============================================================
+   BREAKDOWN BARS
+============================================================ */
+
+.ats-page .breakdown-item {
+    padding: 1rem 0 1.1rem;
+
+    border-bottom:
+        1px solid rgba(20, 23, 31, 0.08);
+}
+
+.ats-page .breakdown-item:last-child {
+    border-bottom: 0;
+}
+
+.ats-page .bar {
+    height: 0.55rem;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background:
+        #DFDBD1 !important;
+
+    box-shadow:
+        inset 0 1px 2px rgba(20, 23, 31, 0.06);
+}
+
+
+/* ============================================================
+   ALERTS
+============================================================ */
 
 .alert {
-    padding: 10px 15px;
+    padding: 12px 16px;
     margin-bottom: 15px;
-    border-radius: 5px;
+
+    border-radius: 8px;
+
     font-size: 14px;
-}
-.alert-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+
+    border: 1px solid transparent;
+
+    box-shadow:
+        0 4px 15px rgba(20, 23, 31, 0.035);
 }
 
+.alert-error {
+    background-color: #F8D7DA;
+    color: #721C24;
+    border-color: #F5C6CB;
+}
+
+.alert-success {
+    background-color: #D4EDDA;
+    color: #155724;
+    border-color: #C3E6CB;
+}
+
+
+/* ============================================================
+   DJANGO MESSAGES
+============================================================ */
 
 .messages-container {
     margin-bottom: 20px;
@@ -145,32 +670,162 @@ a:focus-visible {
 
 .message {
     padding: 12px 16px;
+
     border-radius: 8px;
+
     margin-bottom: 10px;
+
     font-size: 14px;
+
     border: 1px solid transparent;
+
+    box-shadow:
+        0 4px 15px rgba(20, 23, 31, 0.035);
 }
 
 .message-error {
-    background: #fff1f2;
-    color: #b42318;
-    border-color: #fecdca;
+    background: #FFF1F2;
+    color: #B42318;
+    border-color: #FECDCA;
 }
 
 .message-success {
-    background: #ecfdf3;
-    color: #027a48;
-    border-color: #abefc6;
+    background: #ECFDF3;
+    color: #027A48;
+    border-color: #ABEF C6;
 }
 
 .message-warning {
-    background: #fffaeb;
-    color: #b54708;
-    border-color: #fedf89;
+    background: #FFFAEB;
+    color: #B54708;
+    border-color: #FEDF89;
 }
 
 .message-info {
-    background: #eff8ff;
-    color: #175cd3;
-    border-color: #b2ddff;
+    background: #EFF8FF;
+    color: #175CD3;
+    border-color: #B2DDFF;
+}
+
+
+/* ============================================================
+   RESPONSIVE / BROWSER ZOOM
+============================================================ */
+
+@media (max-width: 1100px) {
+
+    .ats-page .ats-hero::before {
+        display: none;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .ats-page .ats-hero {
+        padding-top: 3rem;
+    }
+
+    .ats-page .ats-hero h1 {
+        font-size: clamp(2.4rem, 7vw, 3.5rem);
+    }
+
+    .ats-page .upload-card {
+        border-radius: 1rem;
+    }
+
+    .ats-page .result-card {
+        padding: 1.25rem;
+    }
+
+}
+
+
+@media (max-width: 640px) {
+
+    .ats-page .ats-hero {
+        padding-top: 2.25rem;
+    }
+
+    .ats-page .ats-hero h1 {
+        font-size: clamp(2.2rem, 11vw, 3rem);
+    }
+
+    .ats-page #dropZone {
+        min-height: 14rem;
+        padding: 2rem 0.8rem 2.8rem;
+    }
+
+    .ats-page #dropZone::after {
+        font-size: 0.48rem;
+        letter-spacing: 0.12em;
+    }
+
+    .ats-page #scoreBtn {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 430px) {
+
+    .ats-page #dropZone {
+        min-height: 12.8rem;
+    }
+
+    .ats-page #scoreNum {
+        font-size: 3.8rem !important;
+    }
+
+}
+
+
+@media (max-width: 330px) {
+
+    .ats-page .ats-hero h1 {
+        font-size: 2.05rem;
+    }
+
+    .ats-page #scoreBtn {
+        font-size: 0.82rem;
+    }
+
+    .ats-page #scoreNum {
+        font-size: 3.5rem !important;
+    }
+
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fade-up,
+    .mark-path,
+    .mark-circle,
+    .mark-check,
+    .mark-dot,
+    .stroke-in {
+        animation: none !important;
+
+        opacity: 1 !important;
+
+        transform: none !important;
+
+        stroke-dashoffset: 0 !important;
+    }
+
+    .dial-fill,
+    .bar-fill,
+    .drop-zone,
+    .ats-page #scoreBtn,
+    .ats-page #removeFile {
+        transition: none !important;
+    }
+
 }
