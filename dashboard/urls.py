@@ -26,8 +26,11 @@ urlpatterns = [
     path('admin_panel/manage_user/<int:user_id>/toggle/',views.toggleUserStatus,name='toggle_user_status'),
     path('admin_panel/manage_user/<int:user_id>/', views.userDetail, name='user_detail'),
     path('admin_panel/manage_staffRole', views.manageStaffRole, name="manageStaffRole"),
-    path('admin_panel/reports', views.reports, name="reports"),
+    # path('admin_panel/reports', views.reports, name="reports"),
     path('admin_panel/feedback', views.feedback, name="feedback"),
 
+
+# Admin report
+    path('admin_panel/reports', views.admin_report, name="reports"),
 
 ]
