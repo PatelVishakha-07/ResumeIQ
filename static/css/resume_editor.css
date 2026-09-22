@@ -1,0 +1,210 @@
+/* ResumeIQ professional editable resume */
+.resume-editor-shell{
+    margin-top:20px;
+    background:#eef1f6;
+    border:1px solid #dfe4ec;
+    border-radius:12px;
+    padding:28px;
+    overflow:auto;
+}
+.resume-paper{
+    width:min(100%, 820px);
+    min-height:1050px;
+    margin:0 auto;
+    box-sizing:border-box;
+    background:#fff;
+    color:#20242b;
+    padding:48px 56px;
+    border:1px solid #e2e6ed;
+    box-shadow:0 8px 28px rgba(20,30,50,.08);
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    outline:none;
+}
+.resume-paper:focus{box-shadow:0 0 0 2px rgba(59,91,219,.16),0 8px 28px rgba(20,30,50,.08);}
+.resume-name{
+    text-align:center;
+    font-size:26px;
+    line-height:1.15;
+    font-weight:700;
+    color:#151922;
+    margin-bottom:4px;
+}
+.resume-headline{
+    text-align:center;
+    font-size:15px;
+    line-height:1.3;
+    font-weight:600;
+    color:#404754;
+    margin-bottom:7px;
+}
+.resume-contact{
+    text-align:center;
+    font-size:12.5px;
+    line-height:1.45;
+    color:#555e6d;
+    padding-bottom:13px;
+    border-bottom:1px solid #cfd5de;
+}
+.resume-section{margin-top:17px;}
+.resume-section-title{
+    margin:0 0 7px;
+    padding-bottom:4px;
+    border-bottom:1.5px solid #252a33;
+    color:#181c24;
+    font-size:13px;
+    line-height:1.2;
+    font-weight:700;
+    letter-spacing:.55px;
+}
+.resume-summary{font-size:13px;line-height:1.5;color:#303641;}
+.resume-skill-line{display:flex;gap:5px;margin:3px 0;font-size:13px;line-height:1.45;}
+.resume-skill-label{font-weight:700;white-space:nowrap;}
+.resume-skill-values{flex:1;}
+.resume-entry{margin:0 0 12px;}
+.resume-entry-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;}
+.resume-entry-title{font-weight:700;font-size:13.5px;line-height:1.3;}
+.resume-entry-company{font-weight:600;font-size:13.2px;line-height:1.3;color:#3d4552;}
+.resume-entry-meta{display:flex;justify-content:space-between;gap:12px;color:#697281;font-size:12px;line-height:1.35;margin-top:2px;}
+.resume-entry-location,.resume-entry-dates{min-width:20px;}
+.resume-entry-dates{text-align:right;}
+.resume-entry-tech{font-size:12.3px;color:#555e6d;margin-top:3px;}
+.resume-entry-description{font-size:12.8px;line-height:1.45;color:#343b47;margin-top:3px;}
+.resume-bullets{margin-top:4px;}
+.resume-bullet{position:relative;padding-left:14px;margin:3px 0;font-size:12.8px;line-height:1.45;color:#303640;}
+.resume-bullet::before{content:'•';position:absolute;left:1px;top:0;font-weight:700;}
+.resume-simple-list .resume-bullet{margin:3px 0;}
+.resume-paper [contenteditable="true"]{outline:none;border-radius:3px;}
+.resume-paper [contenteditable="true"]:hover{background:#f7f8fc;}
+.resume-paper [contenteditable="true"]:focus{background:#f7f9ff;box-shadow:0 0 0 1px #c9d3ff;}
+.resume-action-button{border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600;font-size:14px;}
+.resume-recheck-button{border:1px solid var(--primary);background:#fff;color:var(--primary);margin-right:8px;}
+.resume-recheck-button:disabled,.resume-action-button:disabled{opacity:.6;cursor:not-allowed;}
+@media(max-width:760px){
+    .resume-editor-shell{padding:12px;}
+    .resume-paper{min-height:auto;padding:30px 24px;width:100%;}
+    .resume-name{font-size:22px;}
+    .resume-entry-meta{display:block;}
+    .resume-entry-dates{text-align:left;}
+}
+@media print{
+    .resume-editor-shell{background:#fff;padding:0;border:0;}
+    .resume-paper{box-shadow:none;border:0;width:100%;padding:0;}
+}
+
+.resume-paper {
+    background: #ffffff;
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 48px 58px;
+    color: #1f2937;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.45;
+}
+
+.resume-header {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.resume-name {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 5px;
+}
+
+.resume-headline {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 9px;
+}
+
+.resume-contact {
+    font-size: 12.5px;
+    line-height: 1.6;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.resume-contact-item {
+    display: inline;
+}
+
+.resume-section {
+    margin-top: 19px;
+}
+
+.resume-section h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    border-bottom: 1.5px solid #222;
+    padding-bottom: 4px;
+    margin: 0 0 9px;
+}
+
+.resume-summary {
+    font-size: 13px;
+    line-height: 1.55;
+    text-align: justify;
+}
+
+.resume-project-entry,
+.resume-experience-entry,
+.resume-education-entry {
+    margin-bottom: 15px;
+}
+
+.resume-entry-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.resume-entry-company,
+.resume-entry-institution {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.resume-entry-tech {
+    font-size: 12.5px;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.resume-entry-description {
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.resume-entry-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+.resume-paper ul {
+    margin: 5px 0 0 19px;
+    padding: 0;
+}
+
+.resume-paper li {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+[contenteditable="true"] {
+    outline: none;
+    border-radius: 3px;
+}
+
+[contenteditable="true"]:focus {
+    background: #f7f9fc;
+    box-shadow: 0 0 0 1px #cbd5e1;
+}
