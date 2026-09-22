@@ -2,6 +2,7 @@
 
 {% block title %}ATS Score Checker — ResumeIQ{% endblock %}
 {% block page_title %}ATS Score Checker{% endblock %}
+
 {% block page_desc %}
 Analyze your resume, identify ATS issues, and improve your chances of getting shortlisted.
 {% endblock %}
@@ -10,11 +11,17 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/check_ats_score.css' %}">
+<link rel="stylesheet" href="{% static 'css/resume_editor.css' %}">
 {% endblock %}
+
 
 {% block content %}
 
 <div class="ats-wrapper">
+
+    <!-- =========================================================
+         UPLOAD CARD
+         ========================================================= -->
 
     <div class="ats-card upload-card" id="uploadCard">
 
@@ -38,26 +45,31 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
             <div class="dropzone" id="dropZone">
 
-                <svg class="upload-icon"
-                     viewBox="0 0 24 24"
-                     fill="none"
-                     xmlns="http://www.w3.org/2000/svg">
+                <svg
+                    class="upload-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
 
                     <path
                         d="M12 15V4M12 4L7 9M12 4L17 9"
                         stroke="currentColor"
                         stroke-width="1.7"
                         stroke-linecap="round"
-                        stroke-linejoin="round"/>
+                        stroke-linejoin="round"
+                    />
 
                     <path
                         d="M4 15V17.5C4 18.8807 5.11929 20 6.5 20H17.5C18.8807 20 20 18.8807 20 17.5V15"
                         stroke="currentColor"
                         stroke-width="1.7"
                         stroke-linecap="round"
-                        stroke-linejoin="round"/>
+                        stroke-linejoin="round"
+                    />
 
                 </svg>
+
 
                 <div class="dz-title">
                     Drag &amp; drop your resume here
@@ -65,7 +77,9 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
                 <div class="dz-sub">
                     or
-                    <a href="#" id="browseLink">browse a file</a>
+                    <a href="#" id="browseLink">
+                        browse a file
+                    </a>
                 </div>
 
                 <div class="file-types">
@@ -87,6 +101,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
             <div
                 class="selected-file"
                 id="fileRow"
+                style="display:none;"
             >
 
                 <div class="file-info">
@@ -99,6 +114,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                             viewBox="0 0 24 24"
                             fill="none"
                         >
+
                             <path
                                 d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"
                                 stroke="currentColor"
@@ -110,9 +126,11 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                                 stroke="currentColor"
                                 stroke-width="1.6"
                             />
+
                         </svg>
 
                     </div>
+
 
                     <div class="file-details">
 
@@ -130,6 +148,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                     </div>
 
                 </div>
+
 
                 <a
                     href="#"
@@ -152,12 +171,17 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                 class="field-label"
                 for="jd"
             >
-                <span>Job description</span>
+
+                <span>
+                    Job description
+                </span>
 
                 <span class="optional-label">
                     Optional
                 </span>
+
             </label>
+
 
             <textarea
                 id="jd"
@@ -187,14 +211,42 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
             </div>
 
 
-            <button type="button" id="scoreBtn" disabled>
+            <button
+                type="button"
+                id="scoreBtn"
+                disabled
+            >
 
-                <span id="btnLabel"> Analyze my resume </span>
+                <span id="btnLabel">
+                    Analyze my resume
+                </span>
 
-                <svg id="btnSpinner" style="display:none;" class="spin" width="14" height="14" viewBox="0 0 16 16" fill="none" >
 
-                    <circle cx="8" cy="8" r="6.5" stroke="#fff" stroke-width="1.6" opacity="0.3"/>
-                    <path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" />
+                <svg
+                    id="btnSpinner"
+                    style="display:none;"
+                    class="spin"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                >
+
+                    <circle
+                        cx="8"
+                        cy="8"
+                        r="6.5"
+                        stroke="#fff"
+                        stroke-width="1.6"
+                        opacity="0.3"
+                    />
+
+                    <path
+                        d="M14.5 8A6.5 6.5 0 0 0 8 1.5"
+                        stroke="#fff"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                    />
 
                 </svg>
 
@@ -205,10 +257,9 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
     </div>
 
 
-
-    <!-- =========================
+    <!-- =========================================================
          RESULTS
-         ========================= -->
+         ========================================================= -->
 
     <div
         id="results"
@@ -228,10 +279,11 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
         </div>
 
 
-        <!-- SCORE + BREAKDOWN -->
+        <!-- =====================================================
+             SCORE + BREAKDOWN
+             ===================================================== -->
 
         <div class="score-grid">
-
 
             <!-- Overall Score -->
 
@@ -245,9 +297,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
                     <div class="score-ring">
 
-                        <svg
-                            viewBox="0 0 96 96"
-                        >
+                        <svg viewBox="0 0 96 96">
 
                             <circle
                                 cx="48"
@@ -272,6 +322,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                             />
 
                         </svg>
+
 
                         <div
                             class="num"
@@ -303,6 +354,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
                         </div>
 
+
                         <span
                             id="savedBadge"
                             class="saved-badge"
@@ -318,7 +370,6 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
             </div>
 
 
-
             <!-- Score Breakdown -->
 
             <div class="ats-card score-card">
@@ -328,7 +379,6 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                 </h3>
 
                 <div class="breakdown-list">
-
 
                     <!-- Keyword -->
 
@@ -354,10 +404,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                             <div
                                 class="bar-fill"
                                 id="barKeyword"
-                                style="
-                                    width:0%;
-                                    background:var(--primary);
-                                "
+                                style="width:0%;background:var(--primary);"
                             ></div>
 
                         </div>
@@ -389,10 +436,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                             <div
                                 class="bar-fill"
                                 id="barFormat"
-                                style="
-                                    width:0%;
-                                    background:#c99a3e;
-                                "
+                                style="width:0%;background:#c99a3e;"
                             ></div>
 
                         </div>
@@ -424,10 +468,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                             <div
                                 class="bar-fill"
                                 id="barSection"
-                                style="
-                                    width:0%;
-                                    background:#b5482f;
-                                "
+                                style="width:0%;background:#b5482f;"
                             ></div>
 
                         </div>
@@ -441,13 +482,11 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
         </div>
 
 
-
-        <!-- =========================
+        <!-- =====================================================
              INSIGHTS
-             ========================= -->
+             ===================================================== -->
 
         <div class="insights-grid">
-
 
             <!-- Missing Sections -->
 
@@ -468,10 +507,12 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
                 </div>
 
+
                 <p class="ats-hint">
                     Standard resume sections that an ATS may expect
                     but were not detected in your resume.
                 </p>
+
 
                 <div
                     id="missingSectionsTags"
@@ -479,7 +520,6 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                 ></div>
 
             </div>
-
 
 
             <!-- Missing Keywords -->
@@ -493,7 +533,7 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
                 <div class="insight-heading">
 
                     <div class="insight-icon">
-                        #
+                        !
                     </div>
 
                     <h3>
@@ -502,10 +542,12 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
                 </div>
 
+
                 <p class="ats-hint">
                     Important terms from the job description
                     that are missing from your resume.
                 </p>
+
 
                 <div
                     id="missingKeywordsTags"
@@ -517,10 +559,126 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
         </div>
 
 
+        <!-- =====================================================
+             UPDATED RESUME
+             ===================================================== -->
 
-        <!-- =========================
+        <div
+            class="ats-card optimized-resume-card"
+            id="optimizedResumeCard"
+            style="margin-top:24px;"
+        >
+
+            <div
+                class="example-header"
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    gap:16px;
+                    align-items:flex-start;
+                    flex-wrap:wrap;
+                "
+            >
+
+                <div>
+
+                    <div class="example-label">
+                        Updated resume
+                    </div>
+
+                    <h3 class="example-title">
+                        ATS-optimized editable draft
+                    </h3>
+
+                    <p class="example-description">
+                        Review and edit your resume below.
+                        Every resume section is editable.
+                        Re-check the ATS score after making changes
+                        and download the final DOCX.
+                    </p>
+
+                </div>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:10px;
+                        flex-wrap:wrap;
+                    "
+                >
+
+                    <button
+                        type="button"
+                        id="downloadOptimizedBtn"
+                        style="
+                            border:0;
+                            border-radius:8px;
+                            padding:10px 16px;
+                            cursor:pointer;
+                            background:var(--primary);
+                            color:#fff;
+                            font-weight:600;
+                        "
+                    >
+                        Download DOCX
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- JD gaps -->
+
+            <div
+                id="jdGapDetails"
+                style="
+                    margin:18px 0;
+                    display:none;
+                "
+            >
+
+                <h4 style="margin:0 0 10px;">
+                    What the job description expects that your resume misses
+                </h4>
+
+                <div id="jdGapList"></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROFESSIONAL RESUME EDITOR
+                 ================================================= -->
+
+            <div class="resume-editor-shell">
+
+                <div
+                    id="resumePaper"
+                    class="resume-paper"
+                ></div>
+
+            </div>
+
+
+            <div
+                style="
+                    margin-top:10px;
+                    font-size:13px;
+                    color:#6b7280;
+                "
+            >
+                Tip: add a missing skill or JD term only if you actually
+                have that skill or experience.
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
              EXAMPLE
-             ========================= -->
+             ===================================================== -->
 
         <div class="ats-card example-card">
 
@@ -548,9 +706,6 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
             <div class="before-after">
 
-
-                <!-- Before -->
-
                 <div class="ba-block before">
 
                     <div class="ba-label">
@@ -564,8 +719,6 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
                 </div>
 
-
-                <!-- After -->
 
                 <div class="ba-block after">
 
@@ -592,75 +745,173 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 {% endblock %}
 
 
-
 {% block extra_js %}
 
 <script>
 
 (function () {
 
-    const dropZone = document.getElementById('dropZone');
-
-    const fileInput = document.getElementById('fileInput');
-
-    const fileRow = document.getElementById('fileRow');
-
-    const fileName = document.getElementById('fileName');
-
-    const removeFile = document.getElementById('removeFile');
-
-    const browseLink = document.getElementById('browseLink');
-
-    const scoreBtn = document.getElementById('scoreBtn');
-
-    const btnLabel = document.getElementById('btnLabel');
-
-    const btnSpinner = document.getElementById('btnSpinner');
-
-    const uploadError = document.getElementById('uploadError');
-
-    const results = document.getElementById('results');
-
-    const jdInput = document.getElementById('jd');
+    "use strict";
 
 
-    /* =========================
-       ERROR HANDLING
-       ========================= */
+    /* =========================================================
+       ELEMENTS
+       ========================================================= */
+
+    const dropZone =
+        document.getElementById("dropZone");
+
+    const fileInput =
+        document.getElementById("fileInput");
+
+    const fileRow =
+        document.getElementById("fileRow");
+
+    const fileName =
+        document.getElementById("fileName");
+
+    const removeFile =
+        document.getElementById("removeFile");
+
+    const browseLink =
+        document.getElementById("browseLink");
+
+    const scoreBtn =
+        document.getElementById("scoreBtn");
+
+    const btnLabel =
+        document.getElementById("btnLabel");
+
+    const btnSpinner =
+        document.getElementById("btnSpinner");
+
+    const uploadError =
+        document.getElementById("uploadError");
+
+    const results =
+        document.getElementById("results");
+
+    const jdInput =
+        document.getElementById("jd");
+
+    const resumePaper =
+        document.getElementById("resumePaper");
+
+    const downloadOptimizedBtn =
+        document.getElementById("downloadOptimizedBtn");
+
+    const jdGapDetails =
+        document.getElementById("jdGapDetails");
+
+    const jdGapList =
+        document.getElementById("jdGapList");
+
+
+    const analyzeUrl =
+        "{% url 'analyze_resume' %}";
+
+    const downloadUrl =
+        "{% url 'download_optimized_resume' %}";
+
+    const recheckUrl =
+        "{% url 'recheck_optimized_resume' %}";
+
+
+    /* =========================================================
+       HELPERS
+       ========================================================= */
 
     function showError(message) {
 
         uploadError.textContent = message;
-        uploadError.style.display = 'block';
 
+        uploadError.style.display = "block";
     }
 
 
     function clearError() {
 
-        uploadError.style.display = 'none';
-        uploadError.textContent = '';
+        uploadError.style.display = "none";
+
+        uploadError.textContent = "";
+    }
+
+
+    function getCookie(name) {
+
+        const match =
+            document.cookie.match(
+                "(^|;)\\s*" +
+                name +
+                "\\s*=\\s*([^;]+)"
+            );
+
+        return match
+            ? decodeURIComponent(match.pop())
+            : "";
+    }
+
+
+    function escapeHtml(value) {
+
+        return String(
+            value ?? ""
+        ).replace(
+            /[&<>"']/g,
+            function (char) {
+
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[char];
+
+            }
+        );
 
     }
 
 
-    /* =========================
-       FILE BROWSER
-       ========================= */
+    function asArray(value) {
+
+        if (Array.isArray(value)) {
+
+            return value;
+        }
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+
+            return [];
+        }
+
+        return [value];
+    }
+
+
+    function textValue(value) {
+
+        return String(
+            value ?? ""
+        ).trim();
+
+    }
+
+
+    /* =========================================================
+       FILE UPLOAD
+       ========================================================= */
 
     browseLink.addEventListener(
-        'click',
-        function (e) 
-        {
-            e.preventDefault();
-            fileInput.click();
-        }
-    );
+        "click",
+        function (event) {
 
-
-    dropZone.addEventListener(
-        'click',
-        function () {
+            event.preventDefault();
 
             fileInput.click();
 
@@ -668,50 +919,84 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
     );
 
 
-    /* =========================
-       DRAG & DROP
-       ========================= */
-
     dropZone.addEventListener(
-        'dragover',
-        function (e) {
+        "click",
+        function (event) {
 
-            e.preventDefault();
+            if (
+                event.target.closest(
+                    "#browseLink"
+                )
+            ) {
+                return;
+            }
 
-            dropZone.style.borderColor = 'var(--primary)';
-
-            dropZone.style.background = '#f7f8ff';
+            fileInput.click();
 
         }
     );
 
 
     dropZone.addEventListener(
-        'dragleave',
+        "dragover",
+        function (event) {
+
+            event.preventDefault();
+
+            dropZone.style.borderColor =
+                "var(--primary)";
+
+            dropZone.style.background =
+                "#f7f8ff";
+
+        }
+    );
+
+
+    dropZone.addEventListener(
+        "dragleave",
         function () {
 
-            dropZone.style.borderColor = '#cbd2e1';
+            dropZone.style.borderColor =
+                "#cbd2e1";
 
-            dropZone.style.background = '#fafbfe';
+            dropZone.style.background =
+                "#fafbfe";
 
         }
     );
 
 
     dropZone.addEventListener(
-        'drop',
-        function (e) {
+        "drop",
+        function (event) {
 
-            e.preventDefault();
+            event.preventDefault();
 
-            dropZone.style.borderColor = '#cbd2e1';
+            dropZone.style.borderColor =
+                "#cbd2e1";
 
-            dropZone.style.background = '#fafbfe';
+            dropZone.style.background =
+                "#fafbfe";
 
-            if (e.dataTransfer.files.length) {
 
-                fileInput.files =
-                    e.dataTransfer.files;
+            if (
+                event.dataTransfer.files.length
+            ) {
+
+                try {
+
+                    fileInput.files =
+                        event.dataTransfer.files;
+
+                } catch (error) {
+
+                    console.warn(
+                        "Could not assign dropped files.",
+                        error
+                    );
+
+                }
 
                 handleFileSelected();
 
@@ -722,84 +1007,100 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
 
 
     fileInput.addEventListener(
-        'change',
+        "change",
         handleFileSelected
     );
 
 
-    /* =========================
-       FILE VALIDATION
-       ========================= */
-
     function handleFileSelected() {
 
-        const file = fileInput.files[0];
+        const file =
+            fileInput.files[0];
 
-        if (!file) return;
-
-
-        const allowedTypes = [
-            'application/pdf',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/msword'
-        ];
-
-
-        const maxSize = 5 * 1024 * 1024;
-
-
-        if (file.size > maxSize) 
-        {
-            showError( 'File size must be less than 5MB.' );
-            fileInput.value = '';
+        if (!file) {
             return;
         }
 
 
-        const extension = file.name.split('.').pop().toLowerCase();
+        if (
+            file.size >
+            5 * 1024 * 1024
+        ) {
 
+            showError(
+                "File size must be less than 5MB."
+            );
 
-        if ( !['pdf', 'docx', 'doc'].includes(extension) ) 
-        {
-            showError( 'Please upload a PDF, DOCX, or DOC file.' );
-            fileInput.value = '';
+            fileInput.value = "";
+
             return;
-
         }
 
 
-        fileName.textContent = file.name;
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
 
-        dropZone.style.display = 'none';
 
-        fileRow.style.display = 'flex';
+        if (
+            ![
+                "pdf",
+                "docx",
+                "doc"
+            ].includes(extension)
+        ) {
 
-        scoreBtn.disabled = false;
+            showError(
+                "Please upload a PDF, DOCX, or DOC file."
+            );
+
+            fileInput.value = "";
+
+            return;
+        }
+
+
+        fileName.textContent =
+            file.name;
+
+        dropZone.style.display =
+            "none";
+
+        fileRow.style.display =
+            "flex";
+
+        scoreBtn.disabled =
+            false;
 
         clearError();
 
     }
 
 
-    /* =========================
-       REMOVE FILE
-       ========================= */
-
     removeFile.addEventListener(
-        'click',
-        function (e) {
+        "click",
+        function (event) {
 
-            e.preventDefault();
+            event.preventDefault();
 
-            fileInput.value = '';
+            fileInput.value = "";
 
-            fileRow.style.display = 'none';
+            fileRow.style.display =
+                "none";
 
-            dropZone.style.display = 'flex';
+            dropZone.style.display =
+                "flex";
 
-            scoreBtn.disabled = true;
+            scoreBtn.disabled =
+                true;
 
-            results.style.display = 'none';
+            results.style.display =
+                "none";
+
+            resumePaper.innerHTML =
+                "";
 
             clearError();
 
@@ -807,37 +1108,17 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
     );
 
 
-    /* =========================
-       CSRF COOKIE
-       ========================= */
-
-    function getCookie(name) {
-
-        const match =
-            document.cookie.match(
-                '(^|;)\\s*' +
-                name +
-                '\\s*=\\s*([^;]+)'
-            );
-
-        return match
-            ? decodeURIComponent(match.pop())
-            : '';
-
-    }
-
-
-    /* =========================
-       SCORE VERDICT
-       ========================= */
+    /* =========================================================
+       SCORE
+       ========================================================= */
 
     function verdictFor(score) {
 
         if (score >= 80) {
 
             return [
-                'Strong ATS match',
-                '#16835c'
+                "Strong ATS match",
+                "#16835c"
             ];
 
         }
@@ -845,229 +1126,2727 @@ Analyze your resume, identify ATS issues, and improve your chances of getting sh
         if (score >= 60) {
 
             return [
-                'Needs a few improvements',
-                '#b47a16'
+                "Needs a few improvements",
+                "#b47a16"
             ];
 
         }
 
         return [
-            'Significant improvements needed',
-            '#b5482f'
+            "Significant improvements needed",
+            "#b5482f"
         ];
 
     }
 
 
-    /* =========================
-       RENDER TAGS
-       ========================= */
+    function renderTags(
+        container,
+        items,
+        cls
+    ) {
 
-    function renderTags(container, items, cls) 
-    {
-        container.innerHTML = '';
+        container.innerHTML =
+            "";
 
-        if ( !items || !items.length )
-        {
-            container.innerHTML = '<p class="ats-hint" style="margin:0;">None — nice work!</p>';
+
+        if (
+            !items ||
+            !items.length
+        ) {
+
+            container.innerHTML =
+                '<p class="ats-hint" style="margin:0;">None — nice work!</p>';
+
             return;
         }
 
 
-        items.forEach(function (item) 
-        {
-            const span = document.createElement('span');
-            span.className = 'tag' + (cls ? ' ' + cls : '');
-            span.textContent = item;
-            container.appendChild( span );
-        });
+        items.forEach(
+            function (item) {
+
+                const span =
+                    document.createElement(
+                        "span"
+                    );
+
+                span.className =
+                    "tag" +
+                    (
+                        cls
+                            ? " " + cls
+                            : ""
+                    );
+
+                span.textContent =
+                    item;
+
+                container.appendChild(
+                    span
+                );
+
+            }
+        );
 
     }
 
 
-    /* =========================
-       RENDER SCORE
-       ========================= */
+    /* =========================================================
+       NORMALIZE RESUME DATA
+       ========================================================= */
 
-    function renderScore(data) {
-        const score = Math.round(data.ats_score);
-        const keyword = Math.round(data.keyword_match);
-        const format = Math.round(data.formatting_score);
-        const section = Math.round(data.section_score);
-        const circumference = 251.33;
+    function normalizeEntry(
+        item,
+        key
+    ) {
 
-        /* Ring */
-        const ringFill = document.getElementById( 'ringFill' );
-        ringFill.style.strokeDashoffset = circumference;
+        /*
+         * IMPORTANT:
+         * Never return an object directly to HTML.
+         * Always convert it to a known structure.
+         */
 
-        requestAnimationFrame(
-            function () {
-                ringFill.style.transition = 'stroke-dashoffset .8s ease';
-                ringFill.style.strokeDashoffset = circumference * (1 - score / 100);
+        if (
+            item &&
+            typeof item === "object" &&
+            !Array.isArray(item)
+        ) {
+
+            if (
+                key === "experience"
+            ) {
+
+                return {
+
+                    title:
+                        textValue(
+                            item.title ||
+                            item.role ||
+                            item.position
+                        ),
+
+                    company:
+                        textValue(
+                            item.company ||
+                            item.organization
+                        ),
+
+                    location:
+                        textValue(
+                            item.location
+                        ),
+
+                    dates:
+                        textValue(
+                            item.dates ||
+                            item.date ||
+                            item.duration
+                        ),
+
+                    bullets:
+                        asArray(
+                            item.bullets ||
+                            item.responsibilities ||
+                            item.details
+                        )
+                        .map(textValue)
+                        .filter(Boolean)
+
+                };
+
+            }
+
+
+            if (
+                key === "projects"
+            ) {
+
+                return {
+
+                    name:
+                        textValue(
+                            item.name ||
+                            item.title ||
+                            item.project
+                        ),
+
+                    technologies:
+                        asArray(
+                            item.technologies ||
+                            item.technology ||
+                            item.tech_stack
+                        )
+                        .flatMap(
+                            function (value) {
+
+                                return String(
+                                    value
+                                )
+                                .split(",")
+                                .map(textValue)
+                                .filter(Boolean);
+
+                            }
+                        ),
+
+                    description:
+                        textValue(
+                            item.description
+                        ),
+
+                    bullets:
+                        asArray(
+                            item.bullets ||
+                            item.details
+                        )
+                        .map(textValue)
+                        .filter(Boolean)
+
+                };
+
+            }
+
+
+            if (
+                key === "education"
+            ) {
+
+                return {
+
+                    degree:
+                        textValue(
+                            item.degree ||
+                            item.qualification ||
+                            item.title
+                        ),
+
+                    institution:
+                        textValue(
+                            item.institution ||
+                            item.college ||
+                            item.university
+                        ),
+
+                    location:
+                        textValue(
+                            item.location
+                        ),
+
+                    dates:
+                        textValue(
+                            item.dates ||
+                            item.date ||
+                            item.duration
+                        ),
+
+                    details:
+                        asArray(
+                            item.details ||
+                            item.bullets
+                        )
+                        .map(textValue)
+                        .filter(Boolean)
+
+                };
+
+            }
+
+        }
+
+
+        const value =
+            textValue(item);
+
+
+        if (!value) {
+            return null;
+        }
+
+
+        if (
+            key === "experience"
+        ) {
+
+            return {
+
+                title: "",
+                company: "",
+                location: "",
+                dates: "",
+                bullets: [value]
+
+            };
+
+        }
+
+
+        if (
+            key === "projects"
+        ) {
+
+            return {
+
+                name: value,
+                technologies: [],
+                description: "",
+                bullets: []
+
+            };
+
+        }
+
+
+        if (
+            key === "education"
+        ) {
+
+            return {
+
+                degree: value,
+                institution: "",
+                location: "",
+                dates: "",
+                details: []
+
+            };
+
+        }
+
+
+        return value;
+
+    }
+
+
+    function normalizeResumeData(
+        data
+    ) {
+
+        if (
+            data &&
+            typeof data === "object" &&
+            !Array.isArray(data)
+        ) {
+
+            const output = {
+
+                name:
+                    textValue(
+                        data.name
+                    ),
+
+                headline:
+                    textValue(
+                        data.headline
+                    ),
+
+                contact:
+                    asArray(
+                        data.contact
+                    )
+                    .flatMap(
+                        function (value) {
+
+                            return String(
+                                value
+                            )
+                            .split("|")
+                            .map(textValue)
+                            .filter(Boolean);
+
+                        }
+                    ),
+
+                summary:
+                    textValue(
+                        data.summary
+                    ),
+
+                skills: {},
+
+                experience: [],
+
+                projects: [],
+
+                education: [],
+
+                certifications: [],
+
+                achievements: [],
+
+                languages: []
+
+            };
+
+
+            /*
+             * CONTACT CLEANUP
+             *
+             * Prevent section headings from
+             * appearing in contact.
+             */
+
+            const badContactWords = [
+                "summary",
+                "professional summary",
+                "profile summary",
+                "experience",
+                "work experience",
+                "projects",
+                "education",
+                "skills",
+                "technical skills",
+                "certifications",
+                "achievements",
+                "languages"
+            ];
+
+
+            output.contact =
+                output.contact.filter(
+                    function (value) {
+
+                        const normalized =
+                            value
+                                .toLowerCase()
+                                .replace(
+                                    /[^a-z0-9 ]/g,
+                                    ""
+                                )
+                                .trim();
+
+                        return !badContactWords.includes(
+                            normalized
+                        );
+
+                    }
+                );
+
+
+            /*
+             * SKILLS
+             */
+
+            Object.keys(
+                data.skills || {}
+            ).forEach(
+                function (category) {
+
+                    let values =
+                        asArray(
+                            data.skills[
+                                category
+                            ]
+                        );
+
+                    values =
+                        values.flatMap(
+                            function (value) {
+
+                                return String(
+                                    value
+                                )
+                                .split(",")
+                                .map(textValue)
+                                .filter(Boolean);
+
+                            }
+                        );
+
+
+                    if (
+                        values.length
+                    ) {
+
+                        output.skills[
+                            textValue(
+                                category
+                            )
+                        ] = values;
+
+                    }
+
+                }
+            );
+
+
+            /*
+             * STRUCTURED SECTIONS
+             */
+
+            [
+                "experience",
+                "projects",
+                "education"
+            ].forEach(
+                function (key) {
+
+                    asArray(
+                        data[key]
+                    ).forEach(
+                        function (item) {
+
+                            const normalized =
+                                normalizeEntry(
+                                    item,
+                                    key
+                                );
+
+                            if (
+                                normalized
+                            ) {
+
+                                output[key].push(
+                                    normalized
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+             * SIMPLE SECTIONS
+             */
+
+            [
+                "certifications",
+                "achievements",
+                "languages"
+            ].forEach(
+                function (key) {
+
+                    asArray(
+                        data[key]
+                    ).forEach(
+                        function (item) {
+
+                            let value =
+                                item;
+
+
+                            if (
+                                item &&
+                                typeof item === "object"
+                            ) {
+
+                                value =
+                                    item.name ||
+                                    item.title ||
+                                    item.text ||
+                                    item.value ||
+                                    "";
+
+                            }
+
+
+                            value =
+                                textValue(
+                                    value
+                                );
+
+
+                            if (
+                                value
+                            ) {
+
+                                output[key].push(
+                                    value
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+            return output;
+
+        }
+
+
+        return {
+
+            name: "",
+            headline: "",
+            contact: [],
+            summary:
+                textValue(data),
+            skills: {},
+            experience: [],
+            projects: [],
+            education: [],
+            certifications: [],
+            achievements: [],
+            languages: []
+
+        };
+
+    }
+
+
+    /* =========================================================
+       EDITABLE FIELD
+       ========================================================= */
+
+    function editableText(
+        className,
+        value,
+        placeholder
+    ) {
+
+        const safeValue =
+            escapeHtml(
+                value || ""
+            );
+
+
+        const safePlaceholder =
+            placeholder
+                ? escapeHtml(
+                    placeholder
+                )
+                : "";
+
+
+        return `
+            <div
+                class="${className}"
+                contenteditable="true"
+                spellcheck="true"
+                data-placeholder="${safePlaceholder}"
+            >${safeValue}</div>
+        `;
+
+    }
+
+
+    /* =========================================================
+       EXPERIENCE
+       ========================================================= */
+
+    function renderExperience(
+        item
+    ) {
+
+        let html = `
+            <div class="resume-entry resume-experience-entry">
+
+                <div class="resume-entry-top">
+        `;
+
+
+        if (item.title) {
+
+            html += editableText(
+                "resume-entry-title",
+                item.title,
+                "Job title"
+            );
+
+        }
+
+
+        if (item.company) {
+
+            html += editableText(
+                "resume-entry-company",
+                item.company,
+                "Company"
+            );
+
+        }
+
+
+        html += `
+                </div>
+
+                <div class="resume-entry-meta">
+        `;
+
+
+        if (item.location) {
+
+            html += editableText(
+                "resume-entry-location",
+                item.location,
+                "Location"
+            );
+
+        }
+
+
+        if (item.dates) {
+
+            html += editableText(
+                "resume-entry-dates",
+                item.dates,
+                "Dates"
+            );
+
+        }
+
+
+        html += `
+                </div>
+
+                <div class="resume-bullets">
+        `;
+
+
+        (item.bullets || [])
+            .forEach(
+                function (bullet) {
+
+                    html += `
+                        <div
+                            class="resume-bullet"
+                            contenteditable="true"
+                            spellcheck="true"
+                        >
+                            ${escapeHtml(bullet)}
+                        </div>
+                    `;
+
+                }
+            );
+
+
+        html += `
+                </div>
+
+            </div>
+        `;
+
+
+        return html;
+
+    }
+
+
+    /* =========================================================
+       PROJECTS
+       ========================================================= */
+
+    function renderProject(
+        item
+    ) {
+
+        let html = `
+            <div class="resume-entry resume-project-entry">
+        `;
+
+
+        if (item.name) {
+
+            html += editableText(
+                "resume-entry-title",
+                item.name,
+                "Project name"
+            );
+
+        }
+
+
+        if (
+            item.technologies &&
+            item.technologies.length
+        ) {
+
+            html += editableText(
+                "resume-entry-tech",
+                item.technologies.join(", "),
+                "Technologies"
+            );
+
+        }
+
+
+        if (item.description) {
+
+            html += editableText(
+                "resume-entry-description",
+                item.description,
+                "Project description"
+            );
+
+        }
+
+
+        html += `
+                <div class="resume-bullets">
+        `;
+
+
+        (item.bullets || [])
+            .forEach(
+                function (bullet) {
+
+                    html += `
+                        <div
+                            class="resume-bullet"
+                            contenteditable="true"
+                            spellcheck="true"
+                        >
+                            ${escapeHtml(bullet)}
+                        </div>
+                    `;
+
+                }
+            );
+
+
+        html += `
+                </div>
+            </div>
+        `;
+
+
+        return html;
+
+    }
+
+
+    /* =========================================================
+       EDUCATION
+       ========================================================= */
+
+    function renderEducation(
+        item
+    ) {
+
+        let html = `
+            <div class="resume-entry resume-education-entry">
+        `;
+
+
+        if (item.degree) {
+
+            html += editableText(
+                "resume-entry-title",
+                item.degree,
+                "Degree"
+            );
+
+        }
+
+
+        if (item.institution) {
+
+            html += editableText(
+                "resume-entry-institution",
+                item.institution,
+                "Institution"
+            );
+
+        }
+
+
+        if (
+            item.location ||
+            item.dates
+        ) {
+
+            html += `
+                <div class="resume-entry-meta">
+            `;
+
+
+            if (item.location) {
+
+                html += editableText(
+                    "resume-entry-location",
+                    item.location,
+                    "Location"
+                );
+
+            }
+
+
+            if (item.dates) {
+
+                html += editableText(
+                    "resume-entry-dates",
+                    item.dates,
+                    "Dates"
+                );
+
+            }
+
+
+            html += `
+                </div>
+            `;
+
+        }
+
+
+        html += `
+            <div class="resume-bullets">
+        `;
+
+
+        (item.details || [])
+            .forEach(
+                function (detail) {
+
+                    html += `
+                        <div
+                            class="resume-bullet"
+                            contenteditable="true"
+                            spellcheck="true"
+                        >
+                            ${escapeHtml(detail)}
+                        </div>
+                    `;
+
+                }
+            );
+
+
+        html += `
+            </div>
+        </div>
+        `;
+
+
+        return html;
+
+    }
+
+
+    /* =========================================================
+       SIMPLE SECTIONS
+       ========================================================= */
+
+    function renderSimpleSection(
+        title,
+        key,
+        items
+    ) {
+
+        if (
+            !items ||
+            !items.length
+        ) {
+
+            return "";
+
+        }
+
+
+        let html = `
+            <section
+                class="resume-section"
+                data-resume-section="${key}"
+            >
+
+                <h3 class="resume-section-title">
+                    ${escapeHtml(title)}
+                </h3>
+
+                <div class="resume-simple-list">
+        `;
+
+
+        items.forEach(
+            function (item) {
+
+                html += `
+                    <div
+                        class="resume-bullet"
+                        contenteditable="true"
+                        spellcheck="true"
+                    >
+                        ${escapeHtml(item)}
+                    </div>
+                `;
+
             }
         );
 
-        /* Verdict */
-        const verdict = verdictFor(score);
-        const verdictEl = document.getElementById( 'scoreVerdict' );
 
-        verdictEl.textContent = verdict[0];
-        verdictEl.style.color = verdict[1];
-        ringFill.setAttribute( 'stroke', verdict[1] );
+        html += `
+                </div>
 
-
-        /* Number animation */
-        let current = 0;
-        const numEl = document.getElementById( 'scoreNum' );
-
-        (function animateScore() {
-
-            current += Math.max( 1, Math.round( (score - current) / 6 ) );
-            if (current >= score) {
-                current = score; 
-            }
-
-            numEl.textContent = current;
-
-            if (current < score) {
-                requestAnimationFrame( animateScore );
-            }
-
-        })();
+            </section>
+        `;
 
 
-        /* Breakdown values */
-        document.getElementById( 'valKeyword' ).textContent = keyword + '%';
-        document.getElementById( 'valFormat' ).textContent = format + '%';
-        document.getElementById( 'valSection' ).textContent = section + '%';
+        return html;
 
-        /* Breakdown bars */
-        requestAnimationFrame(
-            function () {
-                document.getElementById(
-                    'barKeyword'
-                ).style.width =
-                    keyword + '%';
+    }
 
-                document.getElementById(
-                    'barFormat'
-                ).style.width =
-                    format + '%';
 
-                document.getElementById(
-                    'barSection'
-                ).style.width =
-                    section + '%';
+    /* =========================================================
+       STRUCTURED SECTION
+       ========================================================= */
+
+    function renderStructuredSection(
+        title,
+        key,
+        items,
+        renderer
+    ) {
+
+        if (
+            !items ||
+            !items.length
+        ) {
+
+            return "";
+
+        }
+
+
+        let html = `
+            <section
+                class="resume-section"
+                data-resume-section="${key}"
+            >
+
+                <h3 class="resume-section-title">
+                    ${escapeHtml(title)}
+                </h3>
+        `;
+
+
+        items.forEach(
+            function (item) {
+
+                html += renderer(item);
+
             }
         );
 
-        /* Missing sections */
-        renderTags(
-            document.getElementById('missingSectionsTags' ),
-            data.missing_sections, 'missing'
+
+        html += `
+            </section>
+        `;
+
+
+        return html;
+
+    }
+
+
+    /* =========================================================
+       RENDER PROFESSIONAL RESUME
+       ========================================================= */
+
+    function renderOptimizedResume(
+        data
+    ) {
+
+        const resume =
+            normalizeResumeData(
+                data
+            );
+
+
+        let html = "";
+
+
+        /*
+         * HEADER
+         */
+
+        html += `
+            <div class="resume-header">
+        `;
+
+
+        if (resume.name) {
+
+            html += editableText(
+                "resume-name",
+                resume.name,
+                "Your name"
+            );
+
+        }
+
+
+        if (resume.headline) {
+
+            html += editableText(
+                "resume-headline",
+                resume.headline,
+                "Professional headline"
+            );
+
+        }
+
+
+        /*
+         * CONTACT
+         *
+         * IMPORTANT:
+         * Contact is completely outside
+         * the summary section.
+         */
+
+        if (
+            resume.contact &&
+            resume.contact.length
+        ) {
+
+            html += `
+                <div class="resume-contact">
+            `;
+
+
+            resume.contact.forEach(
+                function (item, index) {
+
+                    html += `
+                        <span
+                            class="resume-contact-item"
+                            contenteditable="true"
+                            spellcheck="true"
+                        >
+                            ${escapeHtml(item)}
+                        </span>
+                    `;
+
+
+                    if (
+                        index <
+                        resume.contact.length - 1
+                    ) {
+
+                        html += `
+                            <span class="resume-contact-separator">
+                                |
+                            </span>
+                        `;
+
+                    }
+
+                }
+            );
+
+
+            html += `
+                </div>
+            `;
+
+        }
+
+
+        html += `
+            </div>
+        `;
+
+
+        /*
+         * SUMMARY
+         */
+
+        if (resume.summary) {
+
+            html += `
+                <section
+                    class="resume-section"
+                    data-resume-section="summary"
+                >
+
+                    <h3 class="resume-section-title">
+                        PROFESSIONAL SUMMARY
+                    </h3>
+
+                    <div
+                        class="resume-summary"
+                        contenteditable="true"
+                        spellcheck="true"
+                    >
+                        ${escapeHtml(resume.summary)}
+                    </div>
+
+                </section>
+            `;
+
+        }
+
+
+        /*
+         * SKILLS
+         */
+
+        const skillKeys =
+            Object.keys(
+                resume.skills
+            );
+
+
+        if (
+            skillKeys.length
+        ) {
+
+            html += `
+                <section
+                    class="resume-section"
+                    data-resume-section="skills"
+                >
+
+                    <h3 class="resume-section-title">
+                        TECHNICAL SKILLS
+                    </h3>
+            `;
+
+
+            skillKeys.forEach(
+                function (category) {
+
+                    html += `
+                        <div class="resume-skill-line">
+
+                            <span
+                                class="resume-skill-label"
+                                contenteditable="true"
+                                spellcheck="true"
+                            >
+                                ${escapeHtml(category)}:
+                            </span>
+
+                            <span
+                                class="resume-skill-values"
+                                contenteditable="true"
+                                spellcheck="true"
+                            >
+                                ${escapeHtml(
+                                    resume.skills[
+                                        category
+                                    ].join(", ")
+                                )}
+                            </span>
+
+                        </div>
+                    `;
+
+                }
+            );
+
+
+            html += `
+                </section>
+            `;
+
+        }
+
+
+        /*
+         * EXPERIENCE
+         */
+
+        html += renderStructuredSection(
+            "EXPERIENCE",
+            "experience",
+            resume.experience,
+            renderExperience
         );
 
 
-        /* Job description */
-        const jdWasProvided = jdInput.value.trim().length > 0;
+        /*
+         * PROJECTS
+         */
 
-        document.getElementById(
-            'keywordMetaSuffix'
-        ).textContent =
-            jdWasProvided
-                ? ', and keyword match against the job description'
-                : ', and action-verb usage';
+        html += renderStructuredSection(
+            "PROJECTS",
+            "projects",
+            resume.projects,
+            renderProject
+        );
 
-        /* Missing keywords */
-        const keywordCard = document.getElementById( 'missingKeywordsCard');
 
-        if (jdWasProvided) {
-            keywordCard.style.display = 'block';
-            renderTags(
-                document.getElementById('missingKeywordsTags' ),
-                data.missing_keywords, 'missing'
+        /*
+         * EDUCATION
+         */
+
+        html += renderStructuredSection(
+            "EDUCATION",
+            "education",
+            resume.education,
+            renderEducation
+        );
+
+
+        /*
+         * CERTIFICATIONS
+         */
+
+        html += renderSimpleSection(
+            "CERTIFICATIONS",
+            "certifications",
+            resume.certifications
+        );
+
+
+        /*
+         * ACHIEVEMENTS
+         */
+
+        html += renderSimpleSection(
+            "ACHIEVEMENTS",
+            "achievements",
+            resume.achievements
+        );
+
+
+        /*
+         * LANGUAGES
+         */
+
+        html += renderSimpleSection(
+            "LANGUAGES",
+            "languages",
+            resume.languages
+        );
+
+
+        resumePaper.innerHTML =
+            html;
+
+
+        /*
+         * Add safe editing behavior.
+         */
+
+        resumePaper
+            .querySelectorAll(
+                '[contenteditable="true"]'
+            )
+            .forEach(
+                function (element) {
+
+                    element.addEventListener(
+                        "paste",
+                        function (event) {
+
+                            /*
+                             * Paste plain text only.
+                             * This prevents external formatting
+                             * from destroying the resume layout.
+                             */
+
+                            event.preventDefault();
+
+                            const text =
+                                (
+                                    event.clipboardData ||
+                                    window.clipboardData
+                                ).getData(
+                                    "text/plain"
+                                );
+
+
+                            document.execCommand(
+                                "insertText",
+                                false,
+                                text
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* =========================================================
+       READ EDITOR DATA
+       ========================================================= */
+
+    function readEditable(
+        selector,
+        parent
+    ) {
+
+        const element =
+            parent.querySelector(
+                selector
+            );
+
+
+        if (!element) {
+            return "";
+        }
+
+
+        return textValue(
+            element.innerText
+        );
+
+    }
+
+
+    function getEditorData() {
+
+        const data = {
+
+            name:
+                readEditable(
+                    ".resume-name",
+                    resumePaper
+                ),
+
+            headline:
+                readEditable(
+                    ".resume-headline",
+                    resumePaper
+                ),
+
+            contact: [],
+
+            summary:
+                readEditable(
+                    '[data-resume-section="summary"] .resume-summary',
+                    resumePaper
+                ),
+
+            skills: {},
+
+            experience: [],
+
+            projects: [],
+
+            education: [],
+
+            certifications: [],
+
+            achievements: [],
+
+            languages: []
+
+        };
+
+
+        /* =====================================================
+           CONTACT
+           ===================================================== */
+
+        const contact =
+            resumePaper.querySelector(
+                ".resume-contact"
+            );
+
+
+        if (contact) {
+
+            const items =
+                contact.querySelectorAll(
+                    ".resume-contact-item"
+                );
+
+
+            data.contact =
+                Array.from(items)
+                    .map(
+                        function (item) {
+
+                            return textValue(
+                                item.innerText
+                            );
+
+                        }
+                    )
+                    .filter(Boolean);
+
+        }
+
+
+        /* =====================================================
+           SKILLS
+           ===================================================== */
+
+        const skillsSection =
+            resumePaper.querySelector(
+                '[data-resume-section="skills"]'
+            );
+
+
+        if (skillsSection) {
+
+            skillsSection
+                .querySelectorAll(
+                    ".resume-skill-line"
+                )
+                .forEach(
+                    function (row) {
+
+                        const label =
+                            row.querySelector(
+                                ".resume-skill-label"
+                            );
+
+                        const values =
+                            row.querySelector(
+                                ".resume-skill-values"
+                            );
+
+
+                        const category =
+                            label
+                                ? label.innerText
+                                    .trim()
+                                    .replace(
+                                        /:$/,
+                                        ""
+                                    )
+                                : "";
+
+
+                        const list =
+                            values
+                                ? values.innerText
+                                    .split(",")
+                                    .map(textValue)
+                                    .filter(Boolean)
+                                : [];
+
+
+                        if (
+                            category &&
+                            list.length
+                        ) {
+
+                            data.skills[
+                                category
+                            ] = list;
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           EXPERIENCE
+           ===================================================== */
+
+        const experienceSection =
+            resumePaper.querySelector(
+                '[data-resume-section="experience"]'
+            );
+
+
+        if (experienceSection) {
+
+            experienceSection
+                .querySelectorAll(
+                    ".resume-experience-entry"
+                )
+                .forEach(
+                    function (entry) {
+
+                        const bullets =
+                            Array.from(
+                                entry.querySelectorAll(
+                                    ".resume-bullet"
+                                )
+                            )
+                            .map(
+                                function (item) {
+
+                                    return textValue(
+                                        item.innerText
+                                    );
+
+                                }
+                            )
+                            .filter(Boolean);
+
+
+                        const item = {
+
+                            title:
+                                readEditable(
+                                    ".resume-entry-title",
+                                    entry
+                                ),
+
+                            company:
+                                readEditable(
+                                    ".resume-entry-company",
+                                    entry
+                                ),
+
+                            location:
+                                readEditable(
+                                    ".resume-entry-location",
+                                    entry
+                                ),
+
+                            dates:
+                                readEditable(
+                                    ".resume-entry-dates",
+                                    entry
+                                ),
+
+                            bullets:
+                                bullets
+
+                        };
+
+
+                        if (
+                            item.title ||
+                            item.company ||
+                            item.location ||
+                            item.dates ||
+                            bullets.length
+                        ) {
+
+                            data.experience.push(
+                                item
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           PROJECTS
+           ===================================================== */
+
+        const projectsSection =
+            resumePaper.querySelector(
+                '[data-resume-section="projects"]'
+            );
+
+
+        if (projectsSection) {
+
+            projectsSection
+                .querySelectorAll(
+                    ".resume-project-entry"
+                )
+                .forEach(
+                    function (entry) {
+
+                        const technologyText =
+                            readEditable(
+                                ".resume-entry-tech",
+                                entry
+                            );
+
+
+                        const technologies =
+                            technologyText
+                                .replace(
+                                    /^Technologies:\s*/i,
+                                    ""
+                                )
+                                .split(",")
+                                .map(textValue)
+                                .filter(Boolean);
+
+
+                        const bullets =
+                            Array.from(
+                                entry.querySelectorAll(
+                                    ".resume-bullet"
+                                )
+                            )
+                            .map(
+                                function (item) {
+
+                                    return textValue(
+                                        item.innerText
+                                    );
+
+                                }
+                            )
+                            .filter(Boolean);
+
+
+                        const item = {
+
+                            name:
+                                readEditable(
+                                    ".resume-entry-title",
+                                    entry
+                                ),
+
+                            technologies:
+                                technologies,
+
+                            description:
+                                readEditable(
+                                    ".resume-entry-description",
+                                    entry
+                                ),
+
+                            bullets:
+                                bullets
+
+                        };
+
+
+                        if (
+                            item.name ||
+                            item.technologies.length ||
+                            item.description ||
+                            item.bullets.length
+                        ) {
+
+                            data.projects.push(
+                                item
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           EDUCATION
+           ===================================================== */
+
+        const educationSection =
+            resumePaper.querySelector(
+                '[data-resume-section="education"]'
+            );
+
+
+        if (educationSection) {
+
+            educationSection
+                .querySelectorAll(
+                    ".resume-education-entry"
+                )
+                .forEach(
+                    function (entry) {
+
+                        const details =
+                            Array.from(
+                                entry.querySelectorAll(
+                                    ".resume-bullet"
+                                )
+                            )
+                            .map(
+                                function (item) {
+
+                                    return textValue(
+                                        item.innerText
+                                    );
+
+                                }
+                            )
+                            .filter(Boolean);
+
+
+                        const item = {
+
+                            degree:
+                                readEditable(
+                                    ".resume-entry-title",
+                                    entry
+                                ),
+
+                            institution:
+                                readEditable(
+                                    ".resume-entry-institution",
+                                    entry
+                                ),
+
+                            location:
+                                readEditable(
+                                    ".resume-entry-location",
+                                    entry
+                                ),
+
+                            dates:
+                                readEditable(
+                                    ".resume-entry-dates",
+                                    entry
+                                ),
+
+                            details:
+                                details
+
+                        };
+
+
+                        if (
+                            item.degree ||
+                            item.institution ||
+                            item.location ||
+                            item.dates ||
+                            item.details.length
+                        ) {
+
+                            data.education.push(
+                                item
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           SIMPLE SECTIONS
+           ===================================================== */
+
+        [
+            "certifications",
+            "achievements",
+            "languages"
+        ].forEach(
+            function (key) {
+
+                const section =
+                    resumePaper.querySelector(
+                        '[data-resume-section="' +
+                        key +
+                        '"]'
+                    );
+
+
+                if (!section) {
+                    return;
+                }
+
+
+                section
+                    .querySelectorAll(
+                        ".resume-bullet"
+                    )
+                    .forEach(
+                        function (item) {
+
+                            const value =
+                                textValue(
+                                    item.innerText
+                                );
+
+
+                            if (value) {
+
+                                data[key].push(
+                                    value
+                                );
+
+                            }
+
+                        }
+                    );
+
+            }
+        );
+
+
+        return data;
+
+    }
+
+
+    /* =========================================================
+       JD GAPS
+       ========================================================= */
+
+    function renderJDGaps(
+        data
+    ) {
+
+        jdGapList.innerHTML =
+            "";
+
+
+        const gaps =
+            data.jd_gaps || [];
+
+
+        const hasJD =
+            jdInput.value.trim().length >
+            0;
+
+
+        if (
+            hasJD &&
+            gaps.length
+        ) {
+
+            jdGapDetails.style.display =
+                "block";
+
+
+            gaps.forEach(
+                function (gap) {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.style.cssText =
+                        `
+                        border:1px solid #e3e7ef;
+                        border-radius:10px;
+                        padding:12px 14px;
+                        margin-bottom:8px;
+                        background:#fafbfe;
+                        `;
+
+
+                    const title =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    title.style.cssText =
+                        `
+                        font-weight:700;
+                        margin-bottom:4px;
+                        `;
+
+
+                    title.textContent =
+                        (
+                            gap.keyword ||
+                            ""
+                        ) +
+                        " · " +
+                        (
+                            gap.type ||
+                            "Requirement"
+                        );
+
+
+                    const action =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    action.style.cssText =
+                        `
+                        font-size:13px;
+                        color:#667085;
+                        line-height:1.5;
+                        `;
+
+
+                    action.textContent =
+                        gap.action ||
+                        "Review this requirement and add it only if it is genuinely supported by your experience.";
+
+
+                    item.appendChild(
+                        title
+                    );
+
+                    item.appendChild(
+                        action
+                    );
+
+                    jdGapList.appendChild(
+                        item
+                    );
+
+                }
             );
 
         } else {
-            keywordCard.style.display = 'none';
+
+            jdGapDetails.style.display =
+                "none";
+
         }
 
-        /* Saved badge */
-        document.getElementById( 'savedBadge' ).style.display = data.saved ? 'inline-flex' : 'none';
+    }
 
-        /* Show results */
-        results.style.display = 'block';
+
+    /* =========================================================
+       RENDER SCORE
+       ========================================================= */
+
+    function renderScore(
+        data
+    ) {
+
+        const score =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(
+                        Number(
+                            data.ats_score
+                        ) || 0
+                    )
+                )
+            );
+
+
+        const keyword =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(
+                        Number(
+                            data.keyword_match
+                        ) || 0
+                    )
+                )
+            );
+
+
+        const format =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(
+                        Number(
+                            data.formatting_score
+                        ) || 0
+                    )
+                )
+            );
+
+
+        const section =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(
+                        Number(
+                            data.section_score
+                        ) || 0
+                    )
+                )
+            );
+
+
+        const circumference =
+            251.33;
+
+
+        const ringFill =
+            document.getElementById(
+                "ringFill"
+            );
+
+
+        ringFill.style.strokeDashoffset =
+            circumference;
+
+
+        requestAnimationFrame(
+            function () {
+
+                ringFill.style.transition =
+                    "stroke-dashoffset .8s ease";
+
+                ringFill.style.strokeDashoffset =
+                    circumference *
+                    (
+                        1 -
+                        score / 100
+                    );
+
+            }
+        );
+
+
+        const verdict =
+            verdictFor(
+                score
+            );
+
+
+        const verdictEl =
+            document.getElementById(
+                "scoreVerdict"
+            );
+
+
+        verdictEl.textContent =
+            verdict[0];
+
+        verdictEl.style.color =
+            verdict[1];
+
+        ringFill.setAttribute(
+            "stroke",
+            verdict[1]
+        );
+
+
+        let current = 0;
+
+
+        const numEl =
+            document.getElementById(
+                "scoreNum"
+            );
+
+
+        (
+            function animateScore() {
+
+                current +=
+                    Math.max(
+                        1,
+                        Math.round(
+                            (
+                                score -
+                                current
+                            ) / 6
+                        )
+                    );
+
+
+                if (
+                    current >= score
+                ) {
+
+                    current =
+                        score;
+
+                }
+
+
+                numEl.textContent =
+                    current;
+
+
+                if (
+                    current < score
+                ) {
+
+                    requestAnimationFrame(
+                        animateScore
+                    );
+
+                }
+
+            }
+        )();
+
+
+        document.getElementById(
+            "valKeyword"
+        ).textContent =
+            keyword + "%";
+
+
+        document.getElementById(
+            "valFormat"
+        ).textContent =
+            format + "%";
+
+
+        document.getElementById(
+            "valSection"
+        ).textContent =
+            section + "%";
+
+
+        requestAnimationFrame(
+            function () {
+
+                document.getElementById(
+                    "barKeyword"
+                ).style.width =
+                    keyword + "%";
+
+
+                document.getElementById(
+                    "barFormat"
+                ).style.width =
+                    format + "%";
+
+
+                document.getElementById(
+                    "barSection"
+                ).style.width =
+                    section + "%";
+
+            }
+        );
+
+
+        renderTags(
+            document.getElementById(
+                "missingSectionsTags"
+            ),
+            data.missing_sections || [],
+            "missing"
+        );
+
+
+        const jdWasProvided =
+            jdInput.value.trim().length >
+            0;
+
+
+        document.getElementById(
+            "keywordMetaSuffix"
+        ).textContent =
+            jdWasProvided
+                ? ", and keyword match against the job description"
+                : ", and action-verb usage";
+
+
+        const keywordCard =
+            document.getElementById(
+                "missingKeywordsCard"
+            );
+
+
+        if (jdWasProvided) {
+
+            keywordCard.style.display =
+                "block";
+
+
+            renderTags(
+                document.getElementById(
+                    "missingKeywordsTags"
+                ),
+                data.missing_keywords || [],
+                "missing"
+            );
+
+        } else {
+
+            keywordCard.style.display =
+                "none";
+
+        }
+
+
+        renderJDGaps(
+            data
+        );
+
+
+        if (
+            data.optimized_resume
+        ) {
+
+            renderOptimizedResume(
+                data.optimized_resume
+            );
+
+        }
+
+
+        document.getElementById(
+            "savedBadge"
+        ).style.display =
+            data.saved
+                ? "inline-flex"
+                : "none";
+
+
+        results.style.display =
+            "block";
+
+
         results.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
+            behavior: "smooth",
+            block: "start"
         });
 
     }
 
 
-    /* =========================
-       ANALYZE BUTTON
-       ========================= */
+    /* =========================================================
+       RE-CHECK BUTTON
+       ========================================================= */
 
-    scoreBtn.addEventListener('click',
+    const recheckButton =
+        document.createElement(
+            "button"
+        );
+
+
+    recheckButton.type =
+        "button";
+
+
+    recheckButton.id =
+        "recheckOptimizedBtn";
+
+
+    recheckButton.textContent =
+        "Re-check ATS score";
+
+
+    recheckButton.className =
+        "resume-action-button resume-recheck-button";
+
+
+    downloadOptimizedBtn.classList.add(
+        "resume-action-button"
+    );
+
+
+    downloadOptimizedBtn.parentNode.insertBefore(
+        recheckButton,
+        downloadOptimizedBtn
+    );
+
+
+    recheckButton.addEventListener(
+        "click",
         async function () {
-            clearError();
-            const file = fileInput.files[0];
 
-            if (!file) {
-                showError('Please choose a resume file first.' );
+            clearError();
+
+
+            const data =
+                getEditorData();
+
+
+            if (
+                !data.name &&
+                !data.summary &&
+                !Object.keys(
+                    data.skills
+                ).length &&
+                !data.experience.length &&
+                !data.projects.length &&
+                !data.education.length
+            ) {
+
+                showError(
+                    "Please enter resume content before re-checking."
+                );
+
                 return;
+
             }
 
-            btnLabel.textContent = 'Analyzing resume...';
-            btnSpinner.style.display = 'inline-block';
-            scoreBtn.disabled = true;
 
-            const formData = new FormData();
-            formData.append('resume', file );
-            formData.append('jd', jdInput.value || '' );
+            recheckButton.disabled =
+                true;
+
+
+            recheckButton.textContent =
+                "Re-checking...";
+
 
             try {
-                const response = await fetch('/resume/analyze/',
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "resume_json",
+                    JSON.stringify(data)
+                );
+
+
+                formData.append(
+                    "jd",
+                    jdInput.value || ""
+                );
+
+
+                const response =
+                    await fetch(
+                        recheckUrl,
                         {
-                            method: 'POST',
+                            method: "POST",
+
                             headers: {
-                                'X-CSRFToken':
+                                "X-CSRFToken":
                                     getCookie(
-                                        'csrftoken'
+                                        "csrftoken"
                                     )
                             },
-                            body: formData
+
+                            body:
+                                formData
                         }
                     );
 
 
-                const data = await response.json();
+                const result =
+                    await response.json();
 
 
-                if (!response.ok) {
-                    showError( data.error || 'Something went wrong while analyzing your resume.' );
-                    return;
+                if (
+                    !response.ok
+                ) {
+
+                    throw new Error(
+                        result.error ||
+                        "Could not re-check the resume."
+                    );
 
                 }
 
-                renderScore(data);
-                btnLabel.textContent = 'Re-check score';
+
+                renderScore(
+                    result
+                );
 
 
             } catch (error) {
-                showError( "Couldn't reach the server. Please try again." );
+
+                console.error(
+                    error
+                );
+
+
+                showError(
+                    error.message ||
+                    "Could not re-check the resume."
+                );
+
 
             } finally {
 
-                btnSpinner.style.display = 'none';
+                recheckButton.disabled =
+                    false;
 
-                scoreBtn.disabled = false;
+                recheckButton.textContent =
+                    "Re-check ATS score";
 
             }
 
         }
     );
+
+
+    /* =========================================================
+       DOWNLOAD DOCX
+       ========================================================= */
+
+    downloadOptimizedBtn.addEventListener(
+        "click",
+        async function () {
+
+            clearError();
+
+
+            const data =
+                getEditorData();
+
+
+            if (
+                !data.name &&
+                !data.summary &&
+                !Object.keys(
+                    data.skills
+                ).length &&
+                !data.experience.length &&
+                !data.projects.length &&
+                !data.education.length
+            ) {
+
+                showError(
+                    "The updated resume is empty."
+                );
+
+                return;
+
+            }
+
+
+            downloadOptimizedBtn.disabled =
+                true;
+
+
+            downloadOptimizedBtn.textContent =
+                "Preparing...";
+
+
+            try {
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "resume_json",
+                    JSON.stringify(data)
+                );
+
+
+                const response =
+                    await fetch(
+                        downloadUrl,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "X-CSRFToken":
+                                    getCookie(
+                                        "csrftoken"
+                                    )
+                            },
+
+                            body:
+                                formData
+                        }
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    let message =
+                        "Could not create the updated resume.";
+
+
+                    try {
+
+                        const errorData =
+                            await response.json();
+
+
+                        message =
+                            errorData.error ||
+                            message;
+
+                    } catch (error) {
+                        // Ignore JSON parsing error
+                    }
+
+
+                    throw new Error(
+                        message
+                    );
+
+                }
+
+
+                const blob =
+                    await response.blob();
+
+
+                const url =
+                    URL.createObjectURL(
+                        blob
+                    );
+
+
+                const link =
+                    document.createElement(
+                        "a"
+                    );
+
+
+                link.href =
+                    url;
+
+
+                link.download =
+                    "ATS_Optimized_Resume.docx";
+
+
+                document.body.appendChild(
+                    link
+                );
+
+
+                link.click();
+
+
+                link.remove();
+
+
+                setTimeout(
+                    function () {
+
+                        URL.revokeObjectURL(
+                            url
+                        );
+
+                    },
+                    1000
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+
+                showError(
+                    error.message ||
+                    "Could not download the updated resume."
+                );
+
+
+            } finally {
+
+                downloadOptimizedBtn.disabled =
+                    false;
+
+                downloadOptimizedBtn.textContent =
+                    "Download DOCX";
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       ANALYZE RESUME
+       ========================================================= */
+
+    scoreBtn.addEventListener(
+        "click",
+        async function () {
+
+            clearError();
+
+
+            const file =
+                fileInput.files[0];
+
+
+            if (!file) {
+
+                showError(
+                    "Please choose a resume file first."
+                );
+
+                return;
+
+            }
+
+
+            btnLabel.textContent =
+                "Analyzing resume...";
+
+
+            btnSpinner.style.display =
+                "inline-block";
+
+
+            scoreBtn.disabled =
+                true;
+
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "resume",
+                file
+            );
+
+
+            formData.append(
+                "jd",
+                jdInput.value || ""
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        analyzeUrl,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "X-CSRFToken":
+                                    getCookie(
+                                        "csrftoken"
+                                    )
+                            },
+
+                            body:
+                                formData
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    showError(
+                        data.error ||
+                        "Something went wrong while analyzing your resume."
+                    );
+
+                    return;
+
+                }
+
+
+                renderScore(
+                    data
+                );
+
+
+                btnLabel.textContent =
+                    "Re-check score";
+
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+
+                showError(
+                    "The resume was analyzed by the server, but the result could not be displayed. Check the browser console for the exact error."
+                );
+
+
+            } finally {
+
+                btnSpinner.style.display =
+                    "none";
+
+
+                scoreBtn.disabled =
+                    false;
+
+            }
+
+        }
+    );
+
 
 })();
 

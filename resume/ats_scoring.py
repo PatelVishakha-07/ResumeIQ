@@ -177,8 +177,6 @@ yours yourself yourselves using use used within years year strong looking seekin
 job role team work company across ability including etc will able
 """.split())
 
-
-
 def _empty_meta():
     return {
         'page_count': 1,
@@ -188,6 +186,351 @@ def _empty_meta():
         'is_image_file': False,
     }
 
+
+# ---------------------------------------------------------------------------
+# PDF text extraction helpers
+#
+# pdfplumber's default page.extract_text() lays words out purely by their
+# y-position across the *full page width*. That works for single-column
+# resumes, but it silently interleaves the two halves of any two-column
+# template (a common layout: sidebar with contact/skills, main column with
+# summary/experience/education) whenever a line in one column happens to
+# sit at roughly the same height as a line in the other. The result is
+# exactly the kind of scrambled section content ("EXPERIENCE" heading
+# followed by education entries, contact details bleeding into the summary)
+# that build_structured_resume() below has no way to recover from, because
+# by the time it sees the text the reading order is already wrong.
+#
+# _extract_page_text() detects a two-column layout from word geometry and,
+# when found, extracts and concatenates each column's text separately
+# (left column top-to-bottom, then right column top-to-bottom) instead of
+# reading straight across the page. It also reassembles words using the
+# actual pixel gap between glyphs rather than trusting pdfplumber's default
+# word boundaries, which fixes resume headers set in a letter-spaced font
+# (e.g. "P A T E L  V I S H A K H A") getting split into single-letter
+# "words" that then render with stray spaces between every character.
+# ---------------------------------------------------------------------------
+
+_CID_ARTIFACT_RE = re.compile(r'\(cid:\d+\)')
+
+
+def _strip_cid_artifacts(text):
+    """Remove '(cid:N)' placeholders pdfplumber emits for glyphs (usually
+    decorative icons: a phone/email/location symbol) whose font has no
+    ToUnicode mapping, so they can't be decoded to real characters."""
+    if not text:
+        return text
+    cleaned = _CID_ARTIFACT_RE.sub(' ', text)
+    return re.sub(r'[ \t]{2,}', ' ', cleaned).strip()
+
+
+def _find_column_split(words, page_width):
+    """Return an x-coordinate splitting the page into two columns, or None
+    if the words don't look like a two-column layout."""
+    if len(words) < 15:
+        return None
+
+    centers = sorted((w['x0'] + w['x1']) / 2 for w in words)
+    lo, hi = page_width * 0.25, page_width * 0.75
+
+    best_gap, best_split = 0.0, None
+    for a, b in zip(centers, centers[1:]):
+        midpoint = (a + b) / 2
+        if lo <= midpoint <= hi and (b - a) > best_gap:
+            best_gap, best_split = (b - a), midpoint
+
+    if best_split is None or best_gap < page_width * 0.035:
+        return None
+
+    left_count = sum(1 for c in centers if c < best_split)
+    right_count = len(centers) - left_count
+    if left_count < 5 or right_count < 5:
+        return None
+
+    return best_split
+
+def _words_to_text(words):
+    """
+    Rebuild PDF words into readable lines.
+
+    PDF files sometimes return each visual piece separately.
+    This function joins those pieces while preserving real spaces
+    between words.
+    """
+    if not words:
+        return ""
+
+    rows = []
+
+    # Group words that belong to the same visual line
+    for word in sorted(words, key=lambda w: w["top"]):
+        placed = False
+
+        for row in rows:
+            tolerance = max(
+                row["height"],
+                word.get("height", 10)
+            ) * 0.5
+
+            if abs(row["top"] - word["top"]) <= tolerance:
+                row["words"].append(word)
+                row["top"] = (row["top"] + word["top"]) / 2
+                row["height"] = max(
+                    row["height"],
+                    word.get("height", 10)
+                )
+                placed = True
+                break
+
+        if not placed:
+            rows.append({
+                "top": word["top"],
+                "height": word.get("height", 10),
+                "words": [word]
+            })
+
+    rows.sort(key=lambda row: row["top"])
+
+    lines = []
+
+    for row in rows:
+
+        row_words = sorted(
+            row["words"],
+            key=lambda w: w["x0"]
+        )
+
+        if not row_words:
+            continue
+
+        # Estimate character width
+        widths = []
+
+        for word in row_words:
+            text = word.get("text", "")
+
+            if not text:
+                continue
+
+            width = max(
+                word["x1"] - word["x0"],
+                1
+            )
+
+            widths.append(
+                width / max(len(text), 1)
+            )
+
+        if widths:
+            widths.sort()
+            char_width = widths[len(widths) // 2]
+        else:
+            char_width = 4.0
+
+        parts = [row_words[0]["text"]]
+
+        for previous, current in zip(
+            row_words,
+            row_words[1:]
+        ):
+
+            gap = current["x0"] - previous["x1"]
+
+            # PDF extraction often gives very small gaps.
+            # Use an adaptive threshold.
+            word_gap_threshold = max(
+                1.8,
+                char_width * 0.48
+            )
+
+            punctuation = ",.;:!?)]}%"
+
+            if gap > word_gap_threshold:
+
+                if current["text"] not in punctuation:
+                    parts.append(" ")
+
+            parts.append(current["text"])
+
+        line = "".join(parts).strip()
+
+        if line:
+            lines.append(line)
+
+    return "\n".join(lines)
+
+def _extract_page_text(page):
+
+    words = page.extract_words(
+        x_tolerance=1.5,
+        y_tolerance=3,
+        keep_blank_chars=False
+    )
+
+    if not words:
+        return page.extract_text() or ""
+
+    split_x = _find_column_split(
+        words,
+        float(page.width)
+    )
+
+    if split_x is None:
+
+        text = _words_to_text(words)
+
+    else:
+
+        left = [
+            word
+            for word in words
+            if (word["x0"] + word["x1"]) / 2 < split_x
+        ]
+
+        right = [
+            word
+            for word in words
+            if (word["x0"] + word["x1"]) / 2 >= split_x
+        ]
+
+        left_text = _words_to_text(left)
+        right_text = _words_to_text(right)
+
+        text = "\n".join(
+            part
+            for part in [left_text, right_text]
+            if part
+        )
+
+    text = _strip_cid_artifacts(text)
+
+    # IMPORTANT
+    text = normalize_embedded_headings(text)
+
+    return text
+
+_EMBEDDED_HEADING_PATTERNS = [
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(professional\s*summary|profile\s*summary|"
+        r"career\s*summary|summary)\s*"
+        r"(?=[|•]|$)",
+        "PROFESSIONAL SUMMARY"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(technical\s*skills|core\s*skills|skills)\s*"
+        r"(?=[|•]|$)",
+        "TECHNICAL SKILLS"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(work\s*experience|professional\s*experience|experience)\s*"
+        r"(?=[|•]|$)",
+        "EXPERIENCE"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(projects|personal\s*projects|academic\s*projects)\s*"
+        r"(?=[|•]|$)",
+        "PROJECTS"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(education|academic\s*background|academic\s*qualifications)\s*"
+        r"(?=[|•]|$)",
+        "EDUCATION"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(certifications|certificates|licenses)\s*"
+        r"(?=[|•]|$)",
+        "CERTIFICATIONS"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(achievements|awards|honors)\s*"
+        r"(?=[|•]|$)",
+        "ACHIEVEMENTS"
+    ),
+
+    (
+        r"(?i)(?:^|[|•])\s*"
+        r"(languages)\s*"
+        r"(?=[|•]|$)",
+        "LANGUAGES"
+    ),
+]
+
+
+def normalize_embedded_headings(text):
+    """
+    Fix cases where PDF extraction puts a section heading
+    in the middle of a contact/paragraph line.
+
+    Example:
+
+    Ahmedabad, Gujarat | +91... | LinkedIn | PROFESSIONAL SUMMARY |
+    Final-year MCA student...
+
+    becomes:
+
+    Ahmedabad, Gujarat | +91... | LinkedIn
+
+    PROFESSIONAL SUMMARY
+
+    Final-year MCA student...
+    """
+
+    if not text:
+        return ""
+
+    lines = []
+
+    for original_line in text.splitlines():
+
+        line = original_line.strip()
+
+        if not line:
+            continue
+
+        matched_any = False
+
+        for pattern, heading in _EMBEDDED_HEADING_PATTERNS:
+
+            match = re.search(pattern, line)
+
+            if not match:
+                continue
+
+            before = line[:match.start()].strip()
+            after = line[match.end():].strip()
+
+            # Remove separator characters around the pieces
+            before = before.strip(" |•:-")
+            after = after.strip(" |•:-")
+
+            if before:
+                lines.append(before)
+
+            lines.append(heading)
+
+            if after:
+                lines.append(after)
+
+            matched_any = True
+            break
+
+        if not matched_any:
+            lines.append(line)
+
+    return "\n".join(lines)
 
 # extract text (+ image statistics) from pdf
 def extract_text_from_pdf(file_obj):
@@ -203,7 +546,7 @@ def extract_text_from_pdf(file_obj):
         meta['page_count'] = max(len(pdf.pages), 1)
 
         for page in pdf.pages:
-            page_text = page.extract_text() or ''
+            page_text = _extract_page_text(page)
             text_parts.append(page_text)
             if not has_tables and page.find_tables():
                 has_tables = True
@@ -235,8 +578,20 @@ def extract_text_from_docx(file_obj):
         raise RuntimeError("python-docx is not installed (pip install python-docx)")
 
     document = docx_lib.Document(file_obj)
-    paragraphs = [p.text for p in document.paragraphs]
+    paragraphs = [p.text for p in document.paragraphs if p.text.strip()]
     has_tables = len(document.tables) > 0
+
+    # document.paragraphs only walks top-level body paragraphs; text placed
+    # inside a table (a common way to lay out a two-column resume in Word)
+    # is otherwise silently dropped from the parsed text entirely.
+    if has_tables:
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    cell_text = cell.text.strip()
+                    if cell_text:
+                        paragraphs.append(cell_text)
+
     meta = _empty_meta()
 
     try:
@@ -789,7 +1144,7 @@ def keyword_exists(keyword, text):
     normalized_text = text.lower()
     keyword = normalize_keyword(keyword)
 
-    if keyword in normalize_keyword:
+    if keyword in normalized_text:
         return True
 
     aliases = [alias for alias, canonical in keyword_aliases.items() if canonical == keyword]
@@ -799,7 +1154,7 @@ def keyword_exists(keyword, text):
     return False
 
 def score_keyword_match(resume_text, jd_text):
-    if not jd_text or jd_text.strip():
+    if not jd_text or not jd_text.strip():
         return 0.0, []
 
     jd_lower = jd_text.lower()
@@ -908,7 +1263,7 @@ def generate_recommendations( section_details,section_scores, content_score, bul
     recommendations = []
     for section in ["summary", "skills", "projects", "experience", "education"]:
         score = section_scores.get(section, 0)
-        if score < 400:
+        if score < 60:
             recommendations.append(f'Improve the {section} section. '
                 'It exists but does not contain enough useful or '
                 'relevant information.')
@@ -958,6 +1313,599 @@ def generate_recommendations( section_details,section_scores, content_score, bul
     return recommendations[:10]
 
 
+
+def build_jd_gaps(resume_text, jd_text):
+    """Return actionable JD gaps instead of only a flat missing-keyword list."""
+    if not jd_text or not jd_text.strip():
+        return []
+
+    jd_lower = jd_text.lower()
+    gaps = []
+
+    for skill in technical_skills:
+        canonical = normalize_keyword(skill)
+        if keyword_exists(skill, jd_lower) and not keyword_exists(canonical, resume_text):
+            gaps.append({
+                'keyword': canonical,
+                'type': 'Skill',
+                'action': f'Add "{canonical}" to Skills or a relevant project/experience bullet only if you genuinely have this skill.'
+            })
+
+    generic_jd_terms = {
+        'experience', 'work', 'team', 'company', 'role', 'candidate',
+        'ability', 'skills', 'job', 'using', 'including', 'knowledge',
+        'strong', 'good', 'working', 'years'
+    }
+    for keyword in extract_keywords(jd_text, top_n=30):
+        keyword = normalize_keyword(keyword)
+        if keyword in generic_jd_terms:
+            continue
+        if not keyword_exists(keyword, resume_text) and not any(
+            item['keyword'] == keyword for item in gaps
+        ):
+            gaps.append({
+                'keyword': keyword,
+                'type': 'JD term',
+                'action': f'Consider reflecting "{keyword}" in a relevant summary, project, or experience bullet if it accurately describes your background.'
+            })
+
+    return gaps[:15]
+
+
+# ---------------------------------------------------------------------------
+# Structured "optimized resume" builder
+# ---------------------------------------------------------------------------
+
+# Heading labels recognised as section breaks when walking the extracted
+# text line by line. Kept separate from `section_keywords` above, because
+# those patterns (e.g. r'@' for "contact") are meant to detect a section's
+# *presence* anywhere in the body, not to identify a standalone heading line.
+resume_heading_map = {
+    'contact': ['contact', 'contact information', 'contact info', 'contact details'],
+    'summary': ['summary', 'professional summary', 'career summary', 'profile', 'objective', 'about me'],
+    'skills': ['skills', 'technical skills', 'core skills', 'competencies', 'technologies', 'technical expertise'],
+    'experience': ['experience', 'work experience', 'professional experience', 'employment', 'employment history', 'work history'],
+    'projects': ['projects', 'personal projects', 'academic projects', 'key projects'],
+    'education': ['education', 'academic background', 'academic qualifications'],
+    'certifications': ['certifications', 'certificates', 'licenses'],
+    'achievements': ['achievements', 'awards', 'honors'],
+    'languages': ['languages'],
+}
+
+_contact_line_re = re.compile(
+    r'@|linkedin\.com|github\.com|\+?\d[\d\s().-]{7,}\d'
+)
+
+
+def _looks_like_contact(line):
+    """True for lines that are clearly contact info (email, phone, a
+    profile URL) rather than a name/headline — used so a contact line that
+    ends up first in the extracted text (e.g. from a sidebar column) isn't
+    mistaken for the candidate's name."""
+    return bool(_contact_line_re.search(line))
+
+
+def build_structured_resume(text):
+    """
+    Convert extracted resume text into structured editable data.
+    """
+
+    if not text:
+        return {
+            "name": "",
+            "headline": "",
+            "contact": [],
+            "summary": "",
+            "skills": {},
+            "experience": [],
+            "projects": [],
+            "education": [],
+            "certifications": [],
+            "achievements": [],
+            "languages": [],
+        }
+
+    text = normalize_embedded_headings(text)
+
+    raw_lines = text.splitlines()
+
+    lines = []
+
+    for line in raw_lines:
+
+        line = _strip_cid_artifacts(line)
+
+        # Normalize multiple spaces
+        line = re.sub(r"[ \t]+", " ", line).strip()
+
+        if not line:
+            continue
+
+        lines.append(line)
+
+    resume = {
+        "name": "",
+        "headline": "",
+        "contact": [],
+        "summary": "",
+        "skills": {},
+        "experience": [],
+        "projects": [],
+        "education": [],
+        "certifications": [],
+        "achievements": [],
+        "languages": [],
+    }
+
+    # ---------------------------------------------------------
+    # NAME
+    # ---------------------------------------------------------
+
+    name_index = None
+
+    for index, line in enumerate(lines[:8]):
+
+        if _looks_like_contact(line):
+            continue
+
+        lower = line.lower()
+
+        if lower in {
+            "professional summary",
+            "summary",
+            "profile summary",
+            "technical skills",
+            "skills",
+            "projects",
+            "education",
+            "experience",
+        }:
+            continue
+
+        resume["name"] = line
+        name_index = index
+        break
+
+    if name_index is None and lines:
+        resume["name"] = lines[0]
+        name_index = 0
+
+    # ---------------------------------------------------------
+    # HEADLINE
+    # ---------------------------------------------------------
+
+    if name_index is not None:
+
+        for index in range(
+            name_index + 1,
+            min(name_index + 5, len(lines))
+        ):
+
+            line = lines[index]
+
+            if _looks_like_contact(line):
+                continue
+
+            lower = line.lower()
+
+            if lower in {
+                "professional summary",
+                "summary",
+                "profile summary",
+                "technical skills",
+                "skills",
+                "projects",
+                "education",
+                "experience",
+            }:
+                break
+
+            resume["headline"] = line
+
+            # Remove it from the parsing list
+            lines[index] = ""
+
+            break
+
+    lines = [
+        line
+        for line in lines
+        if line
+    ]
+
+    # ---------------------------------------------------------
+    # SECTION DETECTION
+    # ---------------------------------------------------------
+
+    section_aliases = {
+        "contact": [
+            "contact",
+            "contact information",
+            "personal details",
+        ],
+
+        "summary": [
+            "summary",
+            "professional summary",
+            "profile summary",
+            "career summary",
+            "objective",
+            "profile",
+        ],
+
+        "experience": [
+            "experience",
+            "work experience",
+            "professional experience",
+            "employment",
+            "work history",
+        ],
+
+        "education": [
+            "education",
+            "academic",
+            "academic background",
+            "academic qualifications",
+        ],
+
+        "skills": [
+            "skills",
+            "technical skills",
+            "core skills",
+            "technical expertise",
+            "technologies",
+        ],
+
+        "projects": [
+            "projects",
+            "personal projects",
+            "academic projects",
+            "key projects",
+        ],
+
+        "certifications": [
+            "certifications",
+            "certificates",
+            "licenses",
+        ],
+
+        "achievements": [
+            "achievements",
+            "awards",
+            "honors",
+        ],
+
+        "languages": [
+            "languages",
+        ],
+    }
+
+    def detect_section(line):
+
+        cleaned = re.sub(
+            r"[^a-zA-Z ]",
+            " ",
+            line
+        )
+
+        cleaned = re.sub(
+            r"\s+",
+            " ",
+            cleaned
+        ).strip().lower()
+
+        for section, aliases in section_aliases.items():
+
+            for alias in aliases:
+
+                if cleaned == alias:
+                    return section
+
+        return None
+
+    current_section = ""
+
+    for line in lines:
+
+        section = detect_section(line)
+
+        if section:
+            current_section = section
+            continue
+
+        # -----------------------------------------------------
+        # CONTACT
+        # -----------------------------------------------------
+
+        if current_section == "contact":
+
+            if line:
+                resume["contact"].extend(
+                    [
+                        x.strip()
+                        for x in re.split(
+                            r"\s*[|•]\s*",
+                            line
+                        )
+                        if x.strip()
+                    ]
+                )
+
+            continue
+
+        # -----------------------------------------------------
+        # SUMMARY
+        # -----------------------------------------------------
+
+        if current_section == "summary":
+
+            resume["summary"] = (
+                resume["summary"] + " " + line
+            ).strip()
+
+            continue
+
+        # -----------------------------------------------------
+        # SKILLS
+        # -----------------------------------------------------
+
+        if current_section == "skills":
+
+            if ":" in line:
+
+                key, values = line.split(
+                    ":",
+                    1
+                )
+
+                key = key.strip()
+
+                values = [
+                    value.strip()
+                    for value in values.split(",")
+                    if value.strip()
+                ]
+
+                if key:
+                    resume["skills"][key] = values
+
+            else:
+
+                resume["skills"].setdefault(
+                    "General",
+                    []
+                )
+
+                resume["skills"]["General"].extend(
+                    [
+                        x.strip()
+                        for x in line.split(",")
+                        if x.strip()
+                    ]
+                )
+
+            continue
+
+        # -----------------------------------------------------
+        # CERTIFICATIONS
+        # -----------------------------------------------------
+
+        if current_section == "certifications":
+
+            value = re.sub(
+                r"^[-•*]\s*",
+                "",
+                line
+            ).strip()
+
+            if value:
+                resume["certifications"].append(value)
+
+            continue
+
+        # -----------------------------------------------------
+        # ACHIEVEMENTS
+        # -----------------------------------------------------
+
+        if current_section == "achievements":
+
+            value = re.sub(
+                r"^[-•*]\s*",
+                "",
+                line
+            ).strip()
+
+            if value:
+                resume["achievements"].append(value)
+
+            continue
+
+        # -----------------------------------------------------
+        # LANGUAGES
+        # -----------------------------------------------------
+
+        if current_section == "languages":
+
+            values = re.split(
+                r"[,|]",
+                line
+            )
+
+            resume["languages"].extend(
+                [
+                    value.strip()
+                    for value in values
+                    if value.strip()
+                ]
+            )
+
+            continue
+
+        # -----------------------------------------------------
+        # PROJECTS
+        # -----------------------------------------------------
+
+        if current_section == "projects":
+
+            value = re.sub(
+                r"^[-•*]\s*",
+                "",
+                line
+            ).strip()
+
+            if not value:
+                continue
+
+            # Detect "Project | Technology"
+            parts = re.split(
+                r"\s*[|—–]\s*",
+                value,
+                maxsplit=1
+            )
+
+            project = {
+                "name": parts[0].strip(),
+                "technologies": [],
+                "description": "",
+                "bullets": [],
+            }
+
+            if len(parts) == 2:
+
+                tech_part = parts[1].strip()
+
+                if tech_part:
+
+                    project["technologies"] = [
+                        x.strip()
+                        for x in tech_part.split(",")
+                        if x.strip()
+                    ]
+
+            resume["projects"].append(
+                project
+            )
+
+            continue
+
+        # -----------------------------------------------------
+        # EDUCATION
+        # -----------------------------------------------------
+
+        if current_section == "education":
+
+            value = re.sub(
+                r"^[-•*]\s*",
+                "",
+                line
+            ).strip()
+
+            if not value:
+                continue
+
+            parts = re.split(
+                r"\s*[|—–]\s*",
+                value
+            )
+
+            item = {
+                "degree": parts[0].strip(),
+                "institution": (
+                    parts[1].strip()
+                    if len(parts) > 1
+                    else ""
+                ),
+                "location": "",
+                "dates": (
+                    parts[2].strip()
+                    if len(parts) > 2
+                    else ""
+                ),
+                "details": [],
+            }
+
+            resume["education"].append(
+                item
+            )
+
+            continue
+
+        # -----------------------------------------------------
+        # EXPERIENCE
+        # -----------------------------------------------------
+
+        if current_section == "experience":
+
+            value = re.sub(
+                r"^[-•*]\s*",
+                "",
+                line
+            ).strip()
+
+            if not value:
+                continue
+
+            item = {
+                "title": value,
+                "company": "",
+                "location": "",
+                "dates": "",
+                "bullets": [],
+            }
+
+            resume["experience"].append(
+                item
+            )
+
+            continue
+
+        # -----------------------------------------------------
+        # UNKNOWN CONTENT
+        # -----------------------------------------------------
+
+        # If content occurs before a detected section,
+        # decide whether it is contact information.
+        if _looks_like_contact(line):
+
+            resume["contact"].extend(
+                [
+                    x.strip()
+                    for x in re.split(
+                        r"\s*[|•]\s*",
+                        line
+                    )
+                    if x.strip()
+                ]
+            )
+
+    # ---------------------------------------------------------
+    # CLEAN CONTACT
+    # ---------------------------------------------------------
+
+    cleaned_contact = []
+
+    for value in resume["contact"]:
+
+        value = re.sub(
+            r"\s+",
+            " ",
+            value
+        ).strip()
+
+        if not value:
+            continue
+
+        # Never allow section headings inside contact
+        if detect_section(value):
+            continue
+
+        if value not in cleaned_contact:
+            cleaned_contact.append(value)
+
+    resume["contact"] = cleaned_contact
+
+    return resume
+
 def compute_ats_score(resume_text, jd_text=None, has_tables=False, content_meta=None):
 
     """
@@ -990,6 +1938,7 @@ def compute_ats_score(resume_text, jd_text=None, has_tables=False, content_meta=
 
     if jd_text and jd_text.strip():
         keyword_score, missing_keywords = score_keyword_match(resume_text, jd_text)
+        jd_gaps = build_jd_gaps(resume_text, jd_text)
         ats_score = round((formatting_score * 0.15) + (section_score * 0.15) + (content_score * 0.20) + 
                           (keyword_score * 0.35) + bullet_score * 0.15)
         
@@ -997,6 +1946,7 @@ def compute_ats_score(resume_text, jd_text=None, has_tables=False, content_meta=
     else:
         keyword_score = baselinekeyword_score(resume_text)
         missing_keywords = []
+        jd_gaps = []
         ats_score = round( formatting_score * 0.20 + section_score * 0.20 + content_score * 0.25 +
             keyword_score * 0.15 + bullet_score * 0.20
         )
@@ -1012,9 +1962,6 @@ def compute_ats_score(resume_text, jd_text=None, has_tables=False, content_meta=
         section_details, section_details_score, content_score, bullet_score, formatting_score,
         keyword_score, missing_sections, missing_keywords, grammar_issues, passive_voice_flags, jd_provided
     )
-
-
-
 
     return {
         'ats_score': ats_score,
