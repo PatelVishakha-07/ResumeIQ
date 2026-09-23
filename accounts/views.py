@@ -464,9 +464,9 @@ def login_view(request):
             return redirect("login")
 
         #check if user has login through google
-        if not user.password:
-            messages.error(request, "This account has no password set. Please use social login.")
-            return redirect("login")
+        # if not user.password:
+        #     messages.error(request, "This account has no password set. Please use social login.")
+        #     return redirect("login")
 
         #check if email and password match
         if not check_password(password, user.password):
