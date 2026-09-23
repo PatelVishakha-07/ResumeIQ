@@ -174,7 +174,8 @@ yearly, or custom date ranges.
                     <input type="date"
                            id="reportFromDate"
                            name="from_date"
-                           value="{{ from_date }}">
+                           value="{{ from_date }}"
+                           max="{{ today }}">
 
                 </div>
 
@@ -193,7 +194,8 @@ yearly, or custom date ranges.
                     <input type="date"
                            id="reportToDate"
                            name="to_date"
-                           value="{{ to_date }}">
+                           value="{{ to_date }}"
+                           max="{{ today }}">
 
                 </div>
 
@@ -224,63 +226,7 @@ yearly, or custom date ranges.
     </section>
 
 
-    <!-- =====================================================
-         REPORT INFORMATION
-    ====================================================== -->
-
-    <section class="rq-report-info">
-
-        <div class="rq-info-item">
-
-            <span class="rq-info-number">
-                01
-            </span>
-
-            <div>
-                <strong>Select Table</strong>
-                <p>
-                    Choose the ResumeIQ database table
-                    you want to report on.
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="rq-info-item">
-
-            <span class="rq-info-number">
-                02
-            </span>
-
-            <div>
-                <strong>Select Period</strong>
-                <p>
-                    Generate weekly, monthly, yearly,
-                    or custom date reports.
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="rq-info-item">
-
-            <span class="rq-info-number">
-                03
-            </span>
-
-            <div>
-                <strong>Generate</strong>
-                <p>
-                    View the filtered database records
-                    as a report.
-                </p>
-            </div>
-
-        </div>
-
-    </section>
+   
 
 
     <!-- =====================================================
@@ -315,22 +261,22 @@ yearly, or custom date ranges.
 
             <div class="rq-preview-actions">
 
-                <button type="button"
+                {% comment %} <button type="button"
                         class="rq-secondary-btn"
                         onclick="window.print()">
 
                     Print
 
-                </button>
+                </button> {% endcomment %}
 
                 <!-- Use "Save as PDF" in the browser's print dialog -->
-                <button type="button"
-                        class="rq-primary-btn"
-                        onclick="window.print()">
+                <a class="rq-primary-btn"
+                    id="downloadPdfBtn"
+                    href="{% url 'admin_report_download' %}?table={{ selected_table }}&period={{ selected_period }}&from_date={{ from_date }}&to_date={{ to_date }}">
 
-                    Download PDF
+                        Download PDF
 
-                </button>
+                    </a>
 
             </div>
 
@@ -457,6 +403,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /*
+     * Belt-and-braces: also set max via JS in case the
+     * server didn't render {{ today }} (e.g. cached page).
+     * Uses the browser's local date, formatted as YYYY-MM-DD.
+     */
+
+    const now = new Date();
+    const todayStr =
+        now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
+
+    if (!fromDate.max) fromDate.max = todayStr;
+    if (!toDate.max) toDate.max = todayStr;
+
+
+    /*
      * Show custom date fields only when
      * Custom Date Range is selected.
      */
@@ -500,6 +462,18 @@ document.addEventListener("DOMContentLoaded", function () {
         .addEventListener("submit", function (event) {
 
             if (period.value === "custom") {
+
+                if (fromDate.value > todayStr || toDate.value > todayStr) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Future dates are not allowed."
+                    );
+
+                    return;
+
+                }
 
                 if (
                     fromDate.value &&

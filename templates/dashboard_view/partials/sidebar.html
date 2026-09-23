@@ -33,8 +33,8 @@
 
     <div class="navgroup">
       <div class="navlabel">Account</div>
-      <div class="navitem {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
-          <a href="{% url 'admin_settings' %}"><span class="dot"></span>Settings</a>
+      <div class="navitem {% if request.resolver_match.url_name in 'user_settings,user_update_profile,user_change_password' %}active{% endif %}">
+        <a href="{% url 'account_settings' %}"><span class="dot"></span>Settings</a>
       </div>
 
       <div class="navitem {% if request.resolver_match.url_name == 'logout' %}active{% endif %}">
@@ -81,9 +81,11 @@
 
     <div class="navgroup">
       <div class="navlabel">Account</div>
-      <div class="navitem {% if request.resolver_match.url_name == 'account_settings' %}active{% endif %}">
-        <a href="{% url 'account_settings ' %}"><span class="dot"></span>Settings</a>
+      <div class="navitem {% if request.resolver_match.url_name == 'account_settings' or request.resolver_match.url_name == 'account_update_profile' or request.resolver_match.url_name == 'account_change_password' %}active{% endif %}">
+        <a href="{% url 'account_settings' %}"><span class="dot"></span>Settings</a>
       </div>
+
+      
 
       <div class="navitem {% if request.resolver_match.url_name == 'logout' %}active{% endif %}">
         <a href="{% url 'logout' %}"><span class="dot"></span>Logout</a>

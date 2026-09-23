@@ -68,7 +68,7 @@ def adminOverview(request):
         resumeversion__resumeanalysis__isnull=False
     ).distinct().count()
 
-    # --- Recent activity -
+    # --- Recent activity -------
     activity_items = []
 
     # Recent resume uploads
@@ -207,81 +207,7 @@ def feedback(request):
 REPORT_TEMPLATE = "dashboard_view/admin/admin_reports.html"
 
 
-def admin_report(request):
-    admin_id = request.session.get("user_id")
-    if not admin_id:
-        return redirect("login")
 
-    admin_user = User.objects.filter(user_id=admin_id).first()
-    if not admin_user or admin_user.role != "admin":
-        return redirect("dashboard")
-
-    ctx = {
-        "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
-        },
-        "tables": [(key, cfg["label"]) for key, cfg in REPORT_TABLES.items()],
-        "periods": PERIODS,
-        "selected_table": request.GET.get("table", ""),
-        "selected_period": request.GET.get("period", ""),
-        "from_date": request.GET.get("from_date", ""),
-        "to_date": request.GET.get("to_date", ""),
-        "generated": False,
-    }
-
-    # First page load (no form submitted yet)
-    if not ctx["selected_table"] and not ctx["selected_period"]:
-        return render(request, REPORT_TEMPLATE, ctx)
-
-    cfg = REPORT_TABLES.get(ctx["selected_table"])
-    if cfg is None:
-        ctx["error"] = "Please select a valid table."
-        return render(request, REPORT_TEMPLATE, ctx)
-
-    start, end, error = resolve_period(
-        ctx["selected_period"], ctx["from_date"], ctx["to_date"]
-    )
-    if error:
-        ctx["error"] = error
-        return render(request, REPORT_TEMPLATE, ctx)
-
-    tz = timezone.get_current_timezone()
-    start_dt = timezone.make_aware(datetime.combine(start, time.min), tz)
-    end_dt = timezone.make_aware(
-        datetime.combine(end + timedelta(days=1), time.min), tz
-    )
-
-    model = cfg["model"]
-    date_field = cfg["date_field"]
-    qs = model.objects.filter(
-        **{f"{date_field}__gte": start_dt, f"{date_field}__lt": end_dt}
-    ).order_by(f"-{date_field}")
-
-    fields = [
-        f for f in model._meta.concrete_fields
-        if f.name not in cfg.get("exclude", [])
-        and f.column not in cfg.get("exclude", [])
-    ]
-    columns = [f.column.replace("_", " ").title() for f in fields]
-    total = qs.count()
-    rows = [
-        [format_cell(v) for v in row]
-        for row in qs.values_list(*[f.attname for f in fields])[:MAX_ROWS]
-    ]
-
-    ctx.update({
-        "generated": True,
-        "report_title": f"{cfg['label']} Report",
-        "report_desc": f"{start:%d %b %Y} to {end:%d %b %Y} — {total} record(s)",
-        "columns": columns,
-        "rows": rows,
-        "total": total,
-        "truncated": total > MAX_ROWS,
-        "max_rows": MAX_ROWS,
-    })
-    return render(request, REPORT_TEMPLATE, ctx)
 
 
 #User Views
@@ -836,15 +762,9 @@ def download_roadmap_pdf(request):
 
 # dashboard_view/views.py
 
+#----------------------Admin report-----------
+
 from datetime import date, datetime, time, timedelta
-
-from django.shortcuts import render
-from django.utils import timezone
-
-from accounts.models import User, Profile
-from resume.models import (
-    Resume, ResumeVersion, ResumeAnalysis, JobDescription, JDMatchResult,
-)
 
 MAX_ROWS = 500          # preview limit so huge tables don't freeze the page
 MAX_CELL_CHARS = 100    # truncate long text (parsed_text, content_snapshot...)
@@ -856,36 +776,64 @@ REPORT_TABLES = {
         "model": User,
         "date_field": "created_at",
         "exclude": ["password"],          # never show password hashes
+        "description": (
+            "All registered accounts on ResumeIQ, including both job seekers and "
+            "administrators, along with their role and active/inactive status."
+        ),
     },
     "profile": {
         "label": "Profiles",
         "model": Profile,
         "date_field": "created_at",
+        "description": (
+            "Extended profile details for users, including their bio and "
+            "profile photo, linked one-to-one with the user account."
+        ),
     },
     "resume": {
         "label": "Resumes",
         "model": Resume,
         "date_field": "updated_at",
+        "description": (
+            "Resume files uploaded by users, with the stored file path, "
+            "file type, and the parsed text extracted for analysis."
+        ),
     },
     "resume_version": {
         "label": "Resume Versions",
         "model": ResumeVersion,
         "date_field": "created_at",
+        "description": (
+            "Every saved revision of a resume, used to track how a resume "
+            "changes over time and to compare ATS scores across versions."
+        ),
     },
     "resume_analysis": {
         "label": "Resume Analyses",
         "model": ResumeAnalysis,
         "date_field": "analyzed_at",
+        "description": (
+            "AI-generated analysis for a specific resume version: the ATS "
+            "score, grammar issues, passive-voice flags, and missing sections."
+        ),
     },
     "job_description": {
         "label": "Job Descriptions",
         "model": JobDescription,
         "date_field": "created_at",
+        "description": (
+            "Job descriptions users have pasted in, used to match resumes "
+            "against a target role or to generate interview questions."
+        ),
     },
     "jd_match": {
         "label": "JD Match Results",
         "model": JDMatchResult,
         "date_field": "jd__created_at",   # model has no date of its own
+        "description": (
+            "Match results between a resume and a job description: the match "
+            "percentage, missing keywords, and required skills identified."
+        ),
     },
 }
 
@@ -937,3 +885,128 @@ def format_cell(value):
     return value
 
 
+def get_admin_report_data(request):
+    """
+    Shared logic: reads table/period from the querystring, runs the
+    filtered query, and returns a context dict. Used by both the page
+    view and the PDF view so they never go out of sync.
+    """
+    ctx = {
+        "tables": [(key, cfg["label"]) for key, cfg in REPORT_TABLES.items()],
+        "periods": PERIODS,
+        "selected_table": request.GET.get("table", ""),
+        "selected_period": request.GET.get("period", ""),
+        "from_date": request.GET.get("from_date", ""),
+        "to_date": request.GET.get("to_date", ""),
+        "generated": False,
+    }
+
+    # First page load (no form submitted yet)
+    if not ctx["selected_table"] and not ctx["selected_period"]:
+        return ctx
+
+    cfg = REPORT_TABLES.get(ctx["selected_table"])
+    if cfg is None:
+        ctx["error"] = "Please select a valid table."
+        return ctx
+
+    start, end, error = resolve_period(
+        ctx["selected_period"], ctx["from_date"], ctx["to_date"]
+    )
+    if error:
+        ctx["error"] = error
+        return ctx
+
+    # Half-open range [start 00:00, day-after-end 00:00) avoids __date lookups,
+    # which need timezone tables on MySQL.
+    tz = timezone.get_current_timezone()
+    start_dt = timezone.make_aware(datetime.combine(start, time.min), tz)
+    end_dt = timezone.make_aware(
+        datetime.combine(end + timedelta(days=1), time.min), tz
+    )
+
+    model = cfg["model"]
+    date_field = cfg["date_field"]
+    qs = model.objects.filter(
+        **{f"{date_field}__gte": start_dt, f"{date_field}__lt": end_dt}
+    ).order_by(f"-{date_field}")
+
+    fields = [
+        f for f in model._meta.concrete_fields
+        if f.name not in cfg.get("exclude", [])
+        and f.column not in cfg.get("exclude", [])
+    ]
+    columns = [f.column.replace("_", " ").title() for f in fields]
+    total = qs.count()
+    rows = [
+        [format_cell(v) for v in row]
+        for row in qs.values_list(*[f.attname for f in fields])[:MAX_ROWS]
+    ]
+
+    ctx.update({
+        "generated": True,
+        "report_title": f"{cfg['label']} Report",
+        "report_desc": f"{start:%d %b %Y} to {end:%d %b %Y} — {total} record(s)",
+        "table_description": cfg.get("description", ""),
+        "columns": columns,
+        "rows": rows,
+        "total": total,
+        "truncated": total > MAX_ROWS,
+        "max_rows": MAX_ROWS,
+    })
+    return ctx
+
+
+REPORT_TEMPLATE = "dashboard_view/admin/admin_reports.html"
+
+
+def admin_report(request):
+    admin_id = request.session.get("user_id")
+    if not admin_id:
+        return redirect("login")
+
+    admin_user = User.objects.filter(user_id=admin_id).first()
+    if not admin_user or admin_user.role != "admin":
+        return redirect("dashboard")
+
+    ctx = get_admin_report_data(request)
+    ctx["nav"] = {
+        "role": "admin",
+        "avatar_initial": admin_user.name[0].upper(),
+        "avatar_name": admin_user.name,
+    }
+    return render(request, REPORT_TEMPLATE, ctx)
+
+
+def download_admin_report_pdf(request):
+    admin_id = request.session.get("user_id")
+    if not admin_id:
+        return redirect("login")
+
+    admin_user = User.objects.filter(user_id=admin_id).first()
+    if not admin_user or admin_user.role != "admin":
+        return redirect("dashboard")
+
+    ctx = get_admin_report_data(request)
+
+    if ctx.get("error") or not ctx.get("generated"):
+        return HttpResponse(
+            ctx.get("error", "Select a table and period first."), status=400
+        )
+
+    ctx["generated_on"] = timezone.now()
+    ctx["generated_by"] = admin_user.name
+    ctx["period_label"] = dict(PERIODS).get(ctx["selected_period"], ctx["selected_period"])
+
+    html = render_to_string("dashboard_view/admin/admin_report_pdf.html", ctx)
+
+    pdf_buffer = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=pdf_buffer)
+
+    if pisa_status.err:
+        return HttpResponse("We couldn't generate the PDF for this report.", status=500)
+
+    filename = f"{ctx['report_title'].replace(' ', '_')}.pdf"
+    response = HttpResponse(pdf_buffer.getvalue(), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
