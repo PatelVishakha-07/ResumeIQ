@@ -32,5 +32,7 @@ urlpatterns = [
 
 # Admin report
     path('admin_panel/reports', views.admin_report, name="reports"),
+    path('admin_panel/reports/download/', views.download_admin_report_pdf, name = "admin_report_download"),
+
 
 ]

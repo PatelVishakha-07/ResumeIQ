@@ -464,9 +464,9 @@ def login_view(request):
             return redirect("login")
 
         #check if user has login through google
-        # if not user.password:
-        #     messages.error(request, "This account has no password set. Please use social login.")
-        #     return redirect("login")
+        if not user.password:
+            messages.error(request, "This account has no password set. Please use social login.")
+            return redirect("login")
 
         #check if email and password match
         if not check_password(password, user.password):
@@ -494,35 +494,44 @@ def logout_view(request):
 
 
 # ---------------
-# admin Setting
+# Account settings (shared: admin + user)
 # ---------------
 
-def adminSettings(request):
-    admin_id = request.session.get("user_id")
-    if not admin_id:
+def _get_session_user(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return None
+    try:
+        return User.objects.get(user_id=user_id)
+    except User.DoesNotExist:
+        request.session.flush()
+        return None
+
+
+def account_settings(request):
+    user = _get_session_user(request)
+    if not user:
         messages.error(request, "Please sign in to continue.")
         return redirect("login")
-
-    admin_user = User.objects.get(user_id=admin_id)
 
     context = {
         "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
+            "role": user.role,
+            "avatar_initial": user.name[0].upper(),
+            "avatar_name": user.name,
         },
-        "admin_user": admin_user,
+        "account_user": user,
     }
     return render(request, "dashboard_view/admin/admin_settings.html", context)
 
-def adminUpdateProfile(request):
-    admin_id = request.session.get("user_id")
-    if not admin_id:
+
+def account_update_profile(request):
+    user = _get_session_user(request)
+    if not user:
         messages.error(request, "Please sign in to continue.")
         return redirect("login")
 
-    admin_user = User.objects.get(user_id=admin_id)
-    profile, _ = Profile.objects.get_or_create(user=admin_user)
+    profile, _ = Profile.objects.get_or_create(user=user)
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -530,101 +539,96 @@ def adminUpdateProfile(request):
 
         if not name:
             messages.error(request, "Name cannot be empty.")
-            return redirect("admin_update_profile")
+            return redirect("account_update_profile")
 
-        # Update name
-        admin_user.name = name
-        admin_user.save()
+        user.name = name
+        user.save()
 
-        # Update bio
         profile.bio = bio
 
-        # Remove current photo
         if request.POST.get("remove_image") == "1" and profile.profile_image:
             profile.profile_image.delete(save=False)
             profile.profile_image = None
 
-        # Handle new upload
         uploaded_image = request.FILES.get("profile_image")
         if uploaded_image:
             allowed_types = ["image/jpeg", "image/png", "image/webp"]
 
             if uploaded_image.content_type not in allowed_types:
                 messages.error(request, "Only JPG, PNG, or WEBP images are allowed.")
-                return redirect("admin_update_profile")
+                return redirect("account_update_profile")
 
             if uploaded_image.size > 2 * 1024 * 1024:
                 messages.error(request, "Image must be 2MB or smaller.")
-                return redirect("admin_update_profile")
+                return redirect("account_update_profile")
 
-            # Delete old image
             if profile.profile_image:
                 profile.profile_image.delete(save=False)
 
-            # Save new image
             profile.profile_image = uploaded_image
 
         profile.save()
 
-        request.session["name"] = admin_user.name
+        request.session["name"] = user.name
         messages.success(request, "Profile updated successfully.")
-        return redirect("admin_settings")
+        return redirect("account_settings")
 
     context = {
         "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
+            "role": user.role,
+            "avatar_initial": user.name[0].upper(),
+            "avatar_name": user.name,
             "avatar_image": profile.get_image_url() if profile.profile_image else None,
         },
-        "admin_user": admin_user,
+        "account_user": user,
         "profile": profile,
     }
     return render(request, "dashboard_view/admin/admin_update_profile.html", context)
 
 
-def adminChangePassword(request):
-    admin_id = request.session.get("user_id")
-    if not admin_id:
+def account_change_password(request):
+    user = _get_session_user(request)
+    if not user:
         messages.error(request, "Please sign in to continue.")
         return redirect("login")
-
-    admin_user = User.objects.get(user_id=admin_id)
 
     if request.method == "POST":
         current_password = request.POST.get("current_password", "")
         new_password = request.POST.get("new_password", "")
         confirm_password = request.POST.get("confirm_password", "")
 
-        if not admin_user.password:
+        if not user.password:
             messages.error(request, "This account has no password set. Please use social login.")
-            return redirect("admin_change_password")
+            return redirect("account_change_password")
 
-        #check current password matches
-        if not check_password(current_password, admin_user.password):
+        if not check_password(current_password, user.password):
             messages.error(request, "Current password is incorrect.")
-            return redirect("admin_change_password")
+            return redirect("account_change_password")
+
+        if current_password == new_password:
+            messages.error(request, "New password can't be same as Current Password")
+            return redirect("account_change_password")
+
 
         if len(new_password) < 8:
             messages.error(request, "New password must be at least 8 characters.")
-            return redirect("admin_change_password")
+            return redirect("account_change_password")
 
         if new_password != confirm_password:
             messages.error(request, "New password and confirmation do not match.")
-            return redirect("admin_change_password")
+            return redirect("account_change_password")
 
-        admin_user.password = make_password(new_password)
-        admin_user.save()
+        user.password = make_password(new_password)
+        user.save()
 
         messages.success(request, "Password changed successfully.")
-        return redirect("admin_settings")
+        return redirect("account_settings")
 
     context = {
         "nav": {
-            "role": "admin",
-            "avatar_initial": admin_user.name[0].upper(),
-            "avatar_name": admin_user.name,
+            "role": user.role,
+            "avatar_initial": user.name[0].upper(),
+            "avatar_name": user.name,
         },
     }
     return render(request, "dashboard_view/admin/admin_change_password.html", context)
-

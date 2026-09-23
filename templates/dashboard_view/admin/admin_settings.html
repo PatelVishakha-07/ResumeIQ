@@ -1,8 +1,8 @@
 {% extends "dashboard_view/base.html" %}
 
-{% block title %}Settings — ResumeIQ Admin{% endblock %}
+{% block title %}Settings — ResumeIQ{% endblock %}
 {% block page_title %}Settings{% endblock %}
-{% block page_desc %}Manage your admin account.{% endblock %}
+{% block page_desc %}Manage your account.{% endblock %}
 
 {% block content %}
 
@@ -30,38 +30,46 @@
 
     <div class="rq-summary">
 
-        <img
-            src="{{ admin_user.profile.get_image_url }}"
-            alt="Profile photo"
-        >
+        {% if account_user.profile.profile_image %}
+            <img
+                src="{{ account_user.profile.get_image_url }}"
+                alt="Profile photo"
+            >
+        {% else %}
+            <div class="rq-summary-avatar-placeholder">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                    <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z"/>
+                </svg>
+            </div>
+        {% endif %}
 
         <div>
 
             <div class="rq-summary-name">
-                {{ admin_user.name }}
+                {{ account_user.name }}
             </div>
 
             <span class="rq-summary-role">
-                Administrator
+                {% if nav.role == 'admin' %}Administrator{% else %}Job seeker{% endif %}
             </span>
 
-            <div class="rq-summary-email">
-                {{ admin_user.email }}
-            </div>
+            {% comment %} <div class="rq-summary-email">
+                {{ account_user.email }}
+            </div> {% endcomment %}
 
-            {% if admin_user.profile.bio %}
+            {% comment %} {% if account_user.profile.bio %}
             <div class="rq-summary-bio">
-                {{ admin_user.profile.bio }}
+                {{ account_user.profile.bio }}
             </div>
-            {% endif %}
+            {% endif %} {% endcomment %}
 
         </div>
 
     </div>
 
 
-    <a
-        href="{% url 'admin_update_profile' %}"
+    
+    <a href="{% url 'account_update_profile' %}"
         class="rq-navitem"
     >
         <div class="rq-navitem-inner">
@@ -84,8 +92,8 @@
     </a>
 
 
-    <a
-        href="{% url 'admin_change_password' %}"
+    
+        <a href="{% url 'account_change_password' %}"
         class="rq-navitem"
     >
         <div class="rq-navitem-inner">
