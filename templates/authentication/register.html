@@ -1,8 +1,11 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
@@ -24,6 +27,7 @@
                         correctiondark: "#92392E",
                         paperline: "#DCD5C9"
                     },
+
                     fontFamily: {
                         display: ["Georgia", "serif"],
                         sans: ["Inter", "system-ui", "sans-serif"]
@@ -33,7 +37,9 @@
         }
     </script>
 
+
     <style>
+
         * {
             box-sizing: border-box;
         }
@@ -47,13 +53,12 @@
             min-width: 280px;
             background: #F7F4EE;
             color: #171717;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
-                         "Segoe UI", sans-serif;
+            font-family: Inter, system-ui, -apple-system,
+                         BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        /* --------------------------------------------------
-           BACKGROUND
-        -------------------------------------------------- */
+
+        /* BACKGROUND */
 
         .page-background {
             background:
@@ -70,328 +75,505 @@
                 #F7F4EE;
         }
 
+
         .paper-card {
             background: rgba(255, 255, 255, .72);
+
             border: 1px solid #DCD5C9;
+
             box-shadow:
                 0 25px 70px rgba(23, 23, 23, .08),
                 0 4px 12px rgba(23, 23, 23, .04);
+
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
 
-        /* --------------------------------------------------
-           BRAND MARK
-        -------------------------------------------------- */
+
+        /* BRAND */
 
         .brand-mark {
             position: relative;
+
             width: clamp(2.6rem, 4vw, 3.3rem);
             height: clamp(2.6rem, 4vw, 3.3rem);
+
             border: 1px solid #171717;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             background: #F7F4EE;
         }
 
+
         .brand-mark::after {
             content: "";
+
             position: absolute;
+
             width: 7px;
             height: 7px;
+
             background: #B84A3A;
+
             bottom: -4px;
             right: -4px;
         }
 
-        /* --------------------------------------------------
-           INPUTS
-        -------------------------------------------------- */
+
+        /* INPUTS */
 
         .field {
             width: 100%;
+
             min-height: 3.15rem;
+
             background: rgba(255,255,255,.65);
+
             border: 1px solid #DCD5C9;
+
             color: #171717;
+
             border-radius: .55rem;
+
             padding: .8rem .95rem;
+
             outline: none;
+
             transition:
                 border-color .2s ease,
                 box-shadow .2s ease,
                 background .2s ease;
         }
 
+
         .field:hover {
             background: rgba(255,255,255,.9);
         }
 
+
         .field:focus {
             background: #fff;
+
             border-color: #B84A3A;
-            box-shadow: 0 0 0 3px rgba(184,74,58,.09);
+
+            box-shadow:
+                0 0 0 3px rgba(184,74,58,.09);
         }
+
 
         .field::placeholder {
             color: #9A958D;
         }
 
-        /* --------------------------------------------------
-           MAIN BUTTON
-        -------------------------------------------------- */
+
+        /* BUTTON */
 
         .primary-button {
             min-height: 3.2rem;
+
             background: #171717;
+
             color: #F7F4EE;
+
             border: 1px solid #171717;
+
             border-radius: .55rem;
+
             transition:
                 transform .18s ease,
                 background .18s ease,
                 box-shadow .18s ease;
         }
 
+
         .primary-button:hover {
             background: #292929;
+
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(23,23,23,.15);
+
+            box-shadow:
+                0 10px 24px rgba(23,23,23,.15);
         }
+
 
         .primary-button:active {
             transform: translateY(0);
         }
 
+
         .primary-button:disabled {
             opacity: .65;
+
             cursor: wait;
+
             transform: none;
         }
 
-        /* --------------------------------------------------
-           SIDE PANEL
-        -------------------------------------------------- */
+
+        /* SIDE PANEL */
 
         .manifesto {
             border-left: 2px solid #B84A3A;
-            padding-left: clamp(1rem, 2vw, 1.5rem);
+
+            padding-left:
+                clamp(1rem, 2vw, 1.5rem);
         }
+
 
         .feature-line {
             display: flex;
+
             align-items: flex-start;
+
             gap: .8rem;
         }
 
+
         .feature-number {
             flex: 0 0 auto;
+
             width: 1.8rem;
             height: 1.8rem;
+
             border: 1px solid #CFC7BA;
+
             border-radius: 50%;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             color: #68645E;
+
             font-size: .72rem;
         }
 
-        /* --------------------------------------------------
-           OTP MODAL
-        -------------------------------------------------- */
+
+        /* OTP */
 
         .modal-backdrop {
             position: fixed;
+
             inset: 0;
+
             z-index: 100;
-            padding: clamp(.75rem, 3vw, 2rem);
+
+            padding:
+                clamp(.75rem, 3vw, 2rem);
 
             display: flex;
+
             align-items: center;
             justify-content: center;
 
             background: rgba(23,23,23,.62);
+
             backdrop-filter: blur(7px);
             -webkit-backdrop-filter: blur(7px);
         }
 
+
         .otp-card {
             width: min(100%, 31rem);
-            max-height: min(90vh, 42rem);
+
+            max-height:
+                min(90vh, 42rem);
+
             overflow-y: auto;
 
             background: #F7F4EE;
+
             border: 1px solid #DCD5C9;
-            box-shadow: 0 30px 100px rgba(0,0,0,.25);
+
+            box-shadow:
+                0 30px 100px rgba(0,0,0,.25);
 
             border-radius: .75rem;
-            padding: clamp(1.25rem, 4vw, 2rem);
+
+            padding:
+                clamp(1.25rem, 4vw, 2rem);
 
             animation: modalIn .2s ease-out;
         }
 
+
         @keyframes modalIn {
+
             from {
                 opacity: 0;
-                transform: translateY(12px) scale(.985);
+
+                transform:
+                    translateY(12px)
+                    scale(.985);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+
+                transform:
+                    translateY(0)
+                    scale(1);
             }
         }
 
+
         .otp-input {
-            width: clamp(2.5rem, 10vw, 3.35rem);
-            height: clamp(3rem, 11vw, 3.8rem);
+            width:
+                clamp(2.5rem, 10vw, 3.35rem);
+
+            height:
+                clamp(3rem, 11vw, 3.8rem);
 
             flex: 1 1 0;
+
             max-width: 3.35rem;
 
             text-align: center;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-size: clamp(1.15rem, 4vw, 1.5rem);
+
+            font-family:
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                monospace;
+
+            font-size:
+                clamp(1.15rem, 4vw, 1.5rem);
+
             font-weight: 600;
 
             color: #171717;
-            background: rgba(255,255,255,.65);
 
-            border: 1px solid #DCD5C9;
+            background:
+                rgba(255,255,255,.65);
+
+            border:
+                1px solid #DCD5C9;
+
             border-radius: .55rem;
+
             outline: none;
 
             transition: .18s ease;
         }
 
+
         .otp-input:focus {
+
             background: #fff;
+
             border-color: #B84A3A;
-            box-shadow: 0 0 0 3px rgba(184,74,58,.09);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(184,74,58,.09);
         }
 
-        /* --------------------------------------------------
-           RESPONSIVE
-        -------------------------------------------------- */
+
+        /* RESPONSIVE */
 
         @media (max-width: 900px) {
+
             .desktop-panel {
                 display: none;
             }
         }
 
+
         @media (max-width: 480px) {
+
             .auth-card {
+
                 border-left: 0;
+
                 border-right: 0;
+
                 border-radius: 0;
+
                 box-shadow: none;
             }
+
 
             .page-wrapper {
                 padding: 0;
             }
+
 
             .otp-row {
                 gap: .35rem;
             }
         }
 
+
         @media (min-width: 901px) {
+
             .auth-grid {
+
                 grid-template-columns:
                     minmax(18rem, .85fr)
                     minmax(25rem, 1.15fr);
             }
         }
 
-        /* Browser zoom / accessibility */
+
         @media (min-resolution: 1.5dppx) {
+
             .paper-card {
+
                 box-shadow:
                     0 15px 45px rgba(23,23,23,.07),
                     0 3px 10px rgba(23,23,23,.035);
             }
         }
 
-        /* Reduced motion */
+
         @media (prefers-reduced-motion: reduce) {
+
             *,
             *::before,
             *::after {
+
                 animation-duration: .01ms !important;
+
                 animation-iteration-count: 1 !important;
+
                 transition-duration: .01ms !important;
             }
         }
+
     </style>
+
 </head>
+
 
 <body>
 
 <div class="page-background min-h-screen">
 
-    <div class="page-wrapper min-h-screen flex items-center justify-center px-0 sm:px-6 lg:px-8 py-0 sm:py-8 lg:py-12">
+    <div class="
+        page-wrapper
+        min-h-screen
+        flex
+        items-center
+        justify-center
+        px-0 sm:px-6 lg:px-8
+        py-0 sm:py-8 lg:py-12
+    ">
 
-        <main class="auth-grid w-full max-w-6xl grid bg-transparent">
+        <main
+            class="
+                auth-grid
+                w-full
+                max-w-6xl
+                grid
+                bg-transparent
+            "
+        >
 
-            <!-- =================================================
-                 LEFT BRAND PANEL
-            ================================================== -->
 
-            <section class="desktop-panel hidden lg:flex flex-col justify-between bg-ink text-paper rounded-l-xl px-8 xl:px-12 py-9 xl:py-12">
+            <!-- ==========================================
+                 LEFT PANEL
+            =========================================== -->
+
+            <section
+                class="
+                    desktop-panel
+                    hidden lg:flex
+                    flex-col
+                    justify-between
+                    bg-ink
+                    text-paper
+                    rounded-l-xl
+                    px-8 xl:px-12
+                    py-9 xl:py-12
+                "
+            >
 
                 <div>
 
-                    <!-- Brand -->
-
                     <div class="flex items-center gap-4">
+
                         <div class="brand-mark text-ink">
-                            <span class="font-display text-2xl"> R </span>
+
+                            <span class="font-display text-2xl">
+                                R
+                            </span>
+
                         </div>
 
-                        <div>
-                            <div class="font-display text-2xl"> ResumeIQ </div>
 
-                            <div class="text-xs tracking-[.18em] uppercase text-paper/50
-                                       mt-0.5"> Career Intelligence </div>
+                        <div>
+
+                            <div class="font-display text-2xl">
+                                ResumeIQ
+                            </div>
+
+                            <div
+                                class="
+                                    text-xs
+                                    tracking-[.18em]
+                                    uppercase
+                                    text-paper/50
+                                    mt-0.5
+                                "
+                            >
+                                Career Intelligence
+                            </div>
+
                         </div>
 
                     </div>
 
-                    <!-- Editorial heading -->
 
                     <div class="mt-20 xl:mt-28">
 
-                        <div class="text-xs uppercase tracking-[.2em] text-paper/45 mb-5">
+                        <div
+                            class="
+                                text-xs
+                                uppercase
+                                tracking-[.2em]
+                                text-paper/45
+                                mb-5
+                            "
+                        >
                             Your professional workspace
                         </div>
 
-                        <h1 class="font-display
-                                   text-4xl xl:text-5xl
-                                   leading-[1.05]
-                                   font-normal">
+
+                        <h1
+                            class="
+                                font-display
+                                text-4xl xl:text-5xl
+                                leading-[1.05]
+                                font-normal
+                            "
+                        >
 
                             Build a career
+
                             <span class="text-paper/50">
                                 worth remembering.
                             </span>
 
                         </h1>
 
+
                         <div class="manifesto mt-7">
 
-                            <p class="text-paper/70
-                                      leading-relaxed
-                                      max-w-md">
-
+                            <p
+                                class="
+                                    text-paper/70
+                                    leading-relaxed
+                                    max-w-md
+                                "
+                            >
                                 ResumeIQ brings your resume,
                                 interview preparation and
                                 career development into one
                                 intelligent workspace.
-
                             </p>
 
                         </div>
@@ -399,9 +581,8 @@
                     </div>
 
 
-                    <!-- Features -->
-
                     <div class="mt-12 space-y-6">
+
 
                         <div class="feature-line">
 
@@ -410,17 +591,23 @@
                             </div>
 
                             <div>
+
                                 <div class="text-sm font-medium">
                                     Intelligent preparation
                                 </div>
 
-                                <div class="text-xs
-                                            text-paper/45
-                                            mt-1
-                                            leading-relaxed">
+                                <div
+                                    class="
+                                        text-xs
+                                        text-paper/45
+                                        mt-1
+                                        leading-relaxed
+                                    "
+                                >
                                     Prepare for interviews with
                                     focused AI-assisted practice.
                                 </div>
+
                             </div>
 
                         </div>
@@ -433,17 +620,23 @@
                             </div>
 
                             <div>
+
                                 <div class="text-sm font-medium">
                                     Professional identity
                                 </div>
 
-                                <div class="text-xs
-                                            text-paper/45
-                                            mt-1
-                                            leading-relaxed">
+                                <div
+                                    class="
+                                        text-xs
+                                        text-paper/45
+                                        mt-1
+                                        leading-relaxed
+                                    "
+                                >
                                     Keep your professional profile
                                     clear and career-ready.
                                 </div>
+
                             </div>
 
                         </div>
@@ -456,17 +649,23 @@
                             </div>
 
                             <div>
+
                                 <div class="text-sm font-medium">
                                     One focused workspace
                                 </div>
 
-                                <div class="text-xs
-                                            text-paper/45
-                                            mt-1
-                                            leading-relaxed">
+                                <div
+                                    class="
+                                        text-xs
+                                        text-paper/45
+                                        mt-1
+                                        leading-relaxed
+                                    "
+                                >
                                     Everything you need to move
                                     your career forward.
                                 </div>
+
                             </div>
 
                         </div>
@@ -476,8 +675,15 @@
                 </div>
 
 
-                <div class="text-xs text-paper/35
-                            flex items-center justify-between">
+                <div
+                    class="
+                        text-xs
+                        text-paper/35
+                        flex
+                        items-center
+                        justify-between
+                    "
+                >
 
                     <span>
                         ResumeIQ
@@ -492,21 +698,29 @@
             </section>
 
 
-            <!-- =================================================
+            <!-- ==========================================
                  REGISTER FORM
-            ================================================== -->
+            =========================================== -->
 
-            <section class="auth-card
-                            paper-card
-                            rounded-none lg:rounded-r-xl
-                            min-h-screen lg:min-h-0
-                            flex items-center">
+            <section
+                class="
+                    auth-card
+                    paper-card
+                    rounded-none lg:rounded-r-xl
+                    min-h-screen lg:min-h-0
+                    flex items-center
+                "
+            >
 
-                <div class="w-full
-                            max-w-xl
-                            mx-auto
-                            px-6 sm:px-10 xl:px-14
-                            py-8 sm:py-10 lg:py-12">
+                <div
+                    class="
+                        w-full
+                        max-w-xl
+                        mx-auto
+                        px-6 sm:px-10 xl:px-14
+                        py-8 sm:py-10 lg:py-12
+                    "
+                >
 
 
                     <!-- Mobile brand -->
@@ -523,16 +737,21 @@
 
                             </div>
 
+
                             <div>
 
                                 <div class="font-display text-xl">
                                     ResumeIQ
                                 </div>
 
-                                <div class="text-[10px]
-                                            uppercase
-                                            tracking-[.18em]
-                                            text-graphite">
+                                <div
+                                    class="
+                                        text-[10px]
+                                        uppercase
+                                        tracking-[.18em]
+                                        text-graphite
+                                    "
+                                >
                                     Career Intelligence
                                 </div>
 
@@ -547,62 +766,86 @@
 
                     <div class="mb-8">
 
-                        <div class="flex items-center gap-2
-                                    text-xs uppercase
-                                    tracking-[.18em]
-                                    text-correction
-                                    mb-4">
+                        <div
+                            class="
+                                flex
+                                items-center
+                                gap-2
+                                text-xs
+                                uppercase
+                                tracking-[.18em]
+                                text-correction
+                                mb-4
+                            "
+                        >
 
-                            <span class="w-5 h-px bg-correction"></span>
+                            <span
+                                class="
+                                    w-5
+                                    h-px
+                                    bg-correction
+                                "
+                            ></span>
 
                             Create your account
 
                         </div>
 
 
-                        <h2 class="font-display
-                                   text-3xl sm:text-4xl
-                                   font-normal
-                                   leading-tight">
-
+                        <h2
+                            class="
+                                font-display
+                                text-3xl sm:text-4xl
+                                font-normal
+                                leading-tight
+                            "
+                        >
                             Start with ResumeIQ.
-
                         </h2>
 
 
-                        <p class="mt-3
-                                  text-sm
-                                  text-graphite
-                                  leading-relaxed
-                                  max-w-md">
-
+                        <p
+                            class="
+                                mt-3
+                                text-sm
+                                text-graphite
+                                leading-relaxed
+                                max-w-md
+                            "
+                        >
                             Create your account to access your
                             personalized career workspace.
-
                         </p>
 
                     </div>
 
 
-                    <!-- Error -->
+                    <!-- ERROR -->
 
-                    <div id="formError"
-                         role="alert"
-                         class="hidden mb-5
-                                rounded-md
-                                border border-red-200
-                                bg-red-50
-                                px-4 py-3
-                                text-sm text-red-700">
-                    </div>
+                    <div
+                        id="formError"
+                        role="alert"
+                        class="
+                            hidden
+                            mb-5
+                            rounded-md
+                            border border-red-200
+                            bg-red-50
+                            px-4 py-3
+                            text-sm
+                            text-red-700
+                        "
+                    ></div>
 
 
                     <!-- FORM -->
 
-                    <form id="registerForm"
-                          method="POST"
-                          action="{% url 'register' %}"
-                          class="space-y-5">
+                    <form
+                        id="registerForm"
+                        method="POST"
+                        action="{% url 'register' %}"
+                        class="space-y-5"
+                    >
 
                         {% csrf_token %}
 
@@ -611,17 +854,21 @@
 
                         <div>
 
-                            <label for="name"
-                                   class="block text-xs
-                                          font-medium
-                                          uppercase
-                                          tracking-[.12em]
-                                          text-graphite
-                                          mb-2">
-
+                            <label
+                                for="name"
+                                class="
+                                    block
+                                    text-xs
+                                    font-medium
+                                    uppercase
+                                    tracking-[.12em]
+                                    text-graphite
+                                    mb-2
+                                "
+                            >
                                 Full name
-
                             </label>
+
 
                             <input
                                 id="name"
@@ -629,7 +876,9 @@
                                 autocomplete="name"
                                 placeholder="Your full name"
                                 class="field"
-                                required>
+                                maxlength="100"
+                                required
+                            >
 
                         </div>
 
@@ -638,17 +887,21 @@
 
                         <div>
 
-                            <label for="email"
-                                   class="block text-xs
-                                          font-medium
-                                          uppercase
-                                          tracking-[.12em]
-                                          text-graphite
-                                          mb-2">
-
+                            <label
+                                for="email"
+                                class="
+                                    block
+                                    text-xs
+                                    font-medium
+                                    uppercase
+                                    tracking-[.12em]
+                                    text-graphite
+                                    mb-2
+                                "
+                            >
                                 Email address
-
                             </label>
+
 
                             <input
                                 id="email"
@@ -656,7 +909,9 @@
                                 autocomplete="email"
                                 placeholder="you@example.com"
                                 class="field"
-                                required>
+                                maxlength="100"
+                                required
+                            >
 
                         </div>
 
@@ -665,23 +920,37 @@
 
                         <div>
 
-                            <div class="flex items-center
-                                        justify-between mb-2">
+                            <div
+                                class="
+                                    flex
+                                    items-center
+                                    justify-between
+                                    mb-2
+                                "
+                            >
 
-                                <label for="password"
-                                       class="block text-xs
-                                              font-medium
-                                              uppercase
-                                              tracking-[.12em]
-                                              text-graphite">
-
+                                <label
+                                    for="password"
+                                    class="
+                                        block
+                                        text-xs
+                                        font-medium
+                                        uppercase
+                                        tracking-[.12em]
+                                        text-graphite
+                                    "
+                                >
                                     Password
-
                                 </label>
 
-                                <span id="passwordHint"
-                                      class="text-[11px]
-                                             text-graphite/70">
+
+                                <span
+                                    id="passwordHint"
+                                    class="
+                                        text-[11px]
+                                        text-graphite/70
+                                    "
+                                >
                                     Minimum 8 characters
                                 </span>
 
@@ -696,35 +965,47 @@
                                     autocomplete="new-password"
                                     placeholder="Create a password"
                                     class="field pr-12"
-                                    required>
+                                    maxlength="128"
+                                    required
+                                >
 
 
                                 <button
                                     type="button"
                                     id="togglePassword"
                                     aria-label="Show password"
-                                    class="absolute
-                                           right-3
-                                           top-1/2
-                                           -translate-y-1/2
-                                           text-graphite
-                                           hover:text-ink">
+                                    class="
+                                        absolute
+                                        right-3
+                                        top-1/2
+                                        -translate-y-1/2
+                                        text-graphite
+                                        hover:text-ink
+                                    "
+                                >
 
-                                    <svg id="eyeOpen"
-                                         width="19"
-                                         height="19"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         stroke-width="1.7"
-                                         viewBox="0 0 24 24">
+                                    <svg
+                                        width="19"
+                                        height="19"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                        viewBox="0 0 24 24"
+                                    >
 
-                                        <path d="M2 12s3.5-7 10-7
-                                                 10 7 10 7-3.5 7-10 7
-                                                 S2 12 2 12z"/>
+                                        <path
+                                            d="
+                                                M2 12s3.5-7 10-7
+                                                10 7 10 7-3.5 7-10 7
+                                                S2 12 2 12z
+                                            "
+                                        />
 
-                                        <circle cx="12"
-                                                cy="12"
-                                                r="3"/>
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="3"
+                                        />
 
                                     </svg>
 
@@ -733,54 +1014,74 @@
                             </div>
 
 
-                            <!-- Strength -->
+                            <!-- STRENGTH -->
 
                             <div class="flex gap-1 mt-2">
 
-                                <span id="strength1"
-                                      class="h-1 flex-1
-                                             rounded-full
-                                             bg-paperline">
-                                </span>
+                                <span
+                                    id="strength1"
+                                    class="
+                                        h-1
+                                        flex-1
+                                        rounded-full
+                                        bg-paperline
+                                    "
+                                ></span>
 
-                                <span id="strength2"
-                                      class="h-1 flex-1
-                                             rounded-full
-                                             bg-paperline">
-                                </span>
+                                <span
+                                    id="strength2"
+                                    class="
+                                        h-1
+                                        flex-1
+                                        rounded-full
+                                        bg-paperline
+                                    "
+                                ></span>
 
-                                <span id="strength3"
-                                      class="h-1 flex-1
-                                             rounded-full
-                                             bg-paperline">
-                                </span>
+                                <span
+                                    id="strength3"
+                                    class="
+                                        h-1
+                                        flex-1
+                                        rounded-full
+                                        bg-paperline
+                                    "
+                                ></span>
 
-                                <span id="strength4"
-                                      class="h-1 flex-1
-                                             rounded-full
-                                             bg-paperline">
-                                </span>
+                                <span
+                                    id="strength4"
+                                    class="
+                                        h-1
+                                        flex-1
+                                        rounded-full
+                                        bg-paperline
+                                    "
+                                ></span>
 
                             </div>
 
                         </div>
 
 
-                        <!-- CONFIRM -->
+                        <!-- CONFIRM PASSWORD -->
 
                         <div>
 
-                            <label for="confirm"
-                                   class="block text-xs
-                                          font-medium
-                                          uppercase
-                                          tracking-[.12em]
-                                          text-graphite
-                                          mb-2">
-
+                            <label
+                                for="confirm"
+                                class="
+                                    block
+                                    text-xs
+                                    font-medium
+                                    uppercase
+                                    tracking-[.12em]
+                                    text-graphite
+                                    mb-2
+                                "
+                            >
                                 Confirm password
-
                             </label>
+
 
                             <input
                                 id="confirm"
@@ -788,81 +1089,60 @@
                                 autocomplete="new-password"
                                 placeholder="Repeat your password"
                                 class="field"
-                                required>
+                                maxlength="128"
+                                required
+                            >
 
                         </div>
 
 
-                        <!-- TERMS -->
-
-                       <!--  <label class="flex items-start
-                                      gap-3 cursor-pointer
-                                      pt-1">
-
-                            <input
-                                id="terms"
-                                type="checkbox"
-                                class="mt-1
-                                       w-4 h-4
-                                       accent-[#B84A3A]">
-
-                            <span class="text-xs
-                                         text-graphite
-                                         leading-relaxed">
-
-                                I agree to the
-                                <a href="#"
-                                   class="text-ink
-                                          underline
-                                          underline-offset-2">
-                                    Terms of Service
-                                </a>
-                                and
-                                <a href="#"
-                                   class="text-ink
-                                          underline
-                                          underline-offset-2">
-                                    Privacy Policy
-                                </a>.
-
-                            </span>
-
-                        </label> -->
-
-
-                        <!-- CREATE BUTTON -->
+                        <!-- CREATE ACCOUNT -->
 
                         <button
                             type="submit"
                             id="createBtn"
-                            class="primary-button
-                                   w-full
-                                   flex items-center
-                                   justify-center
-                                   gap-2
-                                   font-medium">
+                            class="
+                                primary-button
+                                w-full
+                                flex
+                                items-center
+                                justify-center
+                                gap-2
+                                font-medium
+                            "
+                        >
 
                             <span id="createText">
                                 Create account
                             </span>
 
-                            <svg id="createLoader"
-                                 class="hidden animate-spin"
-                                 width="17"
-                                 height="17"
-                                 fill="none"
-                                 viewBox="0 0 24 24">
 
-                                <circle cx="12"
-                                        cy="12"
-                                        r="9"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        opacity=".3"/>
+                            <svg
+                                id="createLoader"
+                                class="hidden animate-spin"
+                                width="17"
+                                height="17"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
 
-                                <path d="M21 12a9 9 0 0 1-9 9"
-                                      stroke="currentColor"
-                                      stroke-width="2"/>
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="9"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    opacity=".3"
+                                />
+
+                                <path
+                                    d="
+                                        M21 12
+                                        a9 9 0 0 1-9 9
+                                    "
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                />
 
                             </svg>
 
@@ -871,25 +1151,31 @@
                     </form>
 
 
-                    <!-- LOGIN LINK -->
+                    <!-- LOGIN -->
 
-                    <div class="mt-8
-                                pt-6
-                                border-t border-paperline
-                                text-center">
+                    <div
+                        class="
+                            mt-8
+                            pt-6
+                            border-t border-paperline
+                            text-center
+                        "
+                    >
 
                         <p class="text-sm text-graphite">
 
                             Already have an account?
 
-                            <a href="{% url 'login' %}"
-                               class="font-medium
-                                      text-ink
-                                      hover:text-correction
-                                      transition-colors">
-
+                            <a
+                                href="{% url 'login' %}"
+                                class="
+                                    font-medium
+                                    text-ink
+                                    hover:text-correction
+                                    transition-colors
+                                "
+                            >
                                 Sign in
-
                             </a>
 
                         </p>
@@ -897,15 +1183,17 @@
                     </div>
 
 
-                    <div class="mt-6
-                                text-center
-                                text-[10px]
-                                uppercase
-                                tracking-[.15em]
-                                text-graphite/50">
-
+                    <div
+                        class="
+                            mt-6
+                            text-center
+                            text-[10px]
+                            uppercase
+                            tracking-[.15em]
+                            text-graphite/50
+                        "
+                    >
                         Secure email verification
-
                     </div>
 
                 </div>
@@ -921,53 +1209,74 @@
 
 <!-- ============================================================
      OTP MODAL
-============================================================ -->
+============================================================= -->
 
-<div id="otpModal"
-     class="hidden modal-backdrop">
+<div
+    id="otpModal"
+    class="hidden modal-backdrop"
+>
 
     <div class="otp-card">
 
-        <!-- Close -->
 
-        <button id="otpClose"
-                type="button"
-                aria-label="Close"
-                class="float-right
-                       w-8 h-8
-                       flex items-center justify-center
-                       text-graphite
-                       hover:text-ink">
+        <!-- CLOSE -->
 
+        <button
+            id="otpClose"
+            type="button"
+            aria-label="Close"
+            class="
+                float-right
+                w-8
+                h-8
+                flex
+                items-center
+                justify-center
+                text-graphite
+                hover:text-ink
+            "
+        >
             ×
-
         </button>
 
 
         <div class="clear-both"></div>
 
 
-        <!-- Icon -->
+        <!-- ICON -->
 
-        <div class="w-12 h-12
-                    border border-paperline
-                    rounded-full
-                    flex items-center justify-center
-                    text-correction
-                    mx-auto mt-2">
+        <div
+            class="
+                w-12
+                h-12
+                border
+                border-paperline
+                rounded-full
+                flex
+                items-center
+                justify-center
+                text-correction
+                mx-auto
+                mt-2
+            "
+        >
 
-            <svg width="22"
-                 height="22"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="1.6"
-                 viewBox="0 0 24 24">
+            <svg
+                width="22"
+                height="22"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                viewBox="0 0 24 24"
+            >
 
-                <rect x="3"
-                      y="5"
-                      width="18"
-                      height="14"
-                      rx="2"/>
+                <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="14"
+                    rx="2"
+                />
 
                 <path d="m3 7 9 6 9-6"/>
 
@@ -976,147 +1285,196 @@
         </div>
 
 
-        <!-- Heading -->
+        <!-- OTP HEADING -->
 
         <div class="text-center mt-5">
 
-            <div class="text-xs
-                        uppercase
-                        tracking-[.18em]
-                        text-correction">
-
+            <div
+                class="
+                    text-xs
+                    uppercase
+                    tracking-[.18em]
+                    text-correction
+                "
+            >
                 Email verification
-
             </div>
 
-            <h3 id="otpTitle"
-                class="font-display
-                       text-2xl
-                       sm:text-3xl
-                       mt-2">
 
+            <h3
+                id="otpTitle"
+                class="
+                    font-display
+                    text-2xl
+                    sm:text-3xl
+                    mt-2
+                "
+            >
                 Check your email
-
             </h3>
 
-            <p class="text-sm
-                      text-graphite
-                      mt-3
-                      leading-relaxed">
 
+            <p
+                class="
+                    text-sm
+                    text-graphite
+                    mt-3
+                    leading-relaxed
+                "
+            >
                 We sent a 6-digit verification code to
-
             </p>
 
-            <p id="otpEmail"
-               class="text-sm
-                      font-medium
-                      text-ink
-                      mt-1
-                      break-all">
-            </p>
 
-            <p class="text-xs
-                      text-graphite/70
-                      mt-2">
+            <p
+                id="otpEmail"
+                class="
+                    text-sm
+                    font-medium
+                    text-ink
+                    mt-1
+                    break-all
+                "
+            ></p>
 
+
+            <p
+                class="
+                    text-xs
+                    text-graphite/70
+                    mt-2
+                "
+            >
                 This code expires in 10 minutes.
-
             </p>
 
         </div>
 
 
-        <!-- OTP -->
+        <!-- OTP BOXES -->
 
-        <div id="otpBoxes"
-             class="otp-row
-                    flex
-                    justify-center
-                    gap-2
-                    mt-7">
+        <div
+            id="otpBoxes"
+            class="
+                otp-row
+                flex
+                justify-center
+                gap-2
+                mt-7
+            "
+        >
 
-            <input class="otp-input"
-                   maxlength="1"
-                   inputmode="numeric"
-                   autocomplete="one-time-code"
-                   aria-label="Digit 1">
+            <input
+                class="otp-input"
+                maxlength="1"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                aria-label="Digit 1"
+            >
 
-            <input class="otp-input"
-                   maxlength="1"
-                   inputmode="numeric"
-                   aria-label="Digit 2">
+            <input
+                class="otp-input"
+                maxlength="1"
+                inputmode="numeric"
+                aria-label="Digit 2"
+            >
 
-            <input class="otp-input"
-                   maxlength="1"
-                   inputmode="numeric"
-                   aria-label="Digit 3">
+            <input
+                class="otp-input"
+                maxlength="1"
+                inputmode="numeric"
+                aria-label="Digit 3"
+            >
 
-            <input class="otp-input"
-                   maxlength="1"
-                   inputmode="numeric"
-                   aria-label="Digit 4">
+            <input
+                class="otp-input"
+                maxlength="1"
+                inputmode="numeric"
+                aria-label="Digit 4"
+            >
 
-            <input class="otp-input"
-                   maxlength="1"
-                   inputmode="numeric"
-                   aria-label="Digit 5">
+            <input
+                class="otp-input"
+                maxlength="1"
+                inputmode="numeric"
+                aria-label="Digit 5"
+            >
 
-            <input class="otp-input"
-                   maxlength="1"
-                   inputmode="numeric"
-                   aria-label="Digit 6">
+            <input
+                class="otp-input"
+                maxlength="1"
+                inputmode="numeric"
+                aria-label="Digit 6"
+            >
 
         </div>
 
 
-        <p id="otpMessage"
-           role="alert"
-           class="hidden text-center
-                  text-sm mt-4">
-        </p>
+        <!-- OTP MESSAGE -->
+
+        <p
+            id="otpMessage"
+            role="alert"
+            class="
+                hidden
+                text-center
+                text-sm
+                mt-4
+            "
+        ></p>
 
 
-        <!-- Verify -->
+        <!-- VERIFY -->
 
-        <button type="button"
-                id="verifyBtn"
-                class="primary-button
-                       w-full
-                       mt-6
-                       font-medium">
-
+        <button
+            type="button"
+            id="verifyBtn"
+            class="
+                primary-button
+                w-full
+                mt-6
+                font-medium
+            "
+        >
             Verify and create account
-
         </button>
 
 
-        <!-- Bottom -->
+        <!-- BOTTOM -->
 
-        <div class="flex
-                    items-center
-                    justify-between
-                    gap-4
-                    mt-5
-                    text-sm">
+        <div
+            class="
+                flex
+                items-center
+                justify-between
+                gap-4
+                mt-5
+                text-sm
+            "
+        >
 
-            <button type="button"
-                    id="resendBtn"
-                    class="text-correction
-                           hover:text-correctiondark
-                           font-medium">
-
+            <button
+                type="button"
+                id="resendBtn"
+                class="
+                    text-correction
+                    hover:text-correctiondark
+                    font-medium
+                "
+            >
                 Resend code
-
             </button>
 
-            <button type="button"
-                    id="otpEdit"
-                    class="text-graphite
-                           hover:text-ink">
 
+            <button
+                type="button"
+                id="otpEdit"
+                class="
+                    text-graphite
+                    hover:text-ink
+                "
+            >
                 Edit details
-
             </button>
 
         </div>
@@ -1132,9 +1490,14 @@
    URLS
 ============================================================ */
 
-const SEND_OTP_URL   = "{% url 'register_send_otp' %}";
-const VERIFY_OTP_URL = "{% url 'register_verify_otp' %}";
-const RESEND_OTP_URL = "{% url 'register_resend_otp' %}";
+const SEND_OTP_URL =
+    "{% url 'register_send_otp' %}";
+
+const VERIFY_OTP_URL =
+    "{% url 'register_verify_otp' %}";
+
+const RESEND_OTP_URL =
+    "{% url 'register_resend_otp' %}";
 
 
 /* ============================================================
@@ -1180,7 +1543,6 @@ const verifyBtn =
 const resendBtn =
     document.getElementById("resendBtn");
 
-
 let resendTimerId = null;
 
 
@@ -1201,11 +1563,15 @@ function getCookie(name) {
 
             cookie = cookie.trim();
 
-            if (cookie.startsWith(name + "=")) {
+            if (
+                cookie.startsWith(name + "=")
+            ) {
 
                 cookieValue =
                     decodeURIComponent(
-                        cookie.substring(name.length + 1)
+                        cookie.substring(
+                            name.length + 1
+                        )
                     );
 
                 break;
@@ -1229,18 +1595,58 @@ async function postJSON(url, payload) {
             method: "POST",
 
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
+                "Content-Type":
+                    "application/json",
+
+                "X-CSRFToken":
+                    getCookie("csrftoken")
             },
 
-            body: JSON.stringify(payload)
+            body:
+                JSON.stringify(payload)
 
         });
 
-    const data =
-        await response
-            .json()
-            .catch(() => ({}));
+
+    /*
+       IMPORTANT:
+       Do not blindly call response.json().
+       If Django returns HTML for an error,
+       we handle it safely.
+    */
+
+    const contentType =
+        response.headers.get("content-type") || "";
+
+    let data = {};
+
+    if (
+        contentType.includes(
+            "application/json"
+        )
+    ) {
+
+        data =
+            await response.json();
+
+    } else {
+
+        const text =
+            await response.text();
+
+        console.error(
+            "Server returned non-JSON:",
+            text
+        );
+
+        data = {
+            error:
+                response.status === 403
+                    ? "CSRF verification failed. Please refresh the page and try again."
+                    : `Server returned an unexpected response (${response.status}).`
+        };
+    }
+
 
     return {
         status: response.status,
@@ -1250,24 +1656,27 @@ async function postJSON(url, payload) {
 
 
 /* ============================================================
-   ERROR
+   FORM ERROR
 ============================================================ */
 
 function showFormError(message) {
 
-    formError.textContent = message;
+    formError.textContent =
+        message;
 
-    formError.classList.remove("hidden");
-
+    formError.classList.remove(
+        "hidden"
+    );
 }
 
 
 function clearFormError() {
 
-    formError.classList.add("hidden");
+    formError.classList.add(
+        "hidden"
+    );
 
     formError.textContent = "";
-
 }
 
 
@@ -1277,96 +1686,114 @@ function clearFormError() {
 
 document
     .getElementById("togglePassword")
-    .addEventListener("click", function () {
+    .addEventListener(
+        "click",
+        function () {
 
-        const isPassword =
-            password.type === "password";
+            const isPassword =
+                password.type === "password";
 
-        password.type =
-            isPassword ? "text" : "password";
+            password.type =
+                isPassword
+                    ? "text"
+                    : "password";
 
-        this.setAttribute(
-            "aria-label",
-            isPassword
-                ? "Hide password"
-                : "Show password"
-        );
+            this.setAttribute(
+                "aria-label",
+                isPassword
+                    ? "Hide password"
+                    : "Show password"
+            );
 
-    });
+        }
+    );
 
 
 /* ============================================================
    PASSWORD STRENGTH
 ============================================================ */
 
-password.addEventListener("input", function () {
+password.addEventListener(
+    "input",
+    function () {
 
-    const value = this.value;
+        const value =
+            this.value;
 
-    let score = 0;
-
-    if (value.length >= 8)
-        score++;
-
-    if (/[A-Z]/.test(value))
-        score++;
-
-    if (/[0-9]/.test(value))
-        score++;
-
-    if (/[^A-Za-z0-9]/.test(value))
-        score++;
+        let score = 0;
 
 
-    for (let i = 1; i <= 4; i++) {
+        if (value.length >= 8)
+            score++;
 
-        const bar =
+
+        if (/[A-Z]/.test(value))
+            score++;
+
+
+        if (/[0-9]/.test(value))
+            score++;
+
+
+        if (/[^A-Za-z0-9]/.test(value))
+            score++;
+
+
+        for (
+            let i = 1;
+            i <= 4;
+            i++
+        ) {
+
+            const bar =
+                document.getElementById(
+                    "strength" + i
+                );
+
+            bar.className =
+                "h-1 flex-1 rounded-full " +
+                (
+                    i <= score
+                        ? "bg-correction"
+                        : "bg-paperline"
+                );
+        }
+
+
+        const hint =
             document.getElementById(
-                "strength" + i
+                "passwordHint"
             );
 
-        bar.className =
-            "h-1 flex-1 rounded-full " +
-            (i <= score
-                ? "bg-correction"
-                : "bg-paperline");
+
+        if (!value) {
+
+            hint.textContent =
+                "Minimum 8 characters";
+
+        } else if (score <= 1) {
+
+            hint.textContent =
+                "Weak password";
+
+        } else if (score === 2) {
+
+            hint.textContent =
+                "Fair password";
+
+        } else if (score === 3) {
+
+            hint.textContent =
+                "Good password";
+
+        } else {
+
+            hint.textContent =
+                "Strong password";
+        }
 
     }
-
-
-    const hint =
-        document.getElementById(
-            "passwordHint"
-        );
-
-    if (!value) {
-
-        hint.textContent =
-            "Minimum 8 characters";
-
-    } else if (score <= 1) {
-
-        hint.textContent =
-            "Weak password";
-
-    } else if (score === 2) {
-
-        hint.textContent =
-            "Fair password";
-
-    } else if (score === 3) {
-
-        hint.textContent =
-            "Good password";
-
-    } else {
-
-        hint.textContent =
-            "Strong password";
-
-    }
-
-});
+);
 
 
 /* ============================================================
@@ -1378,28 +1805,44 @@ function openOtpModal(
     resendIn = 30
 ) {
 
-    otpEmail.textContent = email;
+    otpEmail.textContent =
+        email;
+
 
     otpInputs.forEach(
-        input => input.value = ""
+        input => {
+            input.value = "";
+        }
     );
 
-    otpMessage.classList.add(
-        "hidden"
-    );
+
+    otpMessage.className =
+        "hidden text-center text-sm mt-4";
+
+    otpMessage.textContent =
+        "";
+
 
     otpModal.classList.remove(
         "hidden"
     );
 
+
     document.body.style.overflow =
         "hidden";
 
-    setTimeout(() => {
-        otpInputs[0].focus();
-    }, 100);
 
-    startResendTimer(resendIn);
+    setTimeout(
+        () => {
+            otpInputs[0].focus();
+        },
+        100
+    );
+
+
+    startResendTimer(
+        resendIn
+    );
 }
 
 
@@ -1451,15 +1894,16 @@ otpInputs.forEach(
                         .replace(/\D/g, "")
                         .slice(0, 1);
 
+
                 if (
                     this.value &&
-                    index < otpInputs.length - 1
+                    index <
+                        otpInputs.length - 1
                 ) {
 
                     otpInputs[
                         index + 1
                     ].focus();
-
                 }
 
             }
@@ -1471,7 +1915,8 @@ otpInputs.forEach(
             function (event) {
 
                 if (
-                    event.key === "Backspace" &&
+                    event.key ===
+                        "Backspace" &&
                     !this.value &&
                     index > 0
                 ) {
@@ -1479,7 +1924,6 @@ otpInputs.forEach(
                     otpInputs[
                         index - 1
                     ].focus();
-
                 }
 
             }
@@ -1501,6 +1945,7 @@ document
 
             event.preventDefault();
 
+
             const pasted =
                 (
                     event.clipboardData ||
@@ -1516,21 +1961,23 @@ document
                 .forEach(
                     (digit, index) => {
 
-                        if (otpInputs[index]) {
+                        if (
+                            otpInputs[index]
+                        ) {
 
                             otpInputs[index]
-                                .value = digit;
-
+                                .value =
+                                digit;
                         }
-
                     }
                 );
 
 
-            if (pasted.length === 6) {
+            if (
+                pasted.length === 6
+            ) {
 
                 otpInputs[5].focus();
-
             }
 
         }
@@ -1540,9 +1987,10 @@ document
 function getOTP() {
 
     return otpInputs
-        .map(input => input.value)
+        .map(
+            input => input.value
+        )
         .join("");
-
 }
 
 
@@ -1558,6 +2006,7 @@ function showOTPMessage(
     otpMessage.textContent =
         message;
 
+
     otpMessage.className =
         "text-center text-sm mt-4 " +
         (
@@ -1565,7 +2014,6 @@ function showOTPMessage(
                 ? "text-correction"
                 : "text-green-700"
         );
-
 }
 
 
@@ -1575,13 +2023,18 @@ function showOTPMessage(
 
 function startResendTimer(seconds) {
 
-    clearInterval(resendTimerId);
+    clearInterval(
+        resendTimerId
+    );
+
 
     let remaining =
         Number(seconds) || 30;
 
+
     resendBtn.disabled =
         true;
+
 
     resendBtn.classList.add(
         "opacity-50",
@@ -1599,22 +2052,27 @@ function startResendTimer(seconds) {
 
                 remaining--;
 
+
                 if (remaining <= 0) {
 
                     clearInterval(
                         resendTimerId
                     );
 
+
                     resendBtn.disabled =
                         false;
+
 
                     resendBtn.classList.remove(
                         "opacity-50",
                         "cursor-not-allowed"
                     );
 
+
                     resendBtn.textContent =
                         "Resend code";
+
 
                     return;
                 }
@@ -1626,7 +2084,6 @@ function startResendTimer(seconds) {
             },
             1000
         );
-
 }
 
 
@@ -1665,11 +2122,9 @@ registerForm.addEventListener(
             confirmPassword.value;
 
 
-        const terms =
-            document
-                .getElementById("terms")
-                .checked;
-
+        /* -----------------------------
+           VALIDATION
+        ------------------------------ */
 
         if (!name) {
 
@@ -1711,21 +2166,20 @@ registerForm.addEventListener(
         }
 
 
-        if (!terms) {
-
-            showFormError(
-                "Please accept the Terms of Service and Privacy Policy."
-            );
-
-            return;
-        }
+        /*
+           IMPORTANT:
+           The Terms checkbox was removed from
+           your HTML, so we DO NOT check it here.
+        */
 
 
         createBtn.disabled =
             true;
 
+
         createText.textContent =
             "Sending verification code...";
+
 
         createLoader.classList.remove(
             "hidden"
@@ -1739,9 +2193,13 @@ registerForm.addEventListener(
                     SEND_OTP_URL,
                     {
                         name: name,
+
                         email: email,
+
                         password: pass,
-                        confirm_password: confirm
+
+                        confirm_password:
+                            confirm
                     }
                 );
 
@@ -1762,27 +2220,35 @@ registerForm.addEventListener(
                     result.data.error ||
                     "Could not send the verification code."
                 );
-
             }
 
+
         } catch (error) {
+
+            console.error(
+                "Registration error:",
+                error
+            );
+
 
             showFormError(
                 "Unable to connect to the server. Please try again."
             );
+
 
         } finally {
 
             createBtn.disabled =
                 false;
 
+
             createText.textContent =
                 "Create account";
+
 
             createLoader.classList.add(
                 "hidden"
             );
-
         }
 
     }
@@ -1814,6 +2280,7 @@ verifyBtn.addEventListener(
         verifyBtn.disabled =
             true;
 
+
         verifyBtn.textContent =
             "Verifying...";
 
@@ -1844,22 +2311,48 @@ verifyBtn.addEventListener(
                     "Invalid verification code."
                 );
 
+
+                /*
+                   If session expired,
+                   close modal and ask user
+                   to fill registration again.
+                */
+
+                if (
+                    result.data.expired
+                ) {
+
+                    setTimeout(
+                        () => {
+                            closeOtpModal();
+                        },
+                        1800
+                    );
+                }
             }
 
+
         } catch (error) {
+
+            console.error(
+                "OTP verification error:",
+                error
+            );
+
 
             showOTPMessage(
                 "Unable to connect to the server."
             );
+
 
         } finally {
 
             verifyBtn.disabled =
                 false;
 
+
             verifyBtn.textContent =
                 "Verify and create account";
-
         }
 
     }
@@ -1867,7 +2360,7 @@ verifyBtn.addEventListener(
 
 
 /* ============================================================
-   RESEND
+   RESEND OTP
 ============================================================ */
 
 resendBtn.addEventListener(
@@ -1876,6 +2369,7 @@ resendBtn.addEventListener(
 
         resendBtn.disabled =
             true;
+
 
         resendBtn.textContent =
             "Sending...";
@@ -1900,9 +2394,11 @@ resendBtn.addEventListener(
                     false
                 );
 
+
                 startResendTimer(
                     result.data.resend_in
                 );
+
 
             } else {
 
@@ -1911,24 +2407,33 @@ resendBtn.addEventListener(
                     "Could not resend the code."
                 );
 
-                startResendTimer(
-                    result.data.retry_after || 5
-                );
 
+                startResendTimer(
+                    result.data.retry_after ||
+                    5
+                );
             }
 
+
         } catch (error) {
+
+            console.error(
+                "Resend OTP error:",
+                error
+            );
+
 
             showOTPMessage(
                 "Unable to connect to the server."
             );
 
+
             resendBtn.disabled =
                 false;
 
+
             resendBtn.textContent =
                 "Resend code";
-
         }
 
     }
@@ -1936,7 +2441,7 @@ resendBtn.addEventListener(
 
 
 /* ============================================================
-   ESCAPE CLOSE
+   ESCAPE
 ============================================================ */
 
 document.addEventListener(
@@ -1945,11 +2450,12 @@ document.addEventListener(
 
         if (
             event.key === "Escape" &&
-            !otpModal.classList.contains("hidden")
+            !otpModal.classList.contains(
+                "hidden"
+            )
         ) {
 
             closeOtpModal();
-
         }
 
     }
@@ -1958,4 +2464,5 @@ document.addEventListener(
 </script>
 
 </body>
+
 </html>
