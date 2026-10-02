@@ -261,22 +261,22 @@ yearly, or custom date ranges.
 
             <div class="rq-preview-actions">
 
-                <button type="button"
+                {% comment %} <button type="button"
                         class="rq-secondary-btn"
                         onclick="window.print()">
 
                     Print
 
-                </button>
+                </button> {% endcomment %}
 
                 <!-- Use "Save as PDF" in the browser's print dialog -->
-                <button type="button"
-                        class="rq-primary-btn"
-                        onclick="window.print()">
+                <a class="rq-primary-btn"
+                    id="downloadPdfBtn"
+                    href="{% url 'admin_report_download' %}?table={{ selected_table }}&period={{ selected_period }}&from_date={{ from_date }}&to_date={{ to_date }}">
 
-                    Download PDF
+                        Download PDF
 
-                </button>
+                    </a>
 
             </div>
 
