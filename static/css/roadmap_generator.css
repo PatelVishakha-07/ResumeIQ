@@ -1,181 +1,2898 @@
-/* roadmap_generator.css — scoped to the Roadmap Generator page */
+/* =========================================================
+   RESUMEIQ — ROADMAP GENERATOR
+   Professional Career Roadmap UI
+========================================================= */
 
-.roadmap-textarea {
-  width: 100%;
-  border: 1px solid #E3DFD3;
-  border-radius: 10px;
-  padding: 14px 16px;
-  font-family: inherit;
-  font-size: 14px;
-  color: #14171F;
-  resize: vertical;
-  min-height: 110px;
-  box-sizing: border-box;
-}
-.roadmap-textarea:focus {
-  outline: none;
-  border-color: #6C7AE0;
-  box-shadow: 0 0 0 3px rgba(108, 122, 224, 0.12);
+
+/* =========================================================
+   ROADMAP VARIABLES
+========================================================= */
+
+.roadmap-page {
+
+    --roadmap-primary: #5865d8;
+    --roadmap-primary-dark: #4754c7;
+    --roadmap-primary-light: #eef0ff;
+
+    --roadmap-text: #171a24;
+    --roadmap-heading: #242936;
+    --roadmap-text-soft: #505766;
+    --roadmap-muted: #5f6674;
+
+    --roadmap-border: #e5e7ec;
+    --roadmap-border-dark: #d9dce4;
+
+    --roadmap-bg: #f7f8fb;
+    --roadmap-card: #ffffff;
+
+    --roadmap-green: #4d8b61;
+    --roadmap-green-bg: #f2f9f4;
+
+    --roadmap-red: #dc3030;
+
+    --roadmap-radius: 14px;
+
+    --roadmap-shadow:
+        0 4px 18px rgba(28, 34, 55, 0.045);
+
+    --roadmap-shadow-hover:
+        0 10px 30px rgba(28, 34, 55, 0.075);
+
 }
 
-.example-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
+
+/* =========================================================
+   BOX SIZING
+========================================================= */
+
+.roadmap-page,
+.roadmap-page *,
+.roadmap-page *::before,
+.roadmap-page *::after {
+    box-sizing: border-box;
 }
-.example-label {
-  font-size: 12.5px;
-  color: #8A8676;
-  margin-right: 2px;
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.roadmap-page {
+
+    width: 100%;
+    min-height: calc(100vh - 70px);
+
+    margin: 0;
+
+    padding: 32px 34px 60px;
+
+    background: var(--roadmap-bg);
+
 }
+
+
+.roadmap-container {
+
+    width: 100%;
+    max-width: 1160px;
+
+    margin: 0 auto;
+
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.roadmap-hero {
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 35px;
+
+    min-height: 190px;
+
+    margin-bottom: 24px;
+    padding: 34px 38px;
+
+    overflow: hidden;
+
+    border: 1px solid #e0e3ec;
+    border-radius: 18px;
+
+    background:
+        radial-gradient(
+            circle at 90% 20%,
+            rgba(88, 101, 216, 0.13),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 70% 100%,
+            rgba(88, 101, 216, 0.055),
+            transparent 28%
+        ),
+        #ffffff;
+
+    box-shadow: var(--roadmap-shadow);
+
+}
+
+
+.roadmap-hero::after {
+
+    content: "";
+
+    position: absolute;
+
+    right: -80px;
+    bottom: -100px;
+
+    width: 250px;
+    height: 250px;
+
+    border: 1px solid rgba(88, 101, 216, 0.08);
+
+    border-radius: 50%;
+
+}
+
+
+.hero-content {
+
+    position: relative;
+    z-index: 2;
+
+    min-width: 0;
+
+}
+
+
+.hero-badge {
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 13px;
+
+    padding: 6px 10px;
+
+    border: 1px solid #dfe2f2;
+    border-radius: 7px;
+
+    background: #f6f7ff;
+
+    color: #626bc3;
+
+    font-size: 12.5px;
+    font-weight: 750;
+
+    letter-spacing: .07em;
+
+}
+
+
+.hero-badge-dot {
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--roadmap-primary);
+
+    box-shadow:
+        0 0 0 4px rgba(88, 101, 216, 0.09);
+
+}
+
+
+.roadmap-hero h1 {
+
+    margin: 0;
+
+    color: var(--roadmap-text);
+
+    font-size: 30px;
+    line-height: 1.2;
+
+    font-weight: 750;
+
+    letter-spacing: -.65px;
+
+}
+
+
+.roadmap-hero p {
+
+    max-width: 700px;
+
+    margin: 10px 0 0;
+
+    color: var(--roadmap-muted);
+
+    font-size: 14px;
+    line-height: 1.7;
+
+}
+
+
+.hero-icon {
+
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 76px;
+    height: 76px;
+
+    flex-shrink: 0;
+
+    border: 1px solid #dfe2f2;
+    border-radius: 20px;
+
+    background: #f3f4ff;
+
+    box-shadow:
+        inset 0 0 0 6px rgba(255,255,255,.6),
+        0 8px 20px rgba(88,101,216,.07);
+
+}
+
+
+.hero-icon-inner {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 45px;
+    height: 45px;
+
+    border-radius: 13px;
+
+    background: var(--roadmap-primary);
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    box-shadow:
+        0 7px 18px rgba(88,101,216,.23);
+
+}
+
+
+/* =========================================================
+   GENERATOR CARD
+========================================================= */
+
+.generator-card {
+
+    padding: 28px;
+
+    border: 1px solid var(--roadmap-border);
+    border-radius: var(--roadmap-radius);
+
+    background: var(--roadmap-card);
+
+    box-shadow: var(--roadmap-shadow);
+
+}
+
+
+.generator-card-header {
+
+    margin-bottom: 18px;
+
+}
+
+
+.card-step {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--roadmap-primary);
+
+    font-size: 12.5px;
+    font-weight: 800;
+
+    letter-spacing: .1em;
+
+}
+
+
+.generator-card-header h2 {
+
+    margin: 0;
+
+    color: var(--roadmap-heading);
+
+    font-size: 18px;
+    line-height: 1.35;
+
+    font-weight: 720;
+
+}
+
+
+.generator-card-header p {
+
+    margin: 6px 0 0;
+
+    color: var(--roadmap-muted);
+
+    font-size: 13.5px;
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+.query-wrapper {
+
+    position: relative;
+
+}
+
+
+#roadmapQuery {
+
+    display: block;
+
+    width: 100%;
+    min-height: 130px;
+
+    padding: 16px 17px 42px;
+
+    border: 1px solid #dfe2e9;
+    border-radius: 11px;
+
+    outline: none;
+    resize: vertical;
+
+    background: #fcfcfd;
+
+    color: var(--roadmap-heading);
+
+    font-family: inherit;
+
+    font-size: 14px;
+    line-height: 1.7;
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+
+}
+
+
+#roadmapQuery::placeholder {
+
+    color: #a1a6b2;
+
+}
+
+
+#roadmapQuery:hover {
+
+    border-color: #d2d5df;
+
+    background: #ffffff;
+
+}
+
+
+#roadmapQuery:focus {
+
+    border-color: #7780df;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 4px rgba(88,101,216,.08);
+
+}
+
+
+.textarea-footer {
+
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+    bottom: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    pointer-events: none;
+
+}
+
+
+.textarea-hint {
+
+    color: #68707e;
+
+    font-size: 12.5px;
+
+}
+
+
+.textarea-shortcut {
+
+    padding: 4px 7px;
+
+    border: 1px solid #e2e4e9;
+    border-radius: 5px;
+
+    background: #f7f8fa;
+
+    color: #68707e;
+
+    font-size: 11.75px;
+    font-weight: 750;
+
+    letter-spacing: .04em;
+
+}
+
+
+/* =========================================================
+   QUICK START
+========================================================= */
+
+.quick-start {
+
+    margin-top: 19px;
+
+}
+
+
+.quick-start-title {
+
+    display: flex;
+    align-items: baseline;
+
+    gap: 9px;
+
+    margin-bottom: 9px;
+
+}
+
+
+.quick-start-title span {
+
+    color: var(--roadmap-heading);
+
+    font-size: 13.25px;
+    font-weight: 700;
+
+}
+
+
+.quick-start-title small {
+
+    color: #68707e;
+
+    font-size: 12.25px;
+
+}
+
+
+.chips {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+}
+
+
 .chip {
-  background: #F1EEE4;
-  border: 1px solid #E3DFD3;
-  color: #4A4636;
-  font-size: 12.5px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background-color .15s ease, border-color .15s ease;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 7px 11px;
+
+    border: 1px solid #e1e4ea;
+    border-radius: 8px;
+
+    background: #fafbfc;
+
+    color: #555d6b;
+
+    font-family: inherit;
+
+    font-size: 12.75px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition:
+        background .16s ease,
+        border-color .16s ease,
+        color .16s ease,
+        transform .16s ease;
+
 }
+
+
 .chip:hover {
-  background: #E9E4D6;
-  border-color: #D9D4C4;
+
+    border-color: #cfd3ed;
+
+    background: #f5f6ff;
+
+    color: #555fb9;
+
+    transform: translateY(-1px);
+
 }
 
-.input-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #EFEBE0;
-}
-.input-footer .hint { margin: 0; }
 
-.roadmap-result:empty { display: none; }
+.chip:active {
 
-.stage-timeline { display: flex; flex-direction: column; }
+    transform: translateY(0);
 
-.stage {
-  display: grid;
-  grid-template-columns: 32px 1fr;
-  gap: 16px;
 }
 
-.stage-marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
+.chip-icon {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 23px;
+    height: 23px;
+
+    border-radius: 6px;
+
+    background: #eeeeff;
+
+    color: #6069ca;
+
+    font-size: 11.25px;
+    font-weight: 850;
+
 }
-.stage-dot {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #14171F;
-  color: #F5F3EE;
-  font-family: 'Source Serif 4', serif;
-  font-weight: 700;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+
+
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+.generator-actions,
+.roadmap-actions {
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 9px;
+
+    margin-top: 20px;
+
 }
-.stage-line {
-  width: 2px;
-  flex: 1;
-  background: #E3DFD3;
-  margin: 4px 0;
-  min-height: 24px;
+
+
+.primary-btn,
+.secondary-btn {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 40px;
+
+    padding: 9px 16px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .16s ease,
+        border-color .16s ease,
+        color .16s ease,
+        box-shadow .16s ease,
+        transform .16s ease;
+
 }
+
+
+.primary-btn {
+
+    border: 1px solid var(--roadmap-primary);
+
+    background: var(--roadmap-primary);
+
+    color: #ffffff;
+
+    box-shadow:
+        0 4px 12px rgba(88,101,216,.16);
+
+}
+
+
+.primary-btn:hover {
+
+    border-color: var(--roadmap-primary-dark);
+
+    background: var(--roadmap-primary-dark);
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 16px rgba(88,101,216,.21);
+
+}
+
+
+.primary-btn:disabled {
+
+    opacity: .62;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+}
+
+
+.secondary-btn {
+
+    border: 1px solid #dfe2e8;
+
+    background: #ffffff;
+
+    color: #555d6b;
+
+}
+
+
+.secondary-btn:hover {
+
+    border-color: #cfd3db;
+
+    background: #f8f9fb;
+
+}
+
+
+.btn-icon {
+
+    font-size: 14px;
+
+}
+
+
+.download-btn {
+
+    background: #ffffff;
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading {
+
+    display: none;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 15px;
+
+    padding: 12px 14px;
+
+    border: 1px solid #dfe2f2;
+    border-radius: 9px;
+
+    background: #f8f9ff;
+
+    color: #5e66b0;
+
+    font-size: 12.75px;
+
+}
+
+
+.loading strong {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #515aa7;
+
+    font-size: 13px;
+
+}
+
+
+.loading span {
+
+    color: #8187a7;
+
+    font-size: 12.25px;
+
+}
+
+
+.loading-spinner,
+.btn-spinner {
+
+    display: inline-block;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    border: 2px solid #dfe2f7;
+
+    border-top-color: var(--roadmap-primary);
+
+    animation:
+        roadmapSpin .7s linear infinite;
+
+}
+
+
+.loading-spinner {
+
+    width: 18px;
+    height: 18px;
+
+}
+
+
+.btn-spinner {
+
+    width: 12px;
+    height: 12px;
+
+    border-color: rgba(255,255,255,.35);
+
+    border-top-color: #ffffff;
+
+}
+
+
+@keyframes roadmapSpin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error-box {
+
+    display: none;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 14px;
+
+    padding: 11px 13px;
+
+    border: 1px solid #f0cccc;
+    border-radius: 8px;
+
+    background: #fff7f7;
+
+    color: #b54a4a;
+
+    font-size: 12.75px;
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+#roadmapResult {
+
+    display: none;
+
+    margin-top: 27px;
+
+}
+
+
+.roadmap-output {
+
+    width: 100%;
+
+}
+
+
+/* =========================================================
+   OVERVIEW
+========================================================= */
+
+.roadmap-overview {
+
+    margin-bottom: 27px;
+
+    padding: 27px;
+
+    border: 1px solid #e1e4eb;
+    border-radius: 15px;
+
+    background: #ffffff;
+
+    box-shadow: var(--roadmap-shadow);
+
+}
+
+
+.overview-top {
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+
+}
+
+
+.overview-label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--roadmap-primary);
+
+    font-size: 12.25px;
+    font-weight: 800;
+
+    letter-spacing: .1em;
+
+}
+
+
+.overview-top h2 {
+
+    margin: 0;
+
+    color: var(--roadmap-text);
+
+    font-size: 23px;
+    line-height: 1.3;
+
+    font-weight: 750;
+
+    letter-spacing: -.35px;
+
+}
+
+
+.overview-status {
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    padding: 6px 9px;
+
+    border: 1px solid #d8e9dc;
+    border-radius: 7px;
+
+    background: #f4faf5;
+
+    color: #56805f;
+
+    font-size: 12px;
+    font-weight: 700;
+
+}
+
+
+.status-dot {
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #5b9b6d;
+
+}
+
+
+.roadmap-summary {
+
+    max-width: 900px;
+
+    margin: 10px 0 20px;
+
+    color: #555c69;
+
+    font-size: 13.75px;
+    line-height: 1.7;
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.overview-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+}
+
+
+.overview-stat {
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+
+    padding: 13px;
+
+    border: 1px solid #e7e9ee;
+    border-radius: 9px;
+
+    background: #fafbfc;
+
+}
+
+
+.stat-icon {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #eff0ff;
+
+    color: #626ac8;
+
+    font-size: 12.5px;
+    font-weight: 800;
+
+}
+
+
+.overview-stat strong {
+
+    display: block;
+
+    overflow: hidden;
+
+    color: #303641;
+
+    font-size: 13.5px;
+    font-weight: 720;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+}
+
+
+.overview-stat span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #68707e;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================================
+   PREREQUISITES
+========================================================= */
+
+.prerequisites-box {
+
+    margin-top: 15px;
+
+    padding: 13px 14px;
+
+    border: 1px solid #e3e6ed;
+    border-radius: 9px;
+
+    background: #fafbfc;
+
+}
+
+
+.prerequisites-title {
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 9px;
+
+    color: #3b414d;
+
+    font-size: 12.75px;
+    font-weight: 720;
+
+}
+
+
+.prerequisites-title span {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 18px;
+    height: 18px;
+
+    border-radius: 50%;
+
+    background: #e7f3e9;
+
+    color: #51835c;
+
+    font-size: 11.5px;
+
+}
+
+
+.prerequisites-list {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+}
+
+
+.prerequisite {
+
+    padding: 5px 8px;
+
+    border: 1px solid #e1e4ea;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #656c78;
+
+    font-size: 12.25px;
+
+}
+
+
+/* =========================================================
+   JOURNEY
+========================================================= */
+
+.roadmap-journey {
+
+    margin-top: 2px;
+
+}
+
+
+.roadmap-section-title {
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin: 0 0 15px;
+
+    padding: 0 2px;
+
+}
+
+
+.roadmap-section-label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #7c82a9;
+
+    font-size: 11.75px;
+    font-weight: 800;
+
+    letter-spacing: .11em;
+
+}
+
+
+.roadmap-section-title h3 {
+
+    margin: 0;
+
+    color: #252a35;
+
+    font-size: 18px;
+
+    font-weight: 730;
+
+}
+
+
+.stage-count {
+
+    padding: 6px 9px;
+
+    border: 1px solid #e1e4ea;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #727986;
+
+    font-size: 12px;
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+.timeline {
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+
+.timeline-item {
+
+    display: grid;
+
+    grid-template-columns:
+        48px minmax(0, 1fr);
+
+    gap: 13px;
+
+}
+
+
+.timeline-marker {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+
+.timeline-number {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    border: 3px solid var(--roadmap-bg);
+
+    border-radius: 50%;
+
+    background: var(--roadmap-primary);
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    box-shadow:
+        0 3px 10px rgba(88,101,216,.19);
+
+}
+
+
+.timeline-line {
+
+    width: 2px;
+
+    flex: 1;
+
+    min-height: 25px;
+
+    margin: 3px 0;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #dfe2ea,
+            #e9ebf0
+        );
+
+}
+
+
+/* =========================================================
+   STAGE CARD
+========================================================= */
 
 .stage-card {
-  border: 1px solid #E3DFD3;
-  border-radius: 10px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
-}
-.stage-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-.stage-head h4 {
-  margin: 0;
-  font-family: 'Source Serif 4', serif;
-  font-size: 16px;
-  color: #14171F;
-}
-.stage-duration {
-  font-size: 12px;
-  color: #8A8676;
-  white-space: nowrap;
-}
-.stage-desc {
-  color: #4A4636;
-  font-size: 13.5px;
-  margin: 8px 0 12px;
-  line-height: 1.5;
-}
 
-.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.tag {
-  display: inline-block;
-  padding: 5px 11px;
-  border-radius: 999px;
-  font-size: 12.5px;
-}
-.tag.topic { background: #EDEBFB; color: #4B4FA8; }
+    margin-bottom: 18px;
 
-.level-badge {
-  display: inline-block;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: #6B6F76;
-}
+    overflow: hidden;
 
-@media (max-width: 640px) {
-  .input-footer { flex-direction: column; align-items: stretch; }
-  .input-footer button { width: 100%; }
-  .stage-head { flex-direction: column; gap: 2px; }
+    border: 1px solid #e1e4ea;
+
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 3px 14px rgba(20,25,40,.035);
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+
 }
 
 
+.stage-card:hover {
 
-  /* Print / "Download PDF" support. Scoped here so it works regardless of
-     what roadmap_generator.css does — only #roadmapResult survives print. */
-  @media print {
-    .sidebar, .topbar, #inputCard, .no-print { display: none !important; }
-    .main { padding: 0 !important; max-width: none !important; }
-    #roadmapResult { margin-top: 0 !important; }
-    body { background: #fff !important; }
-    .stage-card { break-inside: avoid; }
-  }
-  #roadmapError {
-    display: none;
-    color: #B5482F;
+    border-color: #d6d9e6;
+
+    box-shadow:
+        var(--roadmap-shadow-hover);
+
+    transform: translateY(-1px);
+
+}
+
+
+/* =========================================================
+   STAGE HEADER
+========================================================= */
+
+.stage-header {
+
+    display: flex;
+    align-items: flex-start;
+
+    padding: 19px 20px;
+
+    border-bottom: 1px solid #eef0f3;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #fbfbfd 100%
+        );
+
+}
+
+
+.stage-heading-content {
+
+    min-width: 0;
+
+}
+
+
+.stage-label {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #7a81c7;
+
+    font-size: 11.75px;
+    font-weight: 800;
+
+    letter-spacing: .1em;
+
+}
+
+
+.stage-title {
+
+    margin: 0;
+
+    color: #202531;
+
+    font-size: 17px;
+
+    line-height: 1.4;
+
+    font-weight: 730;
+
+}
+
+
+.stage-meta {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin-top: 9px;
+
+}
+
+
+.stage-meta-item {
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    padding: 5px 8px;
+
+    border: 1px solid #e2e5f0;
+    border-radius: 6px;
+
+    background: #f7f8ff;
+
+    color: #626ac1;
+
+    font-size: 11.75px;
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   STAGE CONTENT
+========================================================= */
+
+.stage-content {
+
+    padding: 20px;
+
+}
+
+
+.stage-description {
+
+    margin: 0 0 19px;
+
+    color: #68707e;
+
+    font-size: 13.5px;
+
+    line-height: 1.7;
+
+}
+
+
+/* =========================================================
+   INTERNAL SECTIONS
+========================================================= */
+
+.roadmap-section {
+
+    margin-top: 19px;
+
+}
+
+
+.stage-content >
+.roadmap-section:first-child {
+
+    margin-top: 0;
+
+}
+
+
+.section-heading {
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 10px;
+
+    color: #363c49;
+
+    font-size: 12.75px;
+    font-weight: 750;
+
+    letter-spacing: .01em;
+
+}
+
+
+.section-icon {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 21px;
+    height: 21px;
+
+    border-radius: 6px;
+
+    background: #eff0ff;
+
+    color: #6068c8;
+
+    font-size: 11.5px;
+    font-weight: 800;
+
+}
+
+
+.resource-icon {
+
+    background: #f1f7f2;
+
+    color: #5d8c67;
+
+}
+
+
+/* =========================================================
+   TOPICS
+========================================================= */
+
+.topic-list {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+}
+
+
+.topic {
+
+    display: inline-flex;
+
+    padding: 7px 9px;
+
+    border: 1px solid #e0e3e8;
+    border-radius: 7px;
+
+    background: #fafbfc;
+
+    color: #535b69;
+
     font-size: 12.5px;
-    margin-top: 10px;
-  }
-  #generateBtn .spin {
-    animation: roadmap-spin 0.8s linear infinite;
-    display: none;
-    vertical-align: -2px;
-    margin-left: 6px;
-  }
-  @keyframes roadmap-spin { to { transform: rotate(360deg); } }
+    font-weight: 600;
 
-  .rm-meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
-  .rm-summary { margin:0 0 12px; line-height:1.55; }
-  .stage-extra { margin:10px 0 0; font-size:13px; line-height:1.5; }
-  .stage-extra strong { font-weight:600; }
-  .rm-panel { margin-top:18px; padding:14px 16px; border:1px solid rgba(128,128,128,.25); border-radius:10px; }
-  .rm-panel h4 { margin:0 0 6px; font-size:14px; }
-  .rm-panel p { margin:0 0 8px; font-size:13px; line-height:1.5; }
+    transition:
+        background .15s ease,
+        border-color .15s ease;
+
+}
+
+
+.topic:hover {
+
+    border-color: #d6d9ee;
+
+    background: #f7f7ff;
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state {
+
+    color: #68707e;
+
+    font-size: 12.5px;
+
+}
+
+
+/* =========================================================
+   MILESTONE
+========================================================= */
+
+.milestone-box {
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-top: 19px;
+
+    padding: 13px 14px;
+
+    border: 1px solid #dcebdd;
+    border-radius: 9px;
+
+    background: var(--roadmap-green-bg);
+
+}
+
+
+.milestone-icon {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 23px;
+    height: 23px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #5b9b6d;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+}
+
+
+.milestone-label {
+
+    margin-bottom: 3px;
+
+    color: #719078;
+
+    font-size: 11.25px;
+    font-weight: 800;
+
+    letter-spacing: .09em;
+
+}
+
+
+.milestone-text {
+
+    color: #58705d;
+
+    font-size: 12.75px;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   RESOURCES
+========================================================= */
+
+.resource-list {
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+
+}
+
+
+.resource-list li {
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 8px;
+
+    margin-bottom: 8px;
+
+    color: #686f7d;
+
+    font-size: 12.75px;
+
+    line-height: 1.6;
+
+}
+
+
+.resource-list li:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.resource-bullet {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 16px;
+    height: 16px;
+
+    flex-shrink: 0;
+
+    margin-top: 1px;
+
+    border-radius: 50%;
+
+    background: #eef7ef;
+
+    color: #5a9165;
+
+    font-size: 11px;
+    font-weight: 800;
+
+}
+
+
+/* =========================================================
+   YOUTUBE
+========================================================= */
+
+.youtube-panel {
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    border: 1px solid #eadede;
+    border-radius: 10px;
+
+    background: #fffafa;
+
+}
+
+
+.youtube-header {
+
+    margin-bottom: 11px;
+
+}
+
+
+.youtube-heading-wrap {
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+}
+
+
+.youtube-logo {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 21px;
+
+    border-radius: 5px;
+
+    background: #dc2626;
+
+    color: #ffffff;
+
+    font-size: 11.5px;
+
+}
+
+
+.youtube-heading {
+
+    color: #343942;
+
+    font-size: 12.75px;
+    font-weight: 800;
+
+}
+
+
+.youtube-subtitle {
+
+    margin-top: 2px;
+
+    color: #68707e;
+
+    font-size: 11.75px;
+
+}
+
+
+.youtube-list {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.youtube-item {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 11px;
+
+    border: 1px solid #eee2e2;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+
+}
+
+
+.youtube-item:hover {
+
+    border-color: #e4d2d2;
+
+    box-shadow:
+        0 3px 9px rgba(70,30,30,.045);
+
+}
+
+
+.youtube-left {
+
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+
+    gap: 9px;
+
+}
+
+
+.youtube-play {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    flex-shrink: 0;
+
+    border-radius: 6px;
+
+    background: #fff0f0;
+
+    color: #dc2626;
+
+    font-size: 11.5px;
+
+}
+
+
+.youtube-info {
+
+    min-width: 0;
+
+}
+
+
+.youtube-title {
+
+    display: block;
+
+    overflow: hidden;
+
+    color: #3c414b;
+
+    font-size: 12.5px;
+    font-weight: 700;
+
+    line-height: 1.4;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+}
+
+
+.youtube-channel {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: #68707e;
+
+    font-size: 11.75px;
+
+}
+
+
+.youtube-link {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    flex-shrink: 0;
+
+    padding: 7px 10px;
+
+    border-radius: 6px;
+
+    background: #dc2626;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 11.75px;
+    font-weight: 750;
+
+    transition:
+        background .16s ease;
+
+}
+
+
+.youtube-link:hover {
+
+    background: #b91c1c;
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   FINAL CARDS
+========================================================= */
+
+.final-card {
+
+    margin-top: 18px;
+
+    padding: 21px;
+
+    border: 1px solid #e1e4ea;
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 3px 14px rgba(20,25,40,.035);
+
+}
+
+
+.final-card-header {
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 11px;
+
+}
+
+
+.final-card-icon {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #eff0ff;
+
+    color: #6068c8;
+
+    font-size: 13px;
+    font-weight: 800;
+
+}
+
+
+.final-card-label {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #7a81c7;
+
+    font-size: 11.25px;
+    font-weight: 800;
+
+    letter-spacing: .09em;
+
+}
+
+
+.final-card h3 {
+
+    margin: 0;
+
+    color: #252b37;
+
+    font-size: 16px;
+
+    font-weight: 730;
+
+}
+
+
+.final-card p {
+
+    margin: 5px 0 0;
+
+    color: #737a87;
+
+    font-size: 12.75px;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================================
+   CAPSTONE
+========================================================= */
+
+.capstone-content {
+
+    margin-top: 15px;
+
+    padding: 13px 14px;
+
+    border: 1px solid #e3e5ef;
+    border-radius: 8px;
+
+    background: #fafaff;
+
+    color: #5d6370;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+}
+
+
+.project-icon {
+
+    background: #fff7e9;
+
+    color: #b18332;
+
+}
+
+
+/* =========================================================
+   INTERVIEW
+========================================================= */
+
+.interview-icon {
+
+    background: #f4f1ff;
+
+    color: #795fc4;
+
+}
+
+
+.interview-list {
+
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 15px;
+
+}
+
+
+.interview-item {
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    padding: 11px 0;
+
+    border-bottom: 1px solid #edf0f3;
+
+    color: #5d6470;
+
+    font-size: 12.75px;
+
+    line-height: 1.6;
+
+}
+
+
+.interview-item:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+.interview-number {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 25px;
+    height: 25px;
+
+    flex-shrink: 0;
+
+    border-radius: 6px;
+
+    background: #f1f0ff;
+
+    color: #6961bd;
+
+    font-size: 11.5px;
+    font-weight: 800;
+
+}
+
+
+/* =========================================================
+   USEFUL LINKS
+========================================================= */
+
+.preparation-links-card {
+
+    background: #ffffff;
+
+}
+
+
+.final-link-section {
+
+    margin-top: 15px;
+
+}
+
+
+.final-link-item {
+
+    display: grid;
+
+    grid-template-columns:
+        29px minmax(0, 1fr) 29px;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #edf0f3;
+
+}
+
+
+.final-link-item:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+.final-link-number {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 27px;
+    height: 27px;
+
+    border-radius: 6px;
+
+    background: #f3f4ff;
+
+    color: #656cc2;
+
+    font-size: 11.5px;
+    font-weight: 800;
+
+}
+
+
+.final-link-content {
+
+    min-width: 0;
+
+}
+
+
+.final-link-stage {
+
+    margin-bottom: 2px;
+
+    color: #68707e;
+
+    font-size: 11.25px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+
+    letter-spacing: .05em;
+
+}
+
+
+.final-link-stage-title {
+
+    margin-bottom: 2px;
+
+    color: #444a55;
+
+    font-size: 12.25px;
+    font-weight: 700;
+
+}
+
+
+.final-link-title {
+
+    color: #525965;
+
+    font-size: 12.5px;
+    font-weight: 650;
+
+}
+
+
+.final-link-channel {
+
+    margin-top: 2px;
+
+    color: #68707e;
+
+    font-size: 11.5px;
+
+}
+
+
+.final-link-url {
+
+    display: block;
+
+    max-width: 100%;
+
+    margin-top: 4px;
+
+    overflow: hidden;
+
+    color: #626ac5;
+
+    font-size: 11.75px;
+
+    text-decoration: none;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+.final-link-url:hover {
+
+    text-decoration: underline;
+
+}
+
+
+.final-link-open {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 27px;
+    height: 27px;
+
+    border: 1px solid #e1e3ea;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #626ac5;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    transition:
+        border-color .15s ease,
+        background .15s ease;
+
+}
+
+
+.final-link-open:hover {
+
+    border-color: #cfd2ed;
+
+    background: #f5f6ff;
+
+}
+
+
+/* =========================================================
+   BOTTOM ACTIONS
+========================================================= */
+
+.roadmap-actions {
+
+    justify-content: flex-end;
+
+    margin-top: 24px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #e8eaf0;
+
+}
+
+
+/* =========================================================
+   FOCUS ACCESSIBILITY
+========================================================= */
+
+.roadmap-page button:focus-visible,
+.roadmap-page a:focus-visible,
+.roadmap-page textarea:focus-visible {
+
+    outline: 3px solid rgba(88,101,216,.18);
+
+    outline-offset: 2px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .roadmap-page {
+
+        padding: 25px 20px 45px;
+
+    }
+
+
+    .roadmap-hero {
+
+        padding: 29px;
+
+    }
+
+
+    .roadmap-hero h1 {
+
+        font-size: 27px;
+
+    }
+
+
+    .overview-stats {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+    .overview-stat:last-child {
+
+        grid-column: 1 / -1;
+
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .roadmap-page {
+
+        padding: 18px 12px 35px;
+
+    }
+
+
+    .roadmap-hero {
+
+        min-height: auto;
+
+        padding: 23px;
+
+        border-radius: 14px;
+
+    }
+
+
+    .hero-icon {
+
+        display: none;
+
+    }
+
+
+    .roadmap-hero h1 {
+
+        font-size: 23px;
+
+    }
+
+
+    .roadmap-hero p {
+
+        font-size: 13.25px;
+
+    }
+
+
+    .generator-card,
+    .roadmap-overview,
+    .final-card {
+
+        padding: 17px;
+
+    }
+
+
+    .generator-actions,
+    .roadmap-actions {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .generator-actions .primary-btn,
+    .generator-actions .secondary-btn,
+    .roadmap-actions .primary-btn,
+    .roadmap-actions .secondary-btn {
+
+        width: 100%;
+
+    }
+
+
+    .overview-top {
+
+        flex-direction: column;
+
+        gap: 11px;
+
+    }
+
+
+    .overview-status {
+
+        align-self: flex-start;
+
+    }
+
+
+    .overview-stats {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .overview-stat:last-child {
+
+        grid-column: auto;
+
+    }
+
+
+    .roadmap-section-title {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .timeline-item {
+
+        grid-template-columns:
+            32px minmax(0, 1fr);
+
+        gap: 8px;
+
+    }
+
+
+    .timeline-number {
+
+        width: 29px;
+        height: 29px;
+
+        border-width: 2px;
+
+        font-size: 11.5px;
+
+    }
+
+
+    .stage-header,
+    .stage-content {
+
+        padding: 16px;
+
+    }
+
+
+    .stage-title {
+
+        font-size: 15px;
+
+    }
+
+
+    .youtube-item {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .youtube-link {
+
+        width: 100%;
+
+    }
+
+
+    .youtube-title {
+
+        white-space: normal;
+
+    }
+
+
+    .final-link-item {
+
+        grid-template-columns:
+            28px minmax(0, 1fr);
+
+    }
+
+
+    .final-link-open {
+
+        display: none;
+
+    }
+
+
+    .final-link-url {
+
+        white-space: normal;
+
+        word-break: break-word;
+
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL DEVICES
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .roadmap-page {
+
+        padding-left: 9px;
+        padding-right: 9px;
+
+    }
+
+
+    .roadmap-hero {
+
+        padding: 20px;
+
+    }
+
+
+    .roadmap-hero h1 {
+
+        font-size: 21px;
+
+    }
+
+
+    .generator-card,
+    .roadmap-overview,
+    .final-card {
+
+        padding: 15px;
+
+    }
+
+
+    #roadmapQuery {
+
+        min-height: 120px;
+
+        font-size: 13.5px;
+
+    }
+
+
+    .stage-header,
+    .stage-content {
+
+        padding: 14px;
+
+    }
+
+}
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+@media print {
+
+    .roadmap-page {
+
+        padding: 0;
+
+        background: #ffffff;
+
+    }
+
+
+    .roadmap-hero,
+    .generator-card,
+    .roadmap-section-title,
+    .roadmap-actions {
+
+        display: none !important;
+
+    }
+
+
+    .roadmap-overview,
+    .stage-card,
+    .final-card {
+
+        box-shadow: none;
+
+    }
+
+
+    .stage-card,
+    .timeline-item {
+
+        break-inside: avoid;
+
+    }
+
+
+    .roadmap-output {
+
+        width: 100%;
+
+    }
+
+}
+
+/* =========================================================
+   ENHANCEMENTS
+========================================================= */
+
+.textarea-shortcut { font-variant-numeric: tabular-nums; }
+
+.textarea-shortcut.near-limit {
+    border-color: #f0cccc;
+    background: #fff7f7;
+    color: #b54a4a;
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Progress */
+
+.progress-block {
+    margin-top: 15px;
+    padding: 14px 16px;
+    border: 1px solid #e3e6ed;
+    border-radius: 9px;
+    background: #fafbfc;
+}
+
+.progress-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+    color: #3b414d;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.progress-head strong { color: var(--roadmap-primary); font-weight: 750; }
+
+.progress-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: #e6e8f0;
+}
+
+.progress-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--roadmap-primary), #7b86ea);
+    transition: width .35s ease;
+}
+
+.progress-fill.complete { background: var(--roadmap-green); }
+
+.progress-hint {
+    display: block;
+    margin-top: 8px;
+    color: #68707e;
+    font-size: 12px;
+}
+
+/* Journey tools */
+
+.journey-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.tool-btn {
+    padding: 6px 11px;
+    border: 1px solid #e1e4ea;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #555d6b;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+}
+
+.tool-btn:hover { border-color: #cfd3ed; background: #f5f6ff; color: #4754c7; }
+
+/* Collapsible stages */
+
+.stage-header {
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.stage-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border: 1px solid #e1e4ea;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #626ac5;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .2s ease, background .15s ease;
+}
+
+.stage-toggle:hover { background: #f5f6ff; }
+
+.stage-card.collapsed .stage-content { display: none; }
+.stage-card.collapsed .stage-toggle { transform: rotate(180deg); }
+.stage-card.collapsed .stage-header { border-bottom-color: transparent; }
+
+/* Checkable topics */
+
+button.topic {
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.topic::before {
+    content: "";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    border: 1.5px solid #c3c8d4;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.topic.done {
+    border-color: #cfe6d4;
+    background: var(--roadmap-green-bg);
+    color: #4d6b55;
+    text-decoration: line-through;
+    text-decoration-color: rgba(77, 107, 85, .45);
+}
+
+.topic.done::before {
+    content: "✓";
+    border-color: var(--roadmap-green);
+    background: var(--roadmap-green);
+}
+
+/* Entrance + motion preferences */
+
+@keyframes roadmapFadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.roadmap-output { animation: roadmapFadeUp .35s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+    .roadmap-page *,
+    .roadmap-page *::before,
+    .roadmap-page *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media (max-width: 650px) {
+    .journey-tools { width: 100%; }
+    .journey-tools .stage-count { margin-left: auto; }
+}
+
+@media print {
+    .stage-card.collapsed .stage-content { display: block !important; }
+    .stage-toggle,
+    .journey-tools,
+    .progress-hint { display: none !important; }
+}
