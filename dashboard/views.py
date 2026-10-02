@@ -68,7 +68,7 @@ def adminOverview(request):
         resumeversion__resumeanalysis__isnull=False
     ).distinct().count()
 
-    # --- Recent activity -
+    # --- Recent activity -------
     activity_items = []
 
     # Recent resume uploads
@@ -207,81 +207,7 @@ def feedback(request):
 REPORT_TEMPLATE = "dashboard_view/admin/admin_reports.html"
 
 
-# def admin_report(request):
-#     admin_id = request.session.get("user_id")
-#     if not admin_id:
-#         return redirect("login")
 
-#     admin_user = User.objects.filter(user_id=admin_id).first()
-#     if not admin_user or admin_user.role != "admin":
-#         return redirect("dashboard")
-
-#     ctx = {
-#         "nav": {
-#             "role": "admin",
-#             "avatar_initial": admin_user.name[0].upper(),
-#             "avatar_name": admin_user.name,
-#         },
-#         "tables": [(key, cfg["label"]) for key, cfg in REPORT_TABLES.items()],
-#         "periods": PERIODS,
-#         "selected_table": request.GET.get("table", ""),
-#         "selected_period": request.GET.get("period", ""),
-#         "from_date": request.GET.get("from_date", ""),
-#         "to_date": request.GET.get("to_date", ""),
-#         "generated": False,
-#     }
-
-#     # First page load (no form submitted yet)
-#     if not ctx["selected_table"] and not ctx["selected_period"]:
-#         return render(request, REPORT_TEMPLATE, ctx)
-
-#     cfg = REPORT_TABLES.get(ctx["selected_table"])
-#     if cfg is None:
-#         ctx["error"] = "Please select a valid table."
-#         return render(request, REPORT_TEMPLATE, ctx)
-
-#     start, end, error = resolve_period(
-#         ctx["selected_period"], ctx["from_date"], ctx["to_date"]
-#     )
-#     if error:
-#         ctx["error"] = error
-#         return render(request, REPORT_TEMPLATE, ctx)
-
-#     tz = timezone.get_current_timezone()
-#     start_dt = timezone.make_aware(datetime.combine(start, time.min), tz)
-#     end_dt = timezone.make_aware(
-#         datetime.combine(end + timedelta(days=1), time.min), tz
-#     )
-
-#     model = cfg["model"]
-#     date_field = cfg["date_field"]
-#     qs = model.objects.filter(
-#         **{f"{date_field}__gte": start_dt, f"{date_field}__lt": end_dt}
-#     ).order_by(f"-{date_field}")
-
-#     fields = [
-#         f for f in model._meta.concrete_fields
-#         if f.name not in cfg.get("exclude", [])
-#         and f.column not in cfg.get("exclude", [])
-#     ]
-#     columns = [f.column.replace("_", " ").title() for f in fields]
-#     total = qs.count()
-#     rows = [
-#         [format_cell(v) for v in row]
-#         for row in qs.values_list(*[f.attname for f in fields])[:MAX_ROWS]
-#     ]
-
-#     ctx.update({
-#         "generated": True,
-#         "report_title": f"{cfg['label']} Report",
-#         "report_desc": f"{start:%d %b %Y} to {end:%d %b %Y} — {total} record(s)",
-#         "columns": columns,
-#         "rows": rows,
-#         "total": total,
-#         "truncated": total > MAX_ROWS,
-#         "max_rows": MAX_ROWS,
-#     })
-#     return render(request, REPORT_TEMPLATE, ctx)
 
 
 #User Views

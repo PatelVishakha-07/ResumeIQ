@@ -605,6 +605,11 @@ def account_change_password(request):
             messages.error(request, "Current password is incorrect.")
             return redirect("account_change_password")
 
+        
+        if current_password == new_password:
+            messages.error(request, "New Password can not be as current Password.")
+            return redirect("account_change_password")
+
         if len(new_password) < 8:
             messages.error(request, "New password must be at least 8 characters.")
             return redirect("account_change_password")
