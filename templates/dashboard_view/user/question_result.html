@@ -246,8 +246,42 @@ Practice your AI-generated interview questions and reveal answers when ready.
     display: flex;
 
     justify-content: space-between;
+
+    align-items: center;
+
+    gap: 12px;
 }
 
+.bottom-actions .btn {
+
+    text-decoration: none;
+}
+
+
+/* Empty */
+
+.empty-card {
+
+    background: var(--paper-raised);
+
+    border: 1px solid var(--line);
+
+    border-radius: 12px;
+
+    padding: 30px;
+
+    text-align: center;
+}
+
+.empty-card h3 {
+
+    margin-top: 0;
+
+    margin-bottom: 8px;
+}
+
+
+/* Mobile */
 
 @media(max-width: 650px) {
 
@@ -260,6 +294,20 @@ Practice your AI-generated interview questions and reveal answers when ready.
     .question-text {
 
         font-size: 16px;
+
+    }
+
+    .bottom-actions {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+    .bottom-actions .btn {
+
+        text-align: center;
 
     }
 
@@ -282,14 +330,41 @@ Practice your AI-generated interview questions and reveal answers when ready.
         <div>
 
             <div class="summary-topic">
-                {{ topic }}
+
+                {% if source == "resume" %}
+
+                    Resume Based Interview Questions
+
+                {% else %}
+
+                    {{ topic }}
+
+                {% endif %}
+
             </div>
+
 
             <div class="summary-details">
 
-                {{ level }}                
-                ·
-                {{ question_type }}
+                {% if source == "resume" %}
+
+                    Resume
+
+                    {% if resume_name %}
+
+                        · {{ resume_name }}
+
+                    {% endif %}
+
+                {% else %}
+
+                    {{ level }}
+
+                    ·
+
+                    {{ question_type }}
+
+                {% endif %}
 
             </div>
 
@@ -357,7 +432,7 @@ Practice your AI-generated interview questions and reveal answers when ready.
         {% endif %}
 
 
-        <!-- Answer Toggle -->
+        <!-- Answer -->
 
         <div class="answer-section">
 
@@ -368,11 +443,15 @@ Practice your AI-generated interview questions and reveal answers when ready.
             >
 
                 <span>
+
                     Show Answer
+
                 </span>
 
                 <span class="toggle-arrow">
+
                     ▼
+
                 </span>
 
             </button>
@@ -381,46 +460,44 @@ Practice your AI-generated interview questions and reveal answers when ready.
             <div class="answer-content">
 
                 <div class="answer-label">
-                    Correct Answer
+
+                    {% if question.options %}
+
+                        Correct Answer
+
+                    {% else %}
+
+                        Suggested Answer
+
+                    {% endif %}
+
                 </div>
 
-                <div class="answer-text">
-
-                    {{ question.correct_answer }}
-
-                </div>
-
+                <div class="answer-text"> {{ question.correct_answer }} </div>
             </div>
-
         </div>
-
-
     </div>
 
     {% empty %}
 
-    <div class="card">
-
-        <h3>
-            No questions found
-        </h3>
-
-        <p class="hint">
-            Try generating a new question set.
-        </p>
-
+    <div class="empty-card">
+        <h3> No questions found </h3>
+        <p class="hint">Try generating a new question set.</p>
     </div>
 
     {% endfor %}
 
 
-    <div class="bottom-actions">
+    <!-- Bottom Actions -->
 
-        <a
-            href="{% url 'generate_question' %}"
-            class="btn ghost"
-        >
+    <div class="bottom-actions">
+        <a href="{% url 'quiz_questions' %}" class="btn ghost">
             ← Generate Again
+        </a>
+
+
+        <a href="{% url 'download_generated_questions_pdf' %}" class="btn">
+            ↓ Download PDF
         </a>
 
     </div>
@@ -434,34 +511,21 @@ Practice your AI-generated interview questions and reveal answers when ready.
 {% block extra_js %}
 
 <script>
-
 function toggleAnswer(button) {
-
     const answer = button.nextElementSibling;
-
     const text = button.querySelector("span:first-child");
-
     const isOpen = answer.classList.contains("show");
 
-
     if (isOpen) {
-
         answer.classList.remove("show");
-
         button.classList.remove("open");
-
         text.textContent = "Show Answer";
-
     }
 
     else {
-
         answer.classList.add("show");
-
         button.classList.add("open");
-
         text.textContent = "Hide Answer";
-
     }
 
 }
