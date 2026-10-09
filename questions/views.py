@@ -74,14 +74,24 @@ WEAK_AREA_THRESHOLD = 70
 # INTERVIEW PREPARATION PAGE
 # ============================================================
 
+
 def interview_prep_view(request):
-    """
-    Shows the interview preparation page.
-    """
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        messages.error(request, "Please sign in to continue.")
+        return redirect("login")
+
+    user_resumes = Resume.objects.filter(
+        user_id=user_id
+    ).order_by("-updated_at")
 
     return render(
         request,
-        "dashboard_view/user/interview_prep.html"
+        "dashboard_view/user/interview_prep.html",
+        {
+            "user_resumes": user_resumes,
+        }
     )
 
 
