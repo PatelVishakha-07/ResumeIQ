@@ -412,7 +412,7 @@ Generate the questions now.
 """
 
             response = gemini_client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.8-flash",
                 contents=[
                     system_prompt,
                     user_prompt
@@ -1413,7 +1413,7 @@ FORMAT:
     try:
 
         response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=prompt,
 
             config={
