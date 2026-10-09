@@ -1417,6 +1417,23 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
+            /* WEBSITE RESOURCES */
+            const websites = stage.website_resources || [];
+            if (websites.length) {
+                const panel = document.createElement("div");
+                panel.className = "youtube-panel";
+                panel.innerHTML = `<div class="youtube-header"><div class="youtube-heading-wrap"><div class="youtube-logo">↗</div><div><div class="youtube-heading">Website Resources</div><div class="youtube-subtitle">Documentation and learning websites for this stage</div></div></div></div><div class="youtube-list"></div>`;
+                const websiteList = panel.querySelector(".youtube-list");
+                websites.forEach(function (site) {
+                    if (!site || !site.title || !safeUrl(site.url) || safeUrl(site.url) === "#") return;
+                    const row = document.createElement("div");
+                    row.className = "youtube-item";
+                    row.innerHTML = `<div class="youtube-left"><div class="youtube-play">↗</div><div class="youtube-info"><span class="youtube-title">${escapeHtml(site.title)}</span><span class="youtube-channel">${escapeHtml(site.description || "Learning website")}</span></div></div><a class="youtube-link" href="${escapeAttribute(safeUrl(site.url))}" target="_blank" rel="noopener noreferrer">Visit ↗</a>`;
+                    websiteList.appendChild(row);
+                });
+                if (websiteList.children.length) content.appendChild(panel);
+            }
+
             card.appendChild(header);
 
             card.appendChild(content);
@@ -1533,9 +1550,17 @@ document.addEventListener("DOMContentLoaded", function () {
         ====================================================== */
 
         const links =
-            data.useful_links ||
-            data.resources ||
-            [];
+            Array.isArray(data.useful_links) && data.useful_links.length
+                ? data.useful_links
+                : stages.flatMap(function (stage, stageIndex) {
+                    const videos = (stage.youtube_resources || []).map(function (video) {
+                        return {title: video.title || "YouTube learning resource", url: video.url, channel: video.channel || "YouTube", stage: stage.title || ("Stage " + (stageIndex + 1))};
+                    });
+                    const websites = (stage.website_resources || []).map(function (site) {
+                        return {title: site.title || "Learning website", url: site.url, channel: site.description || "Website", stage: stage.title || ("Stage " + (stageIndex + 1))};
+                    });
+                    return videos.concat(websites);
+                }).filter(function (link) { return link.url && safeUrl(link.url) !== "#"; });
 
 
         const linksCard =
@@ -1594,7 +1619,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="final-link-content">
 
                         <div class="final-link-stage">
-                            RESOURCE
+                            ${escapeHtml(link.stage || "RESOURCE")}
                         </div>
 
                         <div class="final-link-title">
