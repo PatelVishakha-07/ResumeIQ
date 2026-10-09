@@ -207,9 +207,6 @@ def feedback(request):
 REPORT_TEMPLATE = "dashboard_view/admin/admin_reports.html"
 
 
-
-
-
 #User Views
 
 def user_dashboard(request):
@@ -454,14 +451,20 @@ def download_report_resume_view(request, version_id):
     return respose
 
 
+
 #function to view roadmap generator page
 def roadmap_generator_view(request):
     return render(request, "dashboard_view/user/roadmap_generator.html")
 
 class YouTubeResource(BaseModel):
-    title:str
-    channel:str
-    url:str
+    title: str
+    channel: str
+    search_query: str
+
+class WebsiteResource(BaseModel):
+    title: str
+    url: str
+    description: str
 
 class RoadmapStage(BaseModel):
     title:str
@@ -470,8 +473,9 @@ class RoadmapStage(BaseModel):
     desc:str
     topics:List[str]
     resources:List[str]
-    youtube_resources:List[YouTubeResource]
-    milestone:str
+    youtube_resources: List[YouTubeResource]
+    website_resources: List[WebsiteResource]
+    milestone: str
 
 class RoadmapPlan(BaseModel):
     unusable_reason:str
@@ -531,6 +535,11 @@ STEP 2 - Design the roadmap:
   Do not invent a video ID.
   Do not provide a direct watch URL.
   The backend will create the YouTube search URL.
+
+- website_resources: provide 2-3 real, relevant learning websites for EACH stage.
+  Each suggestion must contain title, url, and description.
+  Prefer official documentation or established learning sites relevant to the stage.
+  URLs must be complete HTTPS URLs to known official websites; do not invent URLs.
 
 - duration: realistic per stage assuming roughly 8-10 study hours per week. total_duration is the
   sum, given as a range such as "10-14 weeks".
@@ -613,42 +622,77 @@ def youtube_search_url(search_query):
 def clean_youtube_resources(values):
     cleaned = []
     seen = set()
-
     if not isinstance(values, list):
         return cleaned
+
+    from urllib.parse import parse_qs, urlparse
 
     for item in values:
         if not isinstance(item, dict):
             continue
-
         title = clean_str(item.get("title"), 180)
         channel = clean_str(item.get("channel"), 100)
         search_query = clean_str(item.get("search_query"), 180)
+        supplied_url = clean_str(item.get("url"), 500)
 
+        # Accept previously cleaned YouTube search links when rebuilding a PDF.
+        if not search_query and supplied_url:
+            parsed = urlparse(supplied_url)
+            if (parsed.scheme == "https"
+                    and parsed.netloc.lower() in {"youtube.com", "www.youtube.com", "m.youtube.com"}
+                    and parsed.path == "/results"):
+                search_query = clean_str(
+                    parse_qs(parsed.query).get("search_query", [""])[0], 180
+                )
+
+        # If a model omits search_query, still produce a useful search link.
+        if not search_query and title:
+            search_query = title + (" " + channel if channel else "")
         if not title or not search_query:
             continue
 
         key = (title.lower(), channel.lower(), search_query.lower())
-
         if key in seen:
             continue
-
         seen.add(key)
-
         cleaned.append({
             "title": title,
-            "channel": channel,
+            "channel": channel or "YouTube",
             "search_query": search_query,
             "url": youtube_search_url(search_query),
         })
-
         if len(cleaned) >= 3:
             break
-
     return cleaned
 
 
-# ============================================================
+def clean_website_resources(values):
+    from urllib.parse import urlparse
+
+    cleaned = []
+    seen = set()
+    if not isinstance(values, list):
+        return cleaned
+    for item in values:
+        if not isinstance(item, dict):
+            continue
+        title = clean_str(item.get("title") or item.get("name"), 180)
+        url = clean_str(item.get("url") or item.get("link"), 500)
+        description = clean_str(item.get("description"), 250)
+        if not title or not url:
+            continue
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
+            continue
+        if url.lower() in seen:
+            continue
+        seen.add(url.lower())
+        cleaned.append({"title": title, "url": url, "description": description})
+        if len(cleaned) >= 3:
+            break
+    return cleaned
+
+
 # ROADMAP CLEANING
 # ============================================================
 
@@ -678,6 +722,9 @@ def clean_roadmap(data):
             "resources": clean_list(raw.get("resources"), 120, 4),
             "youtube_resources": clean_youtube_resources(
                 raw.get("youtube_resources")
+            ),
+            "website_resources": clean_website_resources(
+                raw.get("website_resources")
             ),
             "milestone": clean_str(raw.get("milestone"), 250),
         })
@@ -875,7 +922,7 @@ def generate_roadmap(request):
     # v2 prevents old cached roadmaps without YouTube
     # recommendations from being returned.
     cache_key = (
-        "roadmap:v2:"
+        "roadmap:v3:"
         + hashlib.sha256(
             normalized.encode("utf-8")
         ).hexdigest()
