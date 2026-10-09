@@ -380,8 +380,7 @@ def _ai_next_question(export_type, resume_text, qa_history):
                     temperature=0.4,
                     max_output_tokens=1000,
                     response_mime_type="application/json",
-                    thinking_config=types.ThinkingConfig(thinking_budget=0),
-                ),
+                )
             )
             data = json.loads(response.text)
 
@@ -460,12 +459,7 @@ def _ai_generate_final_document(export_type, resume_text, qa_history):
                     system_instruction=system_prompt,
                     temperature=0.5,
                     max_output_tokens=2048,
-                    # Writing a short summary/letter doesn't need multi-step
-                    # reasoning. Without this, "thinking" tokens can eat
-                    # most of max_output_tokens before any visible text is
-                    # written, cutting the answer off mid-sentence.
-                    thinking_config=types.ThinkingConfig(thinking_budget=0),
-                ),
+                )
             )
             text = (response.text or "").strip()
             if text:
