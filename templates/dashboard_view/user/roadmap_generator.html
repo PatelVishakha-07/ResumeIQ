@@ -1,282 +1,1847 @@
 {% extends "dashboard_view/base.html" %}
+{% load static %}
 
 {% block title %}Roadmap Generator — ResumeIQ{% endblock %}
-{% block page_title %}Roadmap generator{% endblock %}
-{% block page_desc %}Paste a job description, or just tell us a topic, language, or role — we'll map out how to learn it.{% endblock %}
 
-{% load static %}
+{% block page_title %}Roadmap Generator{% endblock %}
+
+{% block page_desc %}
+Create a personalized learning roadmap based on your career goal or job description.
+{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/roadmap_generator.css' %}">
-<style>
-  .rm-meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
-  .rm-summary { margin:0 0 12px; line-height:1.55; }
-  .stage-extra { margin:10px 0 0; font-size:13px; line-height:1.5; }
-  .stage-extra strong { font-weight:600; }
-  .rm-panel { margin-top:18px; padding:14px 16px; border:1px solid rgba(128,128,128,.25); border-radius:10px; }
-  .rm-panel h4 { margin:0 0 6px; font-size:14px; }
-  .rm-panel p { margin:0 0 8px; font-size:13px; line-height:1.5; }
-  .rm-error { display:none; margin:8px 0 0; font-size:13px; color:#b91c1c; }
-</style>
 {% endblock %}
 
 {% block content %}
 
-<div class="card" id="inputCard">
-  <div class="card-head"><h3>What do you want a roadmap for?</h3></div>
+<div class="roadmap-page">
 
-  <textarea
-    id="roadmapInput"
-    class="roadmap-textarea"
-    rows="5"
-    placeholder="Paste a full job description, or just type something like &quot;React&quot;, &quot;Data Structures &amp; Algorithms&quot;, &quot;AWS Solutions Architect&quot;, or &quot;Backend Engineer, Series B startup&quot;..."
-  ></textarea>
+    <div class="roadmap-container">
 
-  <div class="example-row">
-    <span class="example-label">Try:</span>
-    <button type="button" class="chip" data-fill="React">React</button>
-    <button type="button" class="chip" data-fill="Data Structures &amp; Algorithms">Data Structures &amp; Algorithms</button>
-    <button type="button" class="chip" data-fill="AWS Solutions Architect">AWS Solutions Architect</button>
-    <button type="button" class="chip" data-fill="Python Backend Development">Python Backend Development</button>
-    <button type="button" class="chip" data-fill="System Design">System Design</button>
-  </div>
+        <!-- =====================================================
+             HERO
+        ====================================================== -->
 
-  <div class="input-footer">
-    <div>
-      <p class="hint">Works with a pasted job description, a specific technology, or a broader topic.</p>
-      <p id="roadmapError"></p>
+        <section class="roadmap-hero">
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    AI CAREER PLANNER
+                </div>
+
+                <h1>Build Your Career Roadmap</h1>
+
+                <p>
+                    Tell ResumeIQ what you want to learn, which role you want to target,
+                    or paste a job description. Our AI will organize your journey into
+                    practical learning stages.
+                </p>
+
+            </div>
+
+            <div class="hero-icon">
+                <div class="hero-icon-inner">
+                    ✦
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             GENERATOR
+        ====================================================== -->
+
+        <section class="generator-card">
+
+            <div class="generator-card-header">
+
+                <span class="card-step">
+                    STEP 01
+                </span>
+
+                <h2>
+                    What do you want to achieve?
+                </h2>
+
+                <p>
+                    Enter a career goal, technology, skill, or job description.
+                </p>
+
+            </div>
+
+
+            <!-- QUERY -->
+
+            <div class="query-wrapper">
+
+                <textarea
+                    id="roadmapQuery"
+                    name="roadmap_query"
+                    placeholder="Example: I want to become a Full Stack Developer using React, Django and PostgreSQL..."
+                    maxlength="6000"
+                    aria-label="Career goal, skill or job description"
+                ></textarea>
+
+                <div class="textarea-footer">
+
+                    <span class="textarea-hint">
+                        Be specific about your role, technology or skills. Press Ctrl + Enter to generate.
+                    </span>
+
+                    <span class="textarea-shortcut" id="charCount">0 / 6000</span>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUICK START -->
+
+            <div class="quick-start">
+
+                <div class="quick-start-title">
+
+                    <span>Quick start</span>
+
+                    <small>
+                        Choose an example
+                    </small>
+
+                </div>
+
+                <div class="chips">
+
+                    <button
+                        type="button"
+                        class="chip"
+                        data-query="I want to become a Full Stack Developer using React, Node.js and MongoDB."
+                    >
+                        <span class="chip-icon">FS</span>
+                        Full Stack Developer
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chip"
+                        data-query="I want to become a Python Django Developer and build professional web applications."
+                    >
+                        <span class="chip-icon">PY</span>
+                        Django Developer
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chip"
+                        data-query="I want to learn Java and become a Java Software Developer."
+                    >
+                        <span class="chip-icon">JV</span>
+                        Java Developer
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chip"
+                        data-query="I want to become a Data Analyst using Python, SQL, Excel and Power BI."
+                    >
+                        <span class="chip-icon">DA</span>
+                        Data Analyst
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="generator-actions">
+
+                <button
+                    type="button"
+                    id="generateRoadmapBtn"
+                    class="primary-btn"
+                >
+                    <span class="btn-icon">✦</span>
+                    Generate Roadmap
+                </button>
+
+                <button
+                    type="button"
+                    id="clearRoadmapBtn"
+                    class="secondary-btn"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+
+            <!-- LOADING -->
+
+            <div
+                id="roadmapLoading"
+                class="loading"
+                role="status"
+                aria-live="polite"
+            >
+
+                <span class="loading-spinner"></span>
+
+                <div>
+                    <strong>Building your roadmap...</strong>
+
+                    <span>
+                        ResumeIQ is organizing skills, projects and milestones.
+                    </span>
+                </div>
+
+            </div>
+
+
+            <!-- ERROR -->
+
+            <div
+                id="roadmapError"
+                class="error-box"
+                role="alert"
+            >
+                <span>⚠</span>
+
+                <span id="roadmapErrorText">
+                    Something went wrong. Please try again.
+                </span>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RESULT
+        ====================================================== -->
+
+        <div id="roadmapResult">
+
+            <div class="roadmap-output">
+
+                <!-- =================================================
+                     OVERVIEW
+                ================================================== -->
+
+                <section class="roadmap-overview">
+
+                    <div class="overview-top">
+
+                        <div>
+
+                            <span class="overview-label">
+                                YOUR ROADMAP
+                            </span>
+
+                            <h2 id="roadmapTitle">
+                                Career Roadmap
+                            </h2>
+
+                        </div>
+
+                        <div class="overview-status">
+
+                            <span class="status-dot"></span>
+
+                            AI Generated
+
+                        </div>
+
+                    </div>
+
+
+                    <p
+                        id="roadmapSummary"
+                        class="roadmap-summary"
+                    >
+                    </p>
+
+
+                    <!-- STATS -->
+
+                    <div class="overview-stats">
+
+                        <div class="overview-stat">
+
+                            <div class="stat-icon">
+                                ◈
+                            </div>
+
+                            <div>
+                                <strong id="stageCount">
+                                    0
+                                </strong>
+
+                                <span>
+                                    Learning stages
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="overview-stat">
+
+                            <div class="stat-icon">
+                                ✓
+                            </div>
+
+                            <div>
+                                <strong id="topicCount">
+                                    0
+                                </strong>
+
+                                <span>
+                                    Core topics
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="overview-stat">
+
+                            <div class="stat-icon">
+                                ◷
+                            </div>
+
+                            <div>
+                                <strong id="totalDuration">—</strong>
+                                <span>Estimated time</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PROGRESS -->
+
+                    <div id="progressBlock" class="progress-block">
+                        <div class="progress-head">
+                            <span>Your progress</span>
+                            <strong id="progressText">0%</strong>
+                        </div>
+                        <div class="progress-track">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <small class="progress-hint">Tick topics as you learn them. Progress is saved in this browser.</small>
+                    </div>
+
+
+                    <!-- PREREQUISITES -->
+
+                    <div
+                        id="prerequisitesBox"
+                        class="prerequisites-box"
+                    >
+
+                        <div class="prerequisites-title">
+
+                            <span>✓</span>
+
+                            Prerequisites
+
+                        </div>
+
+                        <div
+                            id="prerequisitesList"
+                            class="prerequisites-list"
+                        >
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     JOURNEY
+                ================================================== -->
+
+                <section class="roadmap-journey">
+
+                    <div class="roadmap-section-title">
+
+                        <div>
+
+                            <span class="roadmap-section-label">
+                                LEARNING JOURNEY
+                            </span>
+
+                            <h3>
+                                Your path to the goal
+                            </h3>
+
+                        </div>
+
+                        <div class="journey-tools">
+                            <button type="button" class="tool-btn" id="expandAllBtn">Expand all</button>
+                            <button type="button" class="tool-btn" id="collapseAllBtn">Collapse all</button>
+                            <span id="journeyStageCount" class="stage-count">0 stages</span>
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="timeline"
+                        class="timeline"
+                    >
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     CAPSTONE
+                ================================================== -->
+
+                <section
+                    id="capstoneCard"
+                    class="final-card"
+                >
+
+                    <div class="final-card-header">
+
+                        <div class="final-card-icon project-icon">
+                            ◆
+                        </div>
+
+                        <div>
+
+                            <span class="final-card-label">
+                                PRACTICAL PROJECT
+                            </span>
+
+                            <h3>
+                                Capstone Project
+                            </h3>
+
+                            <p>
+                                Put everything you learned into one portfolio-ready project.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="capstoneContent"
+                        class="capstone-content"
+                    >
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     INTERVIEW PREPARATION
+                ================================================== -->
+
+                <section
+                    id="interviewCard"
+                    class="final-card"
+                >
+
+                    <div class="final-card-header">
+
+                        <div class="final-card-icon interview-icon">
+                            ?
+                        </div>
+
+                        <div>
+
+                            <span class="final-card-label">
+                                CAREER PREPARATION
+                            </span>
+
+                            <h3>
+                                Interview Preparation
+                            </h3>
+
+                            <p>
+                                Prepare for technical and role-specific interviews.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="interviewList"
+                        class="interview-list"
+                    >
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     USEFUL LINKS
+                ================================================== -->
+
+                <section
+                    id="preparationLinksCard"
+                    class="final-card preparation-links-card"
+                >
+
+                    <div class="final-card-header">
+
+                        <div class="final-card-icon">
+                            ↗
+                        </div>
+
+                        <div>
+
+                            <span class="final-card-label">
+                                RECOMMENDED RESOURCES
+                            </span>
+
+                            <h3>
+                                Useful Learning Links
+                            </h3>
+
+                            <p>
+                                Helpful resources selected for your roadmap.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="finalLinks"
+                        class="final-link-section"
+                    >
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     BOTTOM ACTIONS
+                ================================================== -->
+
+                <div class="roadmap-actions">
+
+                    <button type="button" id="regenerateBtn" class="secondary-btn">
+                        <span class="btn-icon">↻</span>
+                        Regenerate
+                    </button>
+
+                    <button type="button" id="copyRoadmapBtn" class="secondary-btn">
+                        <span class="btn-icon">⧉</span>
+                        Copy as text
+                    </button>
+
+                    <button
+                        type="button"
+                        id="downloadRoadmapBtn"
+                        class="secondary-btn download-btn"
+                    >
+                        <span class="btn-icon">↓</span>
+                        Download PDF
+                    </button>
+
+                    <button
+                        type="button"
+                        id="newRoadmapBtn"
+                        class="primary-btn"
+                    >
+                        <span class="btn-icon">+</span>
+                        Create New Roadmap
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-    <button type="button" id="generateBtn" class="btn sm" disabled>
-      <span id="generateBtnLabel">Generate roadmap</span>
-      <svg class="spin" width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#fff" stroke-width="1.6" opacity="0.3"/><path d="M14.5 8A6.5 6.5 0 0 0 8 1.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-    </button>
-  </div>
+
 </div>
 
-<div id="roadmapResult" class="roadmap-result">
-  <!-- populated by JS via a call to generate_roadmap (Gemini) -->
-</div>
 
-{% endblock %}
-
-{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
 
-  const input = document.getElementById('roadmapInput');
-  const generateBtn = document.getElementById('generateBtn');
-  const generateBtnLabel = document.getElementById('generateBtnLabel');
-  const generateSpinner = generateBtn.querySelector('.spin');
-  const result = document.getElementById('roadmapResult');
-  const errorEl = document.getElementById('roadmapError');
+document.addEventListener("DOMContentLoaded", function () {
 
-  let lastQueryText = '';
-  let currentRoadmap = null;
+    const queryInput = document.getElementById("roadmapQuery");
 
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      input.value = chip.dataset.fill;
-      input.dispatchEvent(new Event('input'));
-      input.focus();
-    });
-  });
+    const generateBtn =
+        document.getElementById("generateRoadmapBtn");
 
-  input.addEventListener('input', () => {
-    generateBtn.disabled = input.value.trim().length < 2;
-  });
+    const clearBtn =
+        document.getElementById("clearRoadmapBtn");
 
-  function getCookie(name) {
-    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-    return match ? decodeURIComponent(match.pop()) : '';
-  }
+    const newRoadmapBtn =
+        document.getElementById("newRoadmapBtn");
 
-  function showError(message) {
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-  }
+    const downloadBtn =
+        document.getElementById("downloadRoadmapBtn");
 
-  function clearError() {
-    errorEl.style.display = 'none';
-    errorEl.textContent = '';
-  }
+    const loading =
+        document.getElementById("roadmapLoading");
 
-  function setLoading(isLoading) {
-    generateBtn.disabled = isLoading || input.value.trim().length < 2;
-    generateBtnLabel.textContent = isLoading ? 'Generating…' : 'Generate roadmap';
-    generateSpinner.style.display = isLoading ? 'inline-block' : 'none';
-  }
+    const errorBox =
+        document.getElementById("roadmapError");
 
-  function esc(value) {
-    return String(value == null ? '' : value).replace(/[&<>"']/g, c => (
-      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-    ));
-  }
+    const errorText =
+        document.getElementById("roadmapErrorText");
 
-  function renderRoadmap(queryLabel, data) {
-    const stages = data.stages || [];
-    currentRoadmap = Object.assign({}, data, { query_label: queryLabel });
+    const result =
+        document.getElementById("roadmapResult");
 
-    const stagesHtml = stages.map((s, i) => `
-      <div class="stage">
-        <div class="stage-marker">
-          <div class="stage-dot">${i + 1}</div>
-          ${i < stages.length - 1 ? '<div class="stage-line"></div>' : ''}
-        </div>
-        <div class="stage-card">
-          <div class="stage-head">
-            <h4>${esc(s.title)}</h4>
-            <span class="stage-duration">${esc(s.duration)}</span>
-          </div>
-          <p class="stage-desc">${esc(s.desc)}</p>
-          <div class="tag-row">
-            ${(s.topics || []).map(t => `<span class="tag topic">${esc(t)}</span>`).join('')}
-          </div>
-          ${s.milestone ? `<p class="stage-extra"><strong>Build:</strong> ${esc(s.milestone)}</p>` : ''}
-          ${(s.resources && s.resources.length) ? `<p class="stage-extra"><strong>Study:</strong> ${s.resources.map(esc).join(' &middot; ')}</p>` : ''}
-          <span class="level-badge">${esc(s.level)}</span>
-        </div>
-      </div>
-    `).join('');
+    const charCount = document.getElementById("charCount");
+    const MAX_CHARS = 6000;
+    let progressKey = "";
+    let progressState = {};
+    const generateLabel = generateBtn.innerHTML;
+    let lastRoadmap = null;
+    let regenerateNext = false;
 
-    const prereqHtml = (data.prerequisites && data.prerequisites.length)
-      ? `<span class="hint">Before you start:</span> ${data.prerequisites.map(p => `<span class="tag">${esc(p)}</span>`).join('')}`
-      : '';
+    document.getElementById("regenerateBtn")
+        .addEventListener("click", function () {
+            if (!queryInput.value.trim()) { return; }
+            regenerateNext = true;
+            generateBtn.click();
+        });
 
-    const capstoneHtml = data.capstone_project ? `
-      <div class="rm-panel">
-        <h4>Capstone project</h4>
-        <p>${esc(data.capstone_project)}</p>
-      </div>` : '';
+    function setBusy(busy) {
+        generateBtn.disabled = busy;
+        clearBtn.disabled = busy;
+        generateBtn.innerHTML = busy
+            ? '<span class="btn-spinner"></span> Generating...'
+            : generateLabel;
+    }
 
-    const interviewHtml = (data.interview_focus && data.interview_focus.length) ? `
-      <div class="rm-panel">
-        <h4>What interviewers will probe</h4>
-        <div class="tag-row">${data.interview_focus.map(t => `<span class="tag topic">${esc(t)}</span>`).join('')}</div>
-      </div>` : '';
+    function updateCount() {
+        const n = queryInput.value.length;
+        charCount.textContent = n + " / " + MAX_CHARS;
+        charCount.classList.toggle("near-limit", n > MAX_CHARS * 0.9);
+    }
 
-    result.innerHTML = `
-      <div class="card" style="margin-top:18px;">
-        <div class="card-head">
-          <h3>Roadmap for &ldquo;${esc(queryLabel)}&rdquo;</h3>
-        </div>
-        ${data.summary ? `<p class="rm-summary">${esc(data.summary)}</p>` : ''}
-        <div class="rm-meta">
-          <span class="hint">${stages.length} stages${data.total_duration ? ' &middot; about ' + esc(data.total_duration) : ''}</span>
-          ${prereqHtml}
-        </div>
-        <div class="stage-timeline">${stagesHtml}</div>
-        ${capstoneHtml}
-        ${interviewHtml}
-        <div class="input-footer no-print" style="margin-top:18px;">
-          <p class="hint">Regenerate for a different take, or download this roadmap as a PDF.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn ghost sm" id="downloadPdfBtn">Download PDF</button>
-            <button type="button" class="btn ghost sm" id="regenerateBtn">Regenerate</button>
-            <button type="button" class="btn sm">Save to my roadmaps</button>
-          </div>
-        </div>
-        <p class="rm-error no-print" id="downloadError"></p>
-      </div>
-    `;
+    queryInput.addEventListener("input", updateCount);
 
-    document.getElementById('regenerateBtn').addEventListener('click', () => {
-      runGenerate(lastQueryText, true);
+    queryInput.addEventListener("keydown", function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            e.preventDefault();
+            generateBtn.click();
+        }
     });
 
-    document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
-
-    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  async function downloadPdf() {
-    if (!currentRoadmap) return;
-
-    const btn = document.getElementById('downloadPdfBtn');
-    const errEl = document.getElementById('downloadError');
-    const originalLabel = btn.textContent;
-
-    errEl.style.display = 'none';
-    btn.disabled = true;
-    btn.textContent = 'Preparing PDF…';
-
-    try {
-      const formData = new FormData();
-      formData.append('roadmap', JSON.stringify(currentRoadmap));
-
-      const response = await fetch('{% url "download_roadmap_pdf" %}', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        let message = "Couldn't create the PDF. Please try again.";
+    function safeUrl(value) {
+        if (!value || value === "#") { return "#"; }
         try {
-          const err = await response.json();
-          if (err.error) message = err.error;
-        } catch (_) {}
-        errEl.textContent = message;
-        errEl.style.display = 'block';
-        return;
-      }
-
-      const blob = await response.blob();
-      const disposition = response.headers.get('Content-Disposition') || '';
-      const match = disposition.match(/filename="?([^";]+)"?/i);
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = match ? match[1] : 'ResumeIQ_Roadmap.pdf';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (err) {
-      errEl.textContent = "Couldn't reach the server. Please try again.";
-      errEl.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalLabel;
+            const parsed = new URL(value, window.location.origin);
+            return (parsed.protocol === "http:" || parsed.protocol === "https:")
+                ? parsed.href : "#";
+        } catch (e) { return "#"; }
     }
-  }
 
-  async function runGenerate(text, regenerate = false) {
-    lastQueryText = text;
-    clearError();
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append('query', text);
-    if (regenerate) formData.append('regenerate', '1');
-
-    try {
-      const response = await fetch('{% url "generate_roadmap" %}', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') },
-        body: formData,
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        showError(data.error || 'Something went wrong generating that roadmap.');
-        return;
-      }
-
-      const label = data.query_label || (text.length > 60 ? text.slice(0, 60) + '…' : text);
-      renderRoadmap(label, data);
-    } catch (err) {
-      showError("Couldn't reach the server. Please try again.");
-    } finally {
-      setLoading(false);
+    function loadProgress() {
+        try {
+            return JSON.parse(localStorage.getItem(progressKey)) || {};
+        } catch (e) { return {}; }
     }
-  }
 
-  generateBtn.addEventListener('click', () => {
-    const text = input.value.trim();
-    if (!text) return;
-    runGenerate(text);
-  });
+    function saveProgress() {
+        try {
+            localStorage.setItem(progressKey, JSON.stringify(progressState));
+        } catch (e) { /* storage unavailable */ }
+    }
+
+    function updateProgress() {
+        const total = document.querySelectorAll(".topic").length;
+        const done = document.querySelectorAll(".topic.done").length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        const fill = document.getElementById("progressFill");
+        fill.style.width = pct + "%";
+        fill.classList.toggle("complete", pct === 100);
+        document.getElementById("progressText").textContent =
+            done + " / " + total + " topics · " + pct + "%";
+        document.getElementById("progressBlock").style.display =
+            total ? "block" : "none";
+    }
+
+    function setAllStages(collapse) {
+        document.querySelectorAll(".stage-card").forEach(function (card) {
+            card.classList.toggle("collapsed", collapse);
+            const t = card.querySelector(".stage-toggle");
+            if (t) { t.setAttribute("aria-expanded", String(!collapse)); }
+        });
+    }
+
+    document.getElementById("expandAllBtn")
+        .addEventListener("click", function () { setAllStages(false); });
+    document.getElementById("collapseAllBtn")
+        .addEventListener("click", function () { setAllStages(true); });
+
+    const copyBtn = document.getElementById("copyRoadmapBtn");
+    copyBtn.addEventListener("click", async function () {
+        const hidden = Array.from(document.querySelectorAll(".stage-card.collapsed"));
+        hidden.forEach(function (c) { c.classList.remove("collapsed"); });
+        const text = result.innerText;
+        hidden.forEach(function (c) { c.classList.add("collapsed"); });
+        try {
+            await navigator.clipboard.writeText(text);
+            copyBtn.innerHTML = '<span class="btn-icon">✓</span> Copied';
+        } catch (e) {
+            copyBtn.innerHTML = '<span class="btn-icon">!</span> Copy failed';
+        }
+        setTimeout(function () {
+            copyBtn.innerHTML = '<span class="btn-icon">⧉</span> Copy as text';
+        }, 1800);
+    });
+
+
+    /* =========================================================
+       QUICK START
+    ========================================================= */
+
+    document.querySelectorAll(".chip").forEach(function (chip) {
+
+        chip.addEventListener("click", function () {
+
+            queryInput.value =
+                this.getAttribute("data-query");
+
+            updateCount();
+
+            queryInput.focus();
+
+        });
+
+    });
+
+
+    /* =========================================================
+       CLEAR
+    ========================================================= */
+
+    clearBtn.addEventListener("click", function () {
+
+        queryInput.value = "";
+
+        updateCount();
+
+        errorBox.style.display = "none";
+
+        result.style.display = "none";
+
+        queryInput.focus();
+
+    });
+
+
+    /* =========================================================
+       NEW ROADMAP
+    ========================================================= */
+
+    if (newRoadmapBtn) {
+
+        newRoadmapBtn.addEventListener("click", function () {
+
+            result.style.display = "none";
+
+            queryInput.value = "";
+
+            queryInput.focus();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        });
+
+    }
+
+
+    /* =========================================================
+       GENERATE
+    ========================================================= */
+
+    generateBtn.addEventListener("click", async function () {
+
+        const query = queryInput.value.trim();
+
+        if (!query) {
+
+            errorText.textContent =
+                "Please enter a career goal, technology, skill, or job description.";
+
+            errorBox.style.display = "flex";
+
+            queryInput.focus();
+
+            return;
+
+        }
+
+
+        errorBox.style.display = "none";
+
+        result.style.display = "none";
+
+        loading.style.display = "flex";
+
+        setBusy(true);
+
+
+        try {
+
+            const form = new FormData();
+
+            form.append("query", query);
+
+            if (regenerateNext) { form.append("regenerate", "1"); }
+
+            regenerateNext = false;
+
+            const response = await fetch(
+                "{% url 'generate_roadmap' %}",
+                {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCookie("csrftoken") },
+                    body: form
+                }
+            );
+
+
+            const data = await response.json().catch(function () { return {}; });
+
+
+            if (!response.ok || data.error) {
+
+                throw new Error(
+                    data.error ||
+                    "Unable to generate roadmap."
+                );
+
+            }
+
+
+            lastRoadmap = data;
+
+            renderRoadmap(data);
+
+            result.style.display = "block";
+
+
+            setTimeout(function () {
+
+                result.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }, 100);
+
+
+        }
+        catch (error) {
+
+            errorText.textContent =
+                error.message ||
+                "Something went wrong. Please try again.";
+
+            errorBox.style.display = "flex";
+
+        }
+        finally {
+
+            loading.style.display = "none";
+
+            setBusy(false);
+
+        }
+
+    });
+
+
+    /* =========================================================
+       RENDER ROADMAP
+    ========================================================= */
+
+    function renderRoadmap(data) {
+
+        progressKey = "roadmapProgress:" + (data.title || "default");
+        progressState = loadProgress();
+
+        document.getElementById("roadmapTitle").textContent =
+            data.query_label || data.title || "Career Roadmap";
+
+
+        document.getElementById("roadmapSummary").textContent =
+            data.summary || "";
+
+
+        const stages =
+            data.stages || data.roadmap || [];
+
+
+        document.getElementById("stageCount").textContent =
+            stages.length;
+
+
+        document.getElementById("journeyStageCount").textContent =
+            stages.length +
+            (stages.length === 1 ? " stage" : " stages");
+
+
+        let topicTotal = 0;
+
+
+        stages.forEach(function (stage) {
+
+            const topics =
+                stage.topics ||
+                stage.skills ||
+                [];
+
+            topicTotal += topics.length;
+
+        });
+
+
+        document.getElementById("topicCount").textContent =
+            topicTotal;
+
+        document.getElementById("totalDuration").textContent =
+            data.total_duration || "Self-paced";
+
+
+        /* =====================================================
+           PREREQUISITES
+        ====================================================== */
+
+        const prerequisiteList =
+            document.getElementById("prerequisitesList");
+
+        prerequisiteList.innerHTML = "";
+
+
+        const prerequisites =
+            data.prerequisites || [];
+
+
+        if (prerequisites.length === 0) {
+
+            document.getElementById(
+                "prerequisitesBox"
+            ).style.display = "none";
+
+        }
+        else {
+
+            document.getElementById(
+                "prerequisitesBox"
+            ).style.display = "block";
+
+
+            prerequisites.forEach(function (item) {
+
+                const span =
+                    document.createElement("span");
+
+                span.className = "prerequisite";
+
+                span.textContent = item;
+
+                prerequisiteList.appendChild(span);
+
+            });
+
+        }
+
+
+        /* =====================================================
+           TIMELINE
+        ====================================================== */
+
+        const timeline =
+            document.getElementById("timeline");
+
+        timeline.innerHTML = "";
+
+
+        stages.forEach(function (stage, index) {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "timeline-item";
+
+
+            const marker =
+                document.createElement("div");
+
+            marker.className =
+                "timeline-marker";
+
+
+            const number =
+                document.createElement("div");
+
+            number.className =
+                "timeline-number";
+
+            number.textContent =
+                String(index + 1).padStart(2, "0");
+
+
+            marker.appendChild(number);
+
+
+            if (index < stages.length - 1) {
+
+                const line =
+                    document.createElement("div");
+
+                line.className =
+                    "timeline-line";
+
+                marker.appendChild(line);
+
+            }
+
+
+            const card =
+                document.createElement("article");
+
+            card.className =
+                "stage-card";
+
+
+            /* STAGE HEADER */
+
+            const header =
+                document.createElement("div");
+
+            header.className =
+                "stage-header";
+
+
+            const headingContent =
+                document.createElement("div");
+
+            headingContent.className =
+                "stage-heading-content";
+
+
+            const label =
+                document.createElement("span");
+
+            label.className =
+                "stage-label";
+
+            label.textContent =
+                "STAGE " +
+                String(index + 1).padStart(2, "0");
+
+
+            const title =
+                document.createElement("h4");
+
+            title.className =
+                "stage-title";
+
+            title.textContent =
+                stage.title ||
+                stage.name ||
+                "Learning Stage";
+
+
+            const meta =
+                document.createElement("div");
+
+            meta.className =
+                "stage-meta";
+
+
+            if (stage.duration) {
+
+                const duration =
+                    document.createElement("span");
+
+                duration.className =
+                    "stage-meta-item";
+
+                duration.innerHTML =
+                    "◷ " +
+                    escapeHtml(stage.duration);
+
+                meta.appendChild(duration);
+
+            }
+
+
+            if (stage.level) {
+
+                const level =
+                    document.createElement("span");
+
+                level.className =
+                    "stage-meta-item";
+
+                level.innerHTML =
+                    "◆ " +
+                    escapeHtml(stage.level);
+
+                meta.appendChild(level);
+
+            }
+
+
+            headingContent.appendChild(label);
+
+            headingContent.appendChild(title);
+
+            if (meta.children.length) {
+                headingContent.appendChild(meta);
+            }
+
+
+            header.appendChild(headingContent);
+
+            const toggle = document.createElement("button");
+
+            toggle.type = "button";
+            toggle.className = "stage-toggle";
+            toggle.setAttribute("aria-expanded", "true");
+            toggle.setAttribute("aria-label", "Show or hide stage details");
+            toggle.textContent = "⌃";
+
+            header.appendChild(toggle);
+
+            header.addEventListener("click", function () {
+                const collapsed = card.classList.toggle("collapsed");
+                toggle.setAttribute("aria-expanded", String(!collapsed));
+            });
+
+
+            /* STAGE CONTENT */
+
+            const content =
+                document.createElement("div");
+
+            content.className =
+                "stage-content";
+
+
+            if (stage.desc || stage.description) {
+
+                const description =
+                    document.createElement("p");
+
+                description.className =
+                    "stage-description";
+
+                description.textContent =
+                    stage.desc || stage.description;
+
+                content.appendChild(description);
+
+            }
+
+
+            /* TOPICS */
+
+            const topics =
+                stage.topics ||
+                stage.skills ||
+                [];
+
+
+            if (topics.length) {
+
+                const section =
+                    createSection(
+                        "CORE TOPICS",
+                        "◇"
+                    );
+
+
+                const list =
+                    document.createElement("div");
+
+                list.className =
+                    "topic-list";
+
+
+                topics.forEach(function (topic, topicIndex) {
+
+                    const key = index + ":" + topicIndex;
+
+                    const btn = document.createElement("button");
+
+                    btn.type = "button";
+                    btn.className = "topic";
+                    btn.textContent = topic;
+
+                    const isDone = !!progressState[key];
+
+                    btn.classList.toggle("done", isDone);
+                    btn.setAttribute("aria-pressed", String(isDone));
+
+                    btn.addEventListener("click", function (e) {
+
+                        e.stopPropagation();
+
+                        const on = btn.classList.toggle("done");
+
+                        btn.setAttribute("aria-pressed", String(on));
+
+                        if (on) { progressState[key] = true; }
+                        else { delete progressState[key]; }
+
+                        saveProgress();
+                        updateProgress();
+
+                    });
+
+                    list.appendChild(btn);
+
+                });
+
+
+                section.appendChild(list);
+
+                content.appendChild(section);
+
+            }
+
+
+            /* MILESTONE */
+
+            if (stage.milestone) {
+
+                const milestone =
+                    document.createElement("div");
+
+                milestone.className =
+                    "milestone-box";
+
+
+                milestone.innerHTML = `
+                    <div class="milestone-icon">✓</div>
+                    <div>
+                        <div class="milestone-label">
+                            MILESTONE
+                        </div>
+                        <div class="milestone-text">
+                            ${escapeHtml(stage.milestone)}
+                        </div>
+                    </div>
+                `;
+
+
+                content.appendChild(milestone);
+
+            }
+
+
+            /* RESOURCES */
+
+            const resources =
+                stage.resources ||
+                [];
+
+
+            if (resources.length) {
+
+                const section =
+                    createSection(
+                        "LEARNING RESOURCES",
+                        "↗"
+                    );
+
+
+                const list =
+                    document.createElement("ul");
+
+                list.className =
+                    "resource-list";
+
+
+                resources.forEach(function (resource) {
+
+                    const li =
+                        document.createElement("li");
+
+
+                    li.innerHTML = `
+                        <span class="resource-bullet">✓</span>
+                        <span>${escapeHtml(resource)}</span>
+                    `;
+
+
+                    list.appendChild(li);
+
+                });
+
+
+                section.appendChild(list);
+
+                content.appendChild(section);
+
+            }
+
+
+            /* YOUTUBE */
+
+            const youtube =
+                stage.youtube_resources ||
+                stage.youtube ||
+                stage.youtube_links ||
+                [];
+
+
+            if (youtube.length) {
+
+                const panel =
+                    document.createElement("div");
+
+                panel.className =
+                    "youtube-panel";
+
+
+                panel.innerHTML = `
+                    <div class="youtube-header">
+                        <div class="youtube-heading-wrap">
+                            <div class="youtube-logo">
+                                ▶
+                            </div>
+                            <div>
+                                <div class="youtube-heading">
+                                    Video Resources
+                                </div>
+                                <div class="youtube-subtitle">
+                                    Recommended videos for this stage
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="youtube-list"></div>
+                `;
+
+
+                const youtubeList =
+                    panel.querySelector(
+                        ".youtube-list"
+                    );
+
+
+                youtube.forEach(function (video) {
+
+                    const item =
+                        document.createElement("div");
+
+                    item.className =
+                        "youtube-item";
+
+
+                    const title =
+                        video.title ||
+                        video.name ||
+                        "Watch resource";
+
+
+                    const url =
+                        video.url ||
+                        video.link ||
+                        "#";
+
+
+                    const channel =
+                        video.channel ||
+                        video.author ||
+                        "YouTube";
+
+
+                    item.innerHTML = `
+                        <div class="youtube-left">
+
+                            <div class="youtube-play">
+                                ▶
+                            </div>
+
+                            <div class="youtube-info">
+
+                                <span class="youtube-title">
+                                    ${escapeHtml(title)}
+                                </span>
+
+                                <span class="youtube-channel">
+                                    ${escapeHtml(channel)}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <a
+                            class="youtube-link"
+                            href="${escapeAttribute(safeUrl(url))}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Watch
+                            ↗
+                        </a>
+                    `;
+
+
+                    youtubeList.appendChild(item);
+
+                });
+
+
+                content.appendChild(panel);
+
+            }
+
+
+            card.appendChild(header);
+
+            card.appendChild(content);
+
+            item.appendChild(marker);
+
+            item.appendChild(card);
+
+            timeline.appendChild(item);
+
+        });
+
+
+        /* =====================================================
+           CAPSTONE
+        ====================================================== */
+
+        const capstone =
+            data.capstone ||
+            data.capstone_project ||
+            "";
+
+
+        const capstoneCard =
+            document.getElementById("capstoneCard");
+
+
+        if (capstone) {
+
+            capstoneCard.style.display =
+                "block";
+
+
+            document.getElementById(
+                "capstoneContent"
+            ).textContent = capstone;
+
+        }
+        else {
+
+            capstoneCard.style.display =
+                "none";
+
+        }
+
+
+        /* =====================================================
+           INTERVIEW
+        ====================================================== */
+
+        const interview =
+            data.interview_focus ||
+            data.interview_preparation ||
+            data.interview ||
+            [];
+
+
+        const interviewCard =
+            document.getElementById("interviewCard");
+
+
+        const interviewList =
+            document.getElementById("interviewList");
+
+
+        interviewList.innerHTML = "";
+
+
+        if (interview.length) {
+
+            interviewCard.style.display =
+                "block";
+
+
+            interview.forEach(function (item, index) {
+
+                const row =
+                    document.createElement("div");
+
+                row.className =
+                    "interview-item";
+
+
+                row.innerHTML = `
+                    <span class="interview-number">
+                        ${index + 1}
+                    </span>
+
+                    <span>
+                        ${escapeHtml(
+                            typeof item === "string"
+                                ? item
+                                : item.title || item.text || ""
+                        )}
+                    </span>
+                `;
+
+
+                interviewList.appendChild(row);
+
+            });
+
+        }
+        else {
+
+            interviewCard.style.display =
+                "none";
+
+        }
+
+
+        /* =====================================================
+           FINAL LINKS
+        ====================================================== */
+
+        const links =
+            data.useful_links ||
+            data.resources ||
+            [];
+
+
+        const linksCard =
+            document.getElementById(
+                "preparationLinksCard"
+            );
+
+
+        const finalLinks =
+            document.getElementById(
+                "finalLinks"
+            );
+
+
+        finalLinks.innerHTML = "";
+
+
+        if (links.length) {
+
+            linksCard.style.display =
+                "block";
+
+
+            links.forEach(function (link, index) {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "final-link-item";
+
+
+                const title =
+                    link.title ||
+                    link.name ||
+                    "Learning Resource";
+
+
+                const url =
+                    link.url ||
+                    link.link ||
+                    "#";
+
+
+                const channel =
+                    link.channel ||
+                    link.source ||
+                    "";
+
+
+                item.innerHTML = `
+                    <div class="final-link-number">
+                        ${String(index + 1).padStart(2, "0")}
+                    </div>
+
+                    <div class="final-link-content">
+
+                        <div class="final-link-stage">
+                            RESOURCE
+                        </div>
+
+                        <div class="final-link-title">
+                            ${escapeHtml(title)}
+                        </div>
+
+                        ${
+                            channel
+                            ? `
+                                <div class="final-link-channel">
+                                    ${escapeHtml(channel)}
+                                </div>
+                            `
+                            : ""
+                        }
+
+                        <a
+                            class="final-link-url"
+                            href="${escapeAttribute(safeUrl(url))}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            ${escapeHtml(url)}
+                        </a>
+
+                    </div>
+
+                    <a
+                        class="final-link-open"
+                        href="${escapeAttribute(safeUrl(url))}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        ↗
+                    </a>
+                `;
+
+
+                finalLinks.appendChild(item);
+
+            });
+
+        }
+        else {
+
+            linksCard.style.display =
+                "none";
+
+        }
+
+    
+        updateProgress();
+
+    }
+
+
+    /* =========================================================
+       SECTION HELPER
+    ========================================================= */
+
+    function createSection(title, icon) {
+
+        const section =
+            document.createElement("div");
+
+        section.className =
+            "roadmap-section";
+
+
+        section.innerHTML = `
+            <div class="section-heading">
+
+                <span class="section-icon">
+                    ${icon}
+                </span>
+
+                ${title}
+
+            </div>
+        `;
+
+
+        return section;
+
+    }
+
+
+    /* =========================================================
+       ESCAPE HTML
+    ========================================================= */
+
+    function escapeHtml(value) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent =
+            value == null ? "" : value;
+
+        return div.innerHTML;
+
+    }
+
+
+    function escapeAttribute(value) {
+
+        return escapeHtml(value)
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* =========================================================
+       CSRF
+    ========================================================= */
+
+    function getCookie(name) {
+
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== "") {
+
+            const cookies =
+                document.cookie.split(";");
+
+            for (let cookie of cookies) {
+
+                cookie = cookie.trim();
+
+                if (
+                    cookie.substring(
+                        0,
+                        name.length + 1
+                    ) === name + "="
+                ) {
+
+                    cookieValue =
+                        decodeURIComponent(
+                            cookie.substring(
+                                name.length + 1
+                            )
+                        );
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+        return cookieValue;
+
+    }
+
+
+    /* =========================================================
+       DOWNLOAD PDF
+    ========================================================= */
+
+    if (downloadBtn) {
+
+        downloadBtn.addEventListener(
+            "click",
+            async function () {
+
+                try {
+
+                    downloadBtn.disabled = true;
+
+                    if (!lastRoadmap) {
+                        throw new Error("There is no roadmap to download.");
+                    }
+
+                    const form = new FormData();
+
+                    form.append("roadmap", JSON.stringify(lastRoadmap));
+
+
+                    const response = await fetch(
+                        "{% url 'download_roadmap_pdf' %}",
+                        {
+                            method: "POST",
+                            headers: { "X-CSRFToken": getCookie("csrftoken") },
+                            body: form
+                        }
+                    );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "PDF generation failed."
+                        );
+
+                    }
+
+
+                    const blob =
+                        await response.blob();
+
+
+                    const url =
+                        window.URL.createObjectURL(
+                            blob
+                        );
+
+
+                    const a =
+                        document.createElement("a");
+
+                    a.href = url;
+
+                    a.download =
+                        "ResumeIQ_Career_Roadmap.pdf";
+
+                    document.body.appendChild(a);
+
+                    a.click();
+
+                    a.remove();
+
+                    window.URL.revokeObjectURL(url);
+
+                    downloadBtn.disabled = false;
+
+                }
+                catch (error) {
+
+                    downloadBtn.disabled = false;
+
+                    errorText.textContent =
+                        error.message;
+
+                    errorBox.style.display =
+                        "flex";
+
+                }
+
+            }
+        );
+
+    }
 
 });
+
 </script>
+
 {% endblock %}
