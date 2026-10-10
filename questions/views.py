@@ -284,250 +284,183 @@ def fallback_questions(count, allowed_types):
 # OLD INTERVIEW PREP GENERATOR
 # ============================================================
 
+
 def generate_questions(request):
+    """
+    Handle interview preparation by topic or resume.
+
+    Topic mode:
+        Uses the existing topic-based generator.
+
+    Resume mode:
+        Forwards the request to quiz_generated_result_view.
+    """
 
     if request.method != "POST":
         return redirect("interview_prep")
 
+    # 1. Check login
     user_id = request.session.get("user_id")
 
     if not user_id:
-        messages.error(
-            request,
-            "Please sign in to continue."
-        )
+        messages.error(request, "Please sign in to continue.")
         return redirect("login")
 
+    # 2. Detect preparation source BEFORE validating question_type
+    source = (
+        request.POST.get("source", "topic") or "topic"
+    ).strip().lower()
+
+    # 3. Resume mode does not submit question_type because
+    #    your HTML disables those radio buttons.
+    if source == "resume":
+        return quiz_generated_result_view(request)
+
+    # 4. Continue with topic mode
     topic_text = (
         request.POST.get("topic") or ""
     ).strip()
 
-    questions_count = request.POST.get(
-        "questions_count",
-        10
-    )
+    questions_count = request.POST.get("questions_count", 10)
 
-    question_type = request.POST.get(
-        "question_type"
-    )
+    question_type = (
+        request.POST.get("question_type") or ""
+    ).strip().lower()
 
-    level = request.POST.get(
-        "level",
-        "intermediate"
-    )
+    level = (
+        request.POST.get("level", "intermediate") or "intermediate"
+    ).strip().lower()
 
-    mode = request.POST.get(
-        "mode",
-        "practice"
-    )
+    mode = (
+        request.POST.get("mode", "practice") or "practice"
+    ).strip().lower()
 
+    # 5. Validate question count
     try:
-
-        questions_count = int(
-            questions_count
-        )
-
-        if questions_count < 1:
-            questions_count = 10
-
-        if questions_count > MAX_QUESTIONS:
-            questions_count = MAX_QUESTIONS
-
+        questions_count = int(questions_count)
     except (ValueError, TypeError):
-
         questions_count = 10
 
-    if question_type not in ALLOWED_TYPES:
+    questions_count = max(1, min(questions_count, MAX_QUESTIONS))
 
+    # 6. Validate question type
+    if question_type not in ALLOWED_TYPES:
         messages.error(
             request,
             "Please select a valid question type."
         )
-
         return redirect("interview_prep")
 
+    # 7. Validate topic
     if len(topic_text) < 2:
-
         messages.error(
             request,
             "Please describe what this session is for first."
         )
-
         return redirect("interview_prep")
 
+    # 8. Validate difficulty and mode
     if level not in ALLOWED_LEVELS:
         level = "intermediate"
 
     if mode not in ALLOWED_MODES:
         mode = "practice"
 
+    # 9. Generate topic questions
     generated = None
 
     if gemini_client is not None:
-
         try:
-
             system_prompt = """
-You are an interview-question generator for a career-readiness platform.
+You are an interview-question generator.
 
-Generate interview questions based specifically on the provided topic.
+Generate questions specifically about the supplied topic.
+Return ONLY valid JSON with a "questions" list.
 
-Return ONLY valid JSON.
-
-Required format:
-
-{
-    "questions": [
-        {
-            "type": "mcq" | "technical" | "behavioral",
-            "level": "easy" | "intermediate" | "advanced" | "expert",
-            "question_text": "question",
-            "options": ["A", "B", "C", "D"],
-            "correct_answer": "correct answer"
-        }
-    ]
-}
+Each question must contain:
+- type: mcq, technical, or behavioral
+- level: easy, intermediate, advanced, or expert
+- question_text: the question
+- options: four options for MCQ, otherwise null
+- correct_answer: the correct answer or model answer
 
 Rules:
-
 1. Generate exactly the requested number of questions.
-2. Use ONLY the requested question type.
-3. Use ONLY the requested difficulty.
-4. Questions must be relevant to the topic.
-5. MCQ must contain exactly four options.
-6. MCQ correct_answer must exactly match one option.
-7. Technical questions must have options = null.
-8. Behavioral questions must have options = null.
-9. Technical and behavioral questions must contain a useful model answer.
+2. Use only the requested question type.
+3. Use only the requested difficulty.
+4. Keep all questions relevant to the topic.
+5. MCQ answers must exactly match one of the four options.
+6. Technical and behavioral questions must have options set to null.
+7. Technical and behavioral questions must include useful model answers.
 """
 
             user_prompt = f"""
-Topic:
-
-{topic_text}
-
-Question type:
-
-{question_type}
-
-Difficulty:
-
-{level}
-
-Number of questions:
-
-{questions_count}
+Topic: {topic_text}
+Question type: {question_type}
+Difficulty: {level}
+Number of questions: {questions_count}
 
 Generate the questions now.
 """
 
             response = gemini_client.models.generate_content(
                 model="gemini-3.8-flash",
-                contents=[
-                    system_prompt,
-                    user_prompt
-                ],
-
+                contents=[system_prompt, user_prompt],
                 config={
                     "temperature": 0.5,
-                    "response_mime_type": "application/json"
-                }
+                    "response_mime_type": "application/json",
+                },
             )
 
-            raw = response.text
-
-            data = json.loads(raw)
+            data = json.loads(response.text or "")
 
             if validate_generated_questions(
                 data,
                 questions_count,
-                {question_type}
+                {question_type},
             ):
+                generated = data["questions"][:questions_count]
 
-                generated = data["questions"][
-                    :questions_count
-                ]
-
-        except Exception as e:
-
-            print(
-                "Gemini interview generation error:",
-                repr(e)
-            )
-
+        except Exception as exc:
+            print("Gemini interview generation error:", repr(exc))
             generated = None
 
-    # --------------------------------------------------------
-    # FALLBACK
-    # --------------------------------------------------------
-
+    # 10. Fallback if Gemini is unavailable or returns invalid data
     if generated is None:
-
         generated = fallback_questions(
             questions_count,
-            {question_type}
+            {question_type},
         )
 
-        for q in generated:
-            q["level"] = level
+        for item in generated:
+            item["level"] = level
 
-    # --------------------------------------------------------
-    # SAVE QUESTIONS
-    # --------------------------------------------------------
-
+    # 11. Save generated questions
     created_ids = []
 
-    for q in generated:
-
+    for item in generated:
         question = Questions.objects.create(
-
             user_id=user_id,
-
             resume=None,
-
-            question_text=q["question_text"],
-
-            question_type=q["type"],
-
-            options=q.get("options"),
-
-            correct_answer=q.get(
-                "correct_answer"
-            ),
-
-            level=q.get(
-                "level",
-                level
-            )
+            question_text=item["question_text"],
+            question_type=item["type"],
+            options=item.get("options"),
+            correct_answer=item.get("correct_answer"),
+            level=item.get("level", level),
         )
 
-        created_ids.append(
-            question.question_id
-        )
+        created_ids.append(question.question_id)
 
-    request.session[
-        "last_generated_question_ids"
-    ] = created_ids
+    # 12. Store session data
+    request.session["last_generated_question_ids"] = created_ids
+    request.session["exam_mode"] = mode
+    request.session["exam_topic"] = topic_text
+    request.session["exam_level"] = level
+    request.session["exam_question_type"] = question_type
+    request.session["exam_source"] = "topic"
 
-    request.session[
-        "exam_mode"
-    ] = mode
-
-    request.session[
-        "exam_topic"
-    ] = topic_text
-
-    request.session[
-        "exam_level"
-    ] = level
-
-    request.session[
-        "exam_question_type"
-    ] = question_type
-
+    # 13. Open the existing exam page
     return redirect("take_exam")
-
-
 # ============================================================
 # TAKE EXAM
 # ============================================================
