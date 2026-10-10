@@ -81,6 +81,9 @@
 
     <div class="navgroup">
       <div class="navlabel">Account</div>
+      <div class="navitem {% if request.resolver_match.url_name == 'user_feedback' %}active{% endif %}">
+        <a href="{% url 'user_feedback' %}"><span class="dot"></span>Give feedback</a>
+      </div>
       <div class="navitem {% if request.resolver_match.url_name == 'account_settings' or request.resolver_match.url_name == 'account_update_profile' or request.resolver_match.url_name == 'account_change_password' %}active{% endif %}">
         <a href="{% url 'account_settings' %}"><span class="dot"></span>Settings</a>
       </div>

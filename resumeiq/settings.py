@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'dashboard',
     'questions',
     'professionalContent',
+    'feedback',
 ]
 
 MIDDLEWARE = [

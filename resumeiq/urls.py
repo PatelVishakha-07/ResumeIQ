@@ -12,6 +12,7 @@ urlpatterns = [
     path('dashboard/', include("dashboard.urls")),
     path('questions/', include("questions.urls")),
     path('', include('professionalContent.urls')),
+    path('',include('feedback.urls')),
 ]
 
 if settings.DEBUG:
