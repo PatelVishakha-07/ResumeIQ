@@ -1,0 +1,270 @@
+{% extends "dashboard_view/base.html" %}
+{% load static %}
+
+{% block title %}Feedback — ResumeIQ{% endblock %}
+{% block page_title %}Feedback{% endblock %}
+{% block page_desc %}Tell us what works and what doesn't. The team reads every message.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/interview_prep.css' %}">
+
+<style>
+.fb-wrap { max-width: 760px; }
+
+.fb-alert {
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    border: 1px solid;
+    font-size: 14px;
+}
+.fb-alert.error   { border-color: #e5a4a4; color: #b42318; }
+.fb-alert.success { border-color: #a7d3b8; color: #2F6F4E; }
+
+.fb-group { margin-top: 24px; }
+.fb-group:first-of-type { margin-top: 8px; }
+
+.fb-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.fb-help { font-size: 13px; opacity: .75; margin: 0 0 12px; }
+
+/* ---- star rating ---- */
+.fb-rating-row { display: flex; align-items: center; gap: 16px; }
+
+.fb-rating {
+    display: inline-flex;
+    flex-direction: row-reverse;   /* DOM order 5..1, shown 1..5 */
+    position: relative;
+}
+.fb-rating input {
+    position: absolute;
+    opacity: 0;
+    width: 1px; height: 1px;
+}
+.fb-rating label {
+    font-size: 38px;
+    line-height: 1;
+    padding: 2px 4px;
+    cursor: pointer;
+    color: #cfd3df;
+    transition: color .12s, transform .12s;
+}
+.fb-rating input:checked ~ label,
+.fb-rating label:hover,
+.fb-rating label:hover ~ label { color: #C98A3E; }
+.fb-rating label:active { transform: scale(.9); }
+.fb-rating input:focus-visible + label {
+    outline: 2px solid #5267e8;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+.fb-rating-text { font-size: 14px; min-width: 90px; opacity: .8; }
+
+/* ---- category chips ---- */
+.fb-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.fb-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 14px;
+    border: 1px solid #d9dce5;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: border-color .15s, background .15s;
+}
+.fb-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.fb-chip:hover { border-color: #aeb5c5; }
+.fb-chip:has(input:checked) {
+    border-color: #5267e8;
+    background: rgba(82, 103, 232, .08);
+    font-weight: 600;
+}
+.fb-chip:has(input:focus-visible) { outline: 2px solid #5267e8; outline-offset: 2px; }
+
+/* ---- message ---- */
+.fb-textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 140px;
+    padding: 12px;
+    border: 1px solid #d9dce5;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.5;
+    resize: vertical;
+}
+.fb-textarea:focus { outline: 2px solid #5267e8; outline-offset: 1px; border-color: transparent; }
+.fb-counter { text-align: right; font-size: 12px; opacity: .65; margin-top: 6px; }
+.fb-counter.near { color: #B23A2E; opacity: 1; }
+
+/* ---- previous submissions ---- */
+.fb-history { margin-top: 28px; }
+.fb-item { padding: 14px 0; border-top: 1px solid #e3e6ee; }
+.fb-item:first-child { border-top: 0; padding-top: 4px; }
+.fb-item-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 6px; }
+.fb-stars { color: #C98A3E; letter-spacing: 2px; }
+.fb-meta { font-size: 13px; opacity: .7; }
+.fb-status { margin-left: auto; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid #d9dce5; }
+.fb-status.reviewed { border-color: #a7d3b8; color: #2F6F4E; }
+.fb-item p { margin: 0; line-height: 1.55; white-space: pre-wrap; }
+
+@media (max-width: 600px) {
+    .fb-rating label { font-size: 34px; }
+    .fb-rating-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fb-rating label, .fb-chip { transition: none; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="fb-wrap">
+
+<form method="POST" action="{% url 'user_feedback' %}" id="feedbackForm" novalidate>
+    {% csrf_token %}
+
+    <div class="card">
+        <div class="card-head">
+            <h3>Rate your experience</h3>
+            <p>It takes about a minute.</p>
+        </div>
+
+        {% if error %}
+            <div class="fb-alert error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        {% for message in messages %}
+            <div class="fb-alert {% if message.tags == 'success' %}success{% else %}error{% endif %}" role="status">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <!-- RATING -->
+        <div class="fb-group">
+            <span class="fb-label" id="ratingLabel">How would you rate ResumeIQ overall?</span>
+
+            <div class="fb-rating-row">
+                <div class="fb-rating" role="radiogroup" aria-labelledby="ratingLabel">
+                    {% for n in "54321" %}
+                        <input type="radio" id="star{{ n }}" name="rating" value="{{ n }}"
+                               {% if form.rating == n %}checked{% endif %}>
+                        <label for="star{{ n }}" title="{{ n }} out of 5">&#9733;</label>
+                    {% endfor %}
+                </div>
+                <span class="fb-rating-text" id="ratingText" aria-live="polite">Select a rating</span>
+            </div>
+        </div>
+
+        <!-- CATEGORY -->
+        <div class="fb-group">
+            <span class="fb-label">What is this about?</span>
+            <div class="fb-chips" role="radiogroup" aria-label="Feedback topic">
+                {% for value, label in categories %}
+                    <label class="fb-chip">
+                        <input type="radio" name="category" value="{{ value }}"
+                               {% if form.category == value %}checked{% endif %}>
+                        {{ label }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- MESSAGE -->
+        <div class="fb-group">
+            <label class="fb-label" for="message">Your feedback</label>
+            <p class="fb-help">Say what you were trying to do and what happened. Specific details help us fix things faster.</p>
+            <textarea id="message" name="message" class="fb-textarea"
+                      maxlength="{{ max_length }}"
+                      placeholder="For example: I uploaded a PDF resume and the ATS score page showed no keywords...">{{ form.message }}</textarea>
+            <div class="fb-counter" id="counter">0 / {{ max_length }}</div>
+        </div>
+
+        <div class="input-footer">
+            <p class="hint">Signed in as you. Feedback is visible to the ResumeIQ team only.</p>
+            <button type="submit" class="btn sm" id="sendBtn">Send feedback</button>
+        </div>
+    </div>
+</form>
+
+{% if past_feedback %}
+<div class="card fb-history">
+    <div class="card-head">
+        <h3>Your recent feedback</h3>
+    </div>
+
+    {% for f in past_feedback %}
+        <div class="fb-item">
+            <div class="fb-item-top">
+                <span class="fb-stars" aria-label="{{ f.rating }} out of 5">{{ f.stars }}</span>
+                <span class="fb-meta">{{ f.get_category_display }} &middot; {{ f.created_at|date:"d M Y" }}</span>
+                <span class="fb-status {{ f.status }}">{{ f.get_status_display }}</span>
+            </div>
+            <p>{{ f.message }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var form = document.getElementById("feedbackForm");
+    var message = document.getElementById("message");
+    var counter = document.getElementById("counter");
+    var ratingText = document.getElementById("ratingText");
+    var sendBtn = document.getElementById("sendBtn");
+    var max = parseInt(message.getAttribute("maxlength"), 10);
+
+    var labels = {
+        "1": "Poor", "2": "Needs work", "3": "Okay",
+        "4": "Good", "5": "Excellent"
+    };
+
+    function updateRating() {
+        var checked = form.querySelector('input[name="rating"]:checked');
+        ratingText.textContent = checked ? labels[checked.value] : "Select a rating";
+    }
+
+    function updateCounter() {
+        counter.textContent = message.value.length + " / " + max;
+        counter.classList.toggle("near", message.value.length > max * 0.9);
+    }
+
+    form.querySelectorAll('input[name="rating"]').forEach(function (r) {
+        r.addEventListener("change", updateRating);
+    });
+    message.addEventListener("input", updateCounter);
+
+    form.addEventListener("submit", function (event) {
+        if (!form.querySelector('input[name="rating"]:checked')) {
+            event.preventDefault();
+            alert("Choose a star rating from 1 to 5.");
+            return;
+        }
+        if (message.value.trim().length < 10) {
+            event.preventDefault();
+            alert("Write at least 10 characters so we can act on it.");
+            message.focus();
+            return;
+        }
+        sendBtn.disabled = true;
+        sendBtn.textContent = "Sending...";
+    });
+
+    updateRating();
+    updateCounter();
+});
+</script>
+{% endblock %}
