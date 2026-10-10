@@ -1,4 +1,3 @@
-
 {% extends "dashboard_view/base.html" %}
 {% load static %}
 
@@ -271,7 +270,7 @@ Prepare for interviews using a topic or your resume.
             </div>
 
             <p class="section-help">
-                Questions will be generated according to your topic.
+                You'll be asked questions on this topic and can answer them one by one.
             </p>
         </div>
 
@@ -326,8 +325,8 @@ Prepare for interviews using a topic or your resume.
             </div>
 
             <p class="section-help">
-                Questions will be based on your resume's skills,
-                projects, education, and experience.
+                You'll be asked questions based on your resume's skills,
+                projects, education, and experience, and answer them one by one.
             </p>
         </div>
 
@@ -468,7 +467,7 @@ Prepare for interviews using a topic or your resume.
             </p>
 
             <button type="submit" id="startBtn" class="btn sm">
-                <span id="startBtnLabel">Generate Questions</span>
+                <span id="startBtnLabel">Start Practice</span>
 
                 <span id="startSpinner" hidden aria-hidden="true">
                     ⏳
@@ -719,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Keep submitting to the existing URL.
         startBtn.disabled = true;
-        startBtnLabel.textContent = "Generating...";
+        startBtnLabel.textContent = "Preparing your session...";
         startSpinner.hidden = false;
     });
 

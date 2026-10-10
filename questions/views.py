@@ -293,7 +293,8 @@ def generate_questions(request):
         Uses the existing topic-based generator.
 
     Resume mode:
-        Forwards the request to quiz_generated_result_view.
+        Forwards to quiz_generated_result_view(prep_mode=True), which
+        generates the questions and then redirects to the exam page.
     """
 
     if request.method != "POST":
@@ -314,7 +315,7 @@ def generate_questions(request):
     # 3. Resume mode does not submit question_type because
     #    your HTML disables those radio buttons.
     if source == "resume":
-        return quiz_generated_result_view(request)
+        return quiz_generated_result_view(request, prep_mode=True)
 
     # 4. Continue with topic mode
     topic_text = (
@@ -718,7 +719,18 @@ def generate_quiz_view(request):
 # MAIN RESUME / TOPIC QUESTION GENERATOR
 # ============================================================
 
-def quiz_generated_result_view(request):
+def quiz_generated_result_view(request, prep_mode=False):
+    """
+    prep_mode=False -> "Generate Questions" page: shows questions + answers.
+    prep_mode=True  -> Interview Prep page: saves questions, then redirects
+                       to take_exam so the user ANSWERS them.
+    """
+
+    error_template = (
+        "dashboard_view/user/interview_prep.html"
+        if prep_mode
+        else "dashboard_view/user/generate_questions.html"
+    )
 
     if request.method != "POST":
 
@@ -814,10 +826,28 @@ def quiz_generated_result_view(request):
         # MCQ is NOT allowed for resume mode.
         # ----------------------------------------------------
 
-        questions_type = [
-            "technical",
-            "behavioral"
-        ]
+        if prep_mode:
+            questions_type = [
+                t for t in request.POST.getlist("resume_question_types")
+                if t in ("technical", "behavioral")
+            ]
+
+            if not questions_type:
+                return render(
+                    request,
+                    error_template,
+                    {
+                        "user_resumes": Resume.objects.filter(
+                            user_id=user_id
+                        ).order_by("-updated_at"),
+                        "error": "Please select Technical, Behavioral (STAR), or both.",
+                    }
+                )
+        else:
+            questions_type = [
+                "technical",
+                "behavioral"
+            ]
 
         # ----------------------------------------------------
         # Existing resume
@@ -844,7 +874,7 @@ def quiz_generated_result_view(request):
 
                     request,
 
-                    "dashboard_view/user/generate_questions.html",
+                    error_template,
 
                     {
                         "user_resumes":
@@ -882,13 +912,13 @@ def quiz_generated_result_view(request):
 
                     request,
 
-                    "dashboard_view/user/generate_questions.html",
+                    error_template,
 
                     {
                         "user_resumes":
                             Resume.objects.filter(
                                 user_id=user_id
-                            ).order_by("-uploaded_at"),
+                            ).order_by("-updated_at"),
 
                         "error":
                             "Please upload a PDF or DOCX resume."
@@ -918,13 +948,13 @@ def quiz_generated_result_view(request):
 
                     request,
 
-                    "dashboard_view/user/generate_questions.html",
+                    error_template,
 
                     {
                         "user_resumes":
                             Resume.objects.filter(
                                 user_id=user_id
-                            ).order_by("-uploaded_at"),
+                            ).order_by("-updated_at"),
 
                         "error":
                             "Only PDF or DOCX resumes are supported."
@@ -956,13 +986,13 @@ def quiz_generated_result_view(request):
 
                     request,
 
-                    "dashboard_view/user/generate_questions.html",
+                    error_template,
 
                     {
                         "user_resumes":
                             Resume.objects.filter(
                                 user_id=user_id
-                            ).order_by("-uploaded_at"),
+                            ).order_by("-updated_at"),
 
                         "error":
                             "Resume extraction failed."
@@ -979,13 +1009,13 @@ def quiz_generated_result_view(request):
 
                     request,
 
-                    "dashboard_view/user/generate_questions.html",
+                    error_template,
 
                     {
                         "user_resumes":
                             Resume.objects.filter(
                                 user_id=user_id
-                            ).order_by("-uploaded_at"),
+                            ).order_by("-updated_at"),
 
                         "error":
                             "We couldn't find enough readable text in that resume."
@@ -1020,13 +1050,13 @@ def quiz_generated_result_view(request):
 
                 request,
 
-                "dashboard_view/user/generate_questions.html",
+                error_template,
 
                 {
                     "user_resumes":
                         Resume.objects.filter(
                             user_id=user_id
-                        ).order_by("-uploaded_at"),
+                        ).order_by("-updated_at"),
 
                     "error":
                         "Please choose a resume or upload a new one."
@@ -1039,20 +1069,24 @@ def quiz_generated_result_view(request):
 
                 request,
 
-                "dashboard_view/user/generate_questions.html",
+                error_template,
 
                 {
                     "user_resumes":
                         Resume.objects.filter(
                             user_id=user_id
-                        ).order_by("-uploaded_at"),
+                        ).order_by("-updated_at"),
 
                     "error":
                         "Unable to extract text from the selected resume."
                 }
             )
 
-        topic = "Questions based on my resume"
+        topic = (
+            "Resume interview practice"
+            if prep_mode
+            else "Questions based on my resume"
+        )
 
     # ========================================================
     # TOPIC MODE
@@ -1073,13 +1107,13 @@ def quiz_generated_result_view(request):
 
                 request,
 
-                "dashboard_view/user/generate_questions.html",
+                error_template,
 
                 {
                     "user_resumes":
                         Resume.objects.filter(
                             user_id=user_id
-                        ).order_by("-uploaded_at"),
+                        ).order_by("-updated_at"),
 
                     "error":
                         "Please enter a topic or job description."
@@ -1107,13 +1141,13 @@ def quiz_generated_result_view(request):
 
                 request,
 
-                "dashboard_view/user/generate_questions.html",
+                error_template,
 
                 {
                     "user_resumes":
                         Resume.objects.filter(
                             user_id=user_id
-                        ).order_by("-uploaded_at"),
+                        ).order_by("-updated_at"),
 
                     "error":
                         "Please select at least one question type."
@@ -1123,7 +1157,7 @@ def quiz_generated_result_view(request):
     else:
 
         return redirect(
-            "quiz_questions"
+            "interview_prep" if prep_mode else "quiz_questions"
         )
 
     # ========================================================
@@ -1152,10 +1186,7 @@ RESUME CONTENT
 
 QUESTION TYPES
 
-Generate only these two types:
-
-1. technical
-2. behavioral
+Generate only these types: {", ".join(questions_type)}
 
 DIFFICULTY:
 
@@ -1182,8 +1213,8 @@ STRICT RULES:
 4. NEVER invent a technology, project, company, experience,
    certification or skill that does not appear in the resume.
 
-5. Generate a reasonable mixture of technical and behavioral
-   questions.
+5. If more than one type is listed above, generate a balanced
+   mixture of them. If only one is listed, use only that type.
 
 6. Technical questions must ask about technologies, projects,
    implementation, architecture, programming concepts or
@@ -1336,13 +1367,13 @@ FORMAT:
 
             request,
 
-            "dashboard_view/user/generate_questions.html",
+            error_template,
 
             {
                 "user_resumes":
                     Resume.objects.filter(
                         user_id=user_id
-                    ).order_by("-uploaded_at"),
+                    ).order_by("-updated_at"),
 
                 "error":
                     "Gemini API is not configured. Please try again later."
@@ -1389,7 +1420,7 @@ FORMAT:
 
             request,
 
-            "dashboard_view/user/generate_questions.html",
+            error_template,
 
             {
                 "user_resumes":
@@ -1422,7 +1453,7 @@ FORMAT:
 
             request,
 
-            "dashboard_view/user/generate_questions.html",
+            error_template,
 
             {
                 "user_resumes":
@@ -1448,7 +1479,7 @@ FORMAT:
 
             request,
 
-            "dashboard_view/user/generate_questions.html",
+            error_template,
 
             {
                 "user_resumes":
@@ -1465,18 +1496,9 @@ FORMAT:
     # VALIDATE TYPES
     # ========================================================
 
-    if source == "resume":
-
-        permitted_types = {
-            "technical",
-            "behavioral"
-        }
-
-    else:
-
-        permitted_types = set(
-            questions_type
-        )
+    permitted_types = set(
+        questions_type
+    )
 
     valid_questions = []
 
@@ -1578,7 +1600,7 @@ FORMAT:
 
             request,
 
-            "dashboard_view/user/generate_questions.html",
+            error_template,
 
             {
                 "user_resumes":
@@ -1625,11 +1647,20 @@ FORMAT:
 
     request.session["last_generated_question_ids"] = [q.question_id for q in saved_questions]
 
-    request.session["exam_mode"] = "practice"
+    mode = (request.POST.get("mode") or "practice").strip().lower()
+
+    if mode not in ALLOWED_MODES:
+        mode = "practice"
+
+    request.session["exam_mode"] = mode if prep_mode else "practice"
     request.session["exam_topic"] = topic
     request.session["exam_level"] = level
     request.session["exam_source"] = source
     request.session["exam_question_types"] = questions_type
+
+    # Interview Prep flow: let the user answer the questions.
+    if prep_mode:
+        return redirect("take_exam")
 
     # ========================================================
     # RESULT PAGE
