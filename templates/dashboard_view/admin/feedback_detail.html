@@ -1,0 +1,57 @@
+{% extends "dashboard_view/base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/admin_feedback.css' %}">
+
+<div class="fb-page">
+  <a href="{% url 'feedback' %}" class="fb-back">&larr; Back to feedback</a>
+
+  <div class="fb-head">
+    <div>
+      <h1>Feedback #{{ fb.feedback_id }}</h1>
+      <p class="fb-sub">Submitted {{ fb.created_at|date:"d M Y, H:i" }}</p>
+    </div>
+    <span class="fb-badge {{ fb.status }}">{{ fb.get_status_display }}</span>
+  </div>
+
+  <div class="fb-detail">
+    <div class="fb-card fb-panel">
+      <h3>Message</h3>
+      <blockquote class="fb-quote">{{ fb.message }}</blockquote>
+    </div>
+
+    <div class="fb-card fb-panel">
+      <h3>Details</h3>
+      <dl class="fb-meta">
+        <div>
+          <dt>From</dt>
+          <dd class="fb-user"><span class="fb-avatar">{{ fb.user|stringformat:"s"|first|upper }}</span> {{ fb.user }}</dd>
+        </div>
+        <div>
+          <dt>Rating</dt>
+          <dd><span class="fb-stars fb-big-stars">{{ fb.stars }}</span> <span class="fb-sub">{{ fb.rating }}/5</span></dd>
+        </div>
+        <div>
+          <dt>Category</dt>
+          <dd><span class="fb-chip">{{ fb.get_category_display }}</span></dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="fb-badge {{ fb.status }}">{{ fb.get_status_display }}</span></dd>
+        </div>
+      </dl>
+
+      <form method="post">
+        {% csrf_token %}
+        {% if fb.status == "new" %}
+          <input type="hidden" name="status" value="reviewed">
+          <button type="submit" class="fb-btn">✓ Mark as reviewed</button>
+        {% else %}
+          <input type="hidden" name="status" value="new">
+          <button type="submit" class="fb-btn secondary">Mark as new</button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

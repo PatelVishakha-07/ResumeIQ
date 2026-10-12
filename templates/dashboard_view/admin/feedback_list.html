@@ -1,0 +1,110 @@
+{% extends "dashboard_view/base.html" %}
+{% block content %}
+
+<style>
+  .fb-page { --ink:#14181c; --muted:#6b6f76; --line:#e6e1d6; --card:#fff; --accent:#3b55e6; --star:#f5a623; max-width:1100px; color:var(--ink); }
+  .fb-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .fb-head h1 { margin:0; }
+  .fb-sub { margin:4px 0 0; color:var(--muted); font-size:14px; }
+  .fb-pill { padding:6px 12px; border-radius:999px; background:#e8ecff; color:var(--accent); font-size:13px; font-weight:600; }
+
+  .fb-filters { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .fb-filters select { width:auto; min-width:180px; padding:9px 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); font-size:14px; }
+  .fb-clear { font-size:13px; color:var(--muted); text-decoration:none; }
+  .fb-clear:hover { color:var(--ink); text-decoration:underline; }
+
+  .fb-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .fb-scroll { overflow-x:auto; }
+  .fb-table { width:100%; border-collapse:collapse; min-width:760px; }
+  .fb-table th { text-align:left; padding:12px 16px; background:#faf8f3; border-bottom:1px solid var(--line); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .fb-table td { padding:14px 16px; border-bottom:1px solid #f0ece3; font-size:14px; vertical-align:middle; }
+  .fb-table tbody tr:last-child td { border-bottom:0; }
+  .fb-row { cursor:pointer; transition:background .12s; }
+  .fb-row:hover { background:#f7f8ff; }
+  .fb-row.is-new td:first-child { box-shadow:inset 3px 0 0 var(--accent); }
+  .fb-msg { color:var(--ink); text-decoration:none; }
+  .fb-msg:hover { color:var(--accent); }
+  .fb-date { color:var(--muted); white-space:nowrap; }
+  .fb-empty { text-align:center; padding:48px 16px !important; color:var(--muted); }
+
+  .fb-user { display:flex; align-items:center; gap:10px; }
+  .fb-avatar { width:32px; height:32px; flex:0 0 32px; border-radius:50%; background:var(--ink); color:#fff; display:grid; place-items:center; font-size:13px; font-weight:600; }
+  .fb-stars { color:var(--star); letter-spacing:2px; white-space:nowrap; }
+  .fb-chip { display:inline-block; padding:3px 10px; border-radius:8px; background:#f1eee6; font-size:12px; white-space:nowrap; }
+  .fb-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .fb-badge.new { background:#e8ecff; color:var(--accent); }
+  .fb-badge.reviewed { background:#e3f6ea; color:#1f8a4c; }
+
+  .fb-pager { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:18px; font-size:14px; color:var(--muted); }
+  .fb-pager a { padding:7px 14px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); text-decoration:none; }
+  .fb-pager a:hover { border-color:var(--accent); color:var(--accent); }
+</style>
+
+<div class="fb-page">
+  <div class="fb-head">
+    <div>
+      <h1>User Feedback</h1>
+      <p class="fb-sub">Click a row to read the full feedback.</p>
+    </div>
+    {% if new_count %}<span class="fb-pill">● {{ new_count }} new</span>{% endif %}
+  </div>
+
+  <form method="get" class="fb-filters">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="category" onchange="this.form.submit()">
+      <option value="">All categories</option>
+      {% for value, label in categories %}
+        <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% if status or category %}<a href="{% url 'feedback' %}" class="fb-clear">Clear filters</a>{% endif %}
+  </form>
+
+  <div class="fb-card">
+    <div class="fb-scroll">
+      <table class="fb-table">
+        <thead>
+          <tr><th>User</th><th>Rating</th><th>Category</th><th>Message</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+        {% for fb in page %}
+          <tr class="fb-row {% if fb.status == 'new' %}is-new{% endif %}"
+              onclick="window.location='{% url 'feedback_detail' fb.feedback_id %}'">
+            <td>
+              <div class="fb-user">
+                <span class="fb-avatar">{{ fb.user|stringformat:"s"|first|upper }}</span>
+                <span>{{ fb.user }}</span>
+              </div>
+            </td>
+            <td><span class="fb-stars" title="{{ fb.rating }}/5">{{ fb.stars }}</span></td>
+            <td><span class="fb-chip">{{ fb.get_category_display }}</span></td>
+            <td><a class="fb-msg" href="{% url 'feedback_detail' fb.feedback_id %}">{{ fb.message|truncatechars:50 }}</a></td>
+            <td><span class="fb-badge {{ fb.status }}">{{ fb.get_status_display }}</span></td>
+            <td class="fb-date">{{ fb.created_at|date:"d M Y, H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="fb-empty">No feedback found.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if page.has_other_pages %}
+  <div class="fb-pager">
+    {% if page.has_previous %}
+      <a href="?page={{ page.previous_page_number }}&status={{ status }}&category={{ category }}">&larr; Prev</a>
+    {% endif %}
+    <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}
+      <a href="?page={{ page.next_page_number }}&status={{ status }}&category={{ category }}">Next &rarr;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
