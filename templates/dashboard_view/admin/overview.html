@@ -69,21 +69,29 @@ Usage and performance metrics across all ResumeIQ accounts.
         </div>
 
 
-        <!-- Open Feedback -->
-        <div class="overview-stat-card">
-            <div class="overview-stat-header">
-                <span>Open feedback</span>
-                <span class="overview-stat-icon">▢</span>
-            </div>
+               <!-- Open Feedback -->
+        {% comment %} <a href="{% url 'feedback' %}" style="text-decoration:none; color:inherit; display:block;"> {% endcomment %}
+            <div class="overview-stat-card">
+                <div class="overview-stat-header">
+                    <span>Total feedback</span>
+                    <span class="overview-stat-icon">▢</span>
+                </div>
 
-            <div class="overview-stat-number">
-                18
-            </div>
+                <div class="overview-stat-number">
+                    {{ feedback_total }}
+                </div>
 
-            <div class="overview-stat-warning">
-                6 unreviewed
+                {% if feedback_new %}
+                    <div class="overview-stat-warning">
+                        {{ feedback_new }} unreviewed
+                    </div>
+                {% else %}
+                    <div class="overview-stat-positive">
+                        All reviewed
+                    </div>
+                {% endif %}
             </div>
-        </div>
+        </a>
 
     </div>
 

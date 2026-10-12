@@ -18,6 +18,7 @@ from typing import List
 from django.core.cache import cache
 from pydantic import BaseModel
 from django.utils.text import slugify
+from feedback.models import Feedback
 
 try:
     from google import genai
@@ -60,13 +61,15 @@ def adminOverview(request):
 
     admin_user = User.objects.get(user_id=admin_id)
 
- 
     active_users_count = User.objects.filter(role="user", status=True).count()
-
 
     resumes_analysed_count = Resume.objects.filter(
         resumeversion__resumeanalysis__isnull=False
     ).distinct().count()
+
+    # --- Feedback counts ---
+    feedback_total = Feedback.objects.count()
+    feedback_new = Feedback.objects.filter(status="new").count()
 
     # --- Recent activity -------
     activity_items = []
@@ -81,7 +84,7 @@ def adminOverview(request):
             "timestamp": resume.updated_at,
         })
 
-
+    # Recent resume analyses
     recent_analyses = ResumeAnalysis.objects.select_related('analyses__versions__user').order_by('-analyzed_at')[:5]
     for analysis in recent_analyses:
         activity_items.append({
@@ -91,11 +94,20 @@ def adminOverview(request):
             "timestamp": analysis.analyzed_at,
         })
 
+    # Recent feedback submissions
+    recent_feedback = Feedback.objects.select_related("user").order_by("-created_at")[:5]
+    for fb in recent_feedback:
+        activity_items.append({
+            "icon": "✎",
+            "text_bold": fb.user.name,
+            "text_rest": f"left {fb.rating}/5 feedback",
+            "timestamp": fb.created_at,
+        })
+
     # Sort combined feed newest-first, keep top 5
     activity_items.sort(key=lambda item: item["timestamp"], reverse=True)
     activity_items = activity_items[:5]
 
-   
     now = timezone.now()
     for item in activity_items:
         item["time_ago"] = timesince(item["timestamp"], now) + " ago"
@@ -108,6 +120,8 @@ def adminOverview(request):
         },
         "active_users_count": active_users_count,
         "resumes_analysed_count": resumes_analysed_count,
+        "feedback_total": feedback_total,
+        "feedback_new": feedback_new,
         "activity_items": activity_items,
     }
     return render(request, "dashboard_view/admin/overview.html", context)
@@ -1327,3 +1341,5 @@ def download_admin_report_pdf(request):
     response = HttpResponse(pdf_buffer.getvalue(), content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+

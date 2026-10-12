@@ -6,6 +6,10 @@ from django.utils import timezone
 
 from .models import Feedback
 
+from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
+from accounts.models import User
+
 FEEDBACK_MIN_LENGTH = 10
 FEEDBACK_MAX_LENGTH = 1000
 FEEDBACK_DAILY_LIMIT = 5
@@ -69,3 +73,65 @@ def user_feedback_view(request):
             "max_length": FEEDBACK_MAX_LENGTH,
         },
     )
+
+def _require_admin(request):
+    """Return (user, None) if admin, else (None, redirect_response)."""
+    user_id = request.session.get("user_id")
+    if not user_id:
+        messages.error(request, "Please sign in to continue.")
+        return None, redirect("login")
+
+    user = User.objects.filter(pk=user_id).first()
+    # ADJUST this check to however your User model stores roles
+    if not user or getattr(user, "role", None) != "admin":
+        messages.error(request, "You don't have access to that page.")
+        return None, redirect("dashboard")
+    return user, None
+
+
+def admin_feedback_list(request):
+    _, denied = _require_admin(request)
+    if denied:
+        return denied
+
+    status = request.GET.get("status", "")
+    category = request.GET.get("category", "")
+
+    qs = Feedback.objects.select_related("user")
+    if status in dict(Feedback.Status_Choices):
+        qs = qs.filter(status=status)
+    if category in dict(Feedback.Category_Choices):
+        qs = qs.filter(category=category)
+
+    page = Paginator(qs, 15).get_page(request.GET.get("page"))
+
+    return render(request, "dashboard_view/admin/feedback_list.html", {
+        "page": page,
+        "status": status,
+        "category": category,
+        "categories": Feedback.Category_Choices,
+        "statuses": Feedback.Status_Choices,
+        "new_count": Feedback.objects.filter(status="new").count(),
+        "nav": {"role": "admin"},
+    })
+
+
+def admin_feedback_detail(request, feedback_id):
+    _, denied = _require_admin(request)
+    if denied:
+        return denied
+
+    fb = get_object_or_404(Feedback.objects.select_related("user"), pk=feedback_id)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        if new_status in dict(Feedback.Status_Choices):
+            fb.status = new_status
+            fb.save(update_fields=["status"])
+            messages.success(request, f"Marked as {fb.get_status_display().lower()}.")
+        return redirect("feedback_detail", feedback_id=fb.feedback_id)
+
+    return render(request, "dashboard_view/admin/feedback_detail.html", {
+    "fb": fb,
+    "nav": {"role": "admin"},
+    })
