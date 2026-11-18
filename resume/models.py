@@ -14,7 +14,7 @@ class Resume(models.Model):
     file_path = models.CharField(max_length=255)
     file_type = models.CharField(max_length=10, choices=file_type_choices)
     parsed_text = models.TextField(null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "resume"
