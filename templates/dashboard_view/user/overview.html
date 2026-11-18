@@ -118,13 +118,13 @@ Overview — ResumeIQ
             </div>
 
 
-            <div class="user-overview-stat-number">
-
-                {{ jd_match|floatformat:0 }}
-
-                <span>%</span>
-
-            </div>
+            {% if has_jd_match %}
+                <div class="user-overview-stat-number">
+                    {{ jd_match|floatformat:0 }}<span>%</span>
+                </div>
+            {% else %}
+                <div class="user-overview-stat-number">—</div>
+            {% endif %}
 
 
             <div class="user-overview-stat-description">
