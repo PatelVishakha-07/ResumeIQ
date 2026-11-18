@@ -3,6 +3,7 @@ from accounts.models import User,Profile
 import os, hashlib, logging, re
 from django.contrib import messages
 from resume.models import Resume,ResumeAnalysis
+from questions.models import WeakArea
 from django.utils.timesince import timesince
 from django.utils import timezone
 from resume.models import Resume, ResumeAnalysis, ResumeVersion, JDMatchResult, JobDescription
@@ -18,6 +19,7 @@ from typing import List
 from django.core.cache import cache
 from pydantic import BaseModel
 from django.utils.text import slugify
+from django.db.models import Avg
 
 try:
     from google import genai
@@ -216,11 +218,10 @@ def user_dashboard(request):
 
     user = User.objects.get(user_id=user_id)
 
-    try:
-        user = User.objects.filter(user_id = user_id).first()
-    except User.DoesNotExist:
+    user = User.objects.filter(user_id=user_id).first()
+    if not user:
         request.session.flush()
-        user = None
+        return redirect("login")
 
     if user.role != "user":
         return redirect("dashboard")
@@ -250,7 +251,7 @@ def user_dashboard(request):
         circumference = 263.89
         ats_score_offset = (circumference - (ats_score/100) * circumference)
 
-    for analysis in analyses:
+    for analysis in list(analyses)[-8:]:
         try:
             score = float(analysis.ats_score or 0)
         except (TypeError, ValueError):
@@ -272,12 +273,15 @@ def user_dashboard(request):
 
         missing_keywords = latest_match.missing_keywords or []
         if isinstance(missing_keywords, str):
-            missing_keywords = [item.strip() for item in missing_keywords.split(",")]
+            missing_keywords = [item.strip() for item in missing_keywords.split(",") if item.strip()]
 
         if latest_match.jd:
             target_role = latest_match.jd.target_role or "Job Description"
 
-    interview_readiness = 0
+    avg = WeakArea.objects.filter(user=user).aggregate(a=Avg("performance_score"))["a"]
+    interview_readiness = max(0, min(100, float(avg or 0)))
+    weak_topics = WeakArea.objects.filter(user=user).order_by("performance_score")[:3]
+    
     nav = {"avatar_initial": user_name[0].upper() if user_name else "U", "avatar_name": user_name}
 
 
@@ -291,6 +295,7 @@ def user_dashboard(request):
         "missing_keywords": missing_keywords,
         "interview_readiness":interview_readiness,
         "nav": nav,
+        "weak_topics": weak_topics,
     }
 
     return render( request, "dashboard_view/user/overview.html", context )

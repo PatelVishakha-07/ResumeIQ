@@ -40,23 +40,9 @@ Overview — ResumeIQ
                 Here's a quick look at your resume and interview progress.
             </div>
 
-        </div>
-
-       <!--  <div class="user-overview-user">
-
-            <div class="user-overview-avatar">
-                {{ user_name|first|upper }}
-            </div>
-
-            <span>
-                {{ user_name }}
-            </span>
-
-        </div> -->
+        </div>       
 
     </div>
-
-
 
     <!-- =====================================================
          STAT CARDS
@@ -165,7 +151,7 @@ Overview — ResumeIQ
 
             <div class="user-overview-stat-description">
 
-                Based on your interview preparation
+                Average across your practice topics
 
             </div>
 
@@ -237,7 +223,7 @@ Overview — ResumeIQ
                             stroke-width="8"
                             stroke-linecap="round"
                             stroke-dasharray="263.89"
-                            stroke-dashoffset="{{ ats_score_offset }}"
+                            stroke-dashoffset="{{ ats_score_offset|stringformat:'.2f' }}"
                         />
 
                     </svg>
@@ -328,7 +314,7 @@ Overview — ResumeIQ
 
                                 <div
                                     class="user-overview-trend-bar"
-                                    style="height: {{ item.score }}%;"
+                                    style="height: {{ item.score|stringformat:'.0f' }}%;"
                                     title="{{ item.score|floatformat:0 }}%"
                                 >
                                 </div>
@@ -543,8 +529,8 @@ Overview — ResumeIQ
                 <div class="user-overview-progress">
 
                     <div
-                        class="user-overview-progress-fill"
-                        style="width: {{ interview_readiness }}%;"
+                        class="user-overview-progress-fill"                        
+                        style="width: {{ interview_readiness|stringformat:'.0f' }}%;"
                     >
                     </div>
 
@@ -591,13 +577,25 @@ Overview — ResumeIQ
 
                         </p>
 
+                                        {% elif interview_readiness == 0 %}
+
+                        <p>
+                            Start practicing interview questions
+                            to build your readiness score.
+                        </p>
+
+                    {% elif interview_readiness < 60 %}
+
+                        <p>
+                            Practice more questions in your weaker
+                            topics to raise your readiness.
+                        </p>
+
                     {% else %}
 
                         <p>
-
-                            Continue practicing interview
-                            questions based on your target role.
-
+                            You're in good shape. Keep refining your
+                            resume for your target role.
                         </p>
 
                     {% endif %}

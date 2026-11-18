@@ -186,31 +186,6 @@ def _empty_meta():
         'is_image_file': False,
     }
 
-
-# ---------------------------------------------------------------------------
-# PDF text extraction helpers
-#
-# pdfplumber's default page.extract_text() lays words out purely by their
-# y-position across the *full page width*. That works for single-column
-# resumes, but it silently interleaves the two halves of any two-column
-# template (a common layout: sidebar with contact/skills, main column with
-# summary/experience/education) whenever a line in one column happens to
-# sit at roughly the same height as a line in the other. The result is
-# exactly the kind of scrambled section content ("EXPERIENCE" heading
-# followed by education entries, contact details bleeding into the summary)
-# that build_structured_resume() below has no way to recover from, because
-# by the time it sees the text the reading order is already wrong.
-#
-# _extract_page_text() detects a two-column layout from word geometry and,
-# when found, extracts and concatenates each column's text separately
-# (left column top-to-bottom, then right column top-to-bottom) instead of
-# reading straight across the page. It also reassembles words using the
-# actual pixel gap between glyphs rather than trusting pdfplumber's default
-# word boundaries, which fixes resume headers set in a letter-spaced font
-# (e.g. "P A T E L  V I S H A K H A") getting split into single-letter
-# "words" that then render with stray spaces between every character.
-# ---------------------------------------------------------------------------
-
 _CID_ARTIFACT_RE = re.compile(r'\(cid:\d+\)')
 
 
@@ -1983,6 +1958,6 @@ def compute_ats_score(resume_text, jd_text=None, has_tables=False, content_meta=
         'passive_voice_flags': passive_voice_flags,
         'image_based': image_check['image_based'],
         'image_warnings': image_check['warnings'],
-
+        'jd_gaps': jd_gaps,
         "recommendations": recommendations
     }
