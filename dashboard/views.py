@@ -301,6 +301,7 @@ def user_dashboard(request):
         "ats_score_offset": ats_score_offset,
         "ats_trend": ats_trend,
         "jd_match": jd_match,
+        "has_jd_match": latest_match is not None,
         "target_role": target_role,
         "missing_keywords": missing_keywords,
         "interview_readiness":interview_readiness,
