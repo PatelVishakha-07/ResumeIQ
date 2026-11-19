@@ -738,11 +738,11 @@ def score_section_quality(text):
 
     if re.search(r'github\.com', text_lower):
         contact_score += 15
-        contact_details.append( 'LinkedIn profile detected.' )
+        contact_details.append( 'GitHub profile detected.' )
 
     if re.search(r'portfolio|website', text_lower):
         contact_score += 15
-        contact_details.append('GitHub profile detected.' )        
+        contact_details.append('Portfolio/website detected.' )        
 
     scores['contact'] = min(contact_score, 100)
     details["contact"] = contact_details
@@ -889,11 +889,11 @@ def score_section_quality(text):
         else:
             education_details.append('Degree/qualification not clearly detected.')
 
-        if re.search(r'\b20\d{2}\b', text_lower):
+        if re.search(r'\b20\d{2}\b', education_text.lower()):
             education_score += 25
             education_details.append('Education year detected.')
 
-        if re.search(r'\b(gpa|cgpa|percentage|percent|%)\b', text_lower):
+        if re.search(r'\b(gpa|cgpa|percentage|percent|%)\b', education_text.lower()):
             education_score += 15
             education_details.append('Academic performance information detected.')
 
@@ -943,13 +943,13 @@ def score_section_quality(text):
     details["experience"] = experience_details
 
     #optional sections
-    certifications_text = extract_section_text(text, "certification")
+    certifications_text = extract_section_text(text, "certifications")
     if certifications_text:
-        scores["certification"] = 100
-        details["certifications"] = 'Certification section detected.'
+        scores["certifications"] = 100
+        details["certifications"] = ['Certification section detected.']
     else:
-        scores["certification"] = 0
-        details["certifications"] = 'No certification section detected.'
+        scores["certifications"] = 0
+        details["certifications"] = ['No certification section detected.']
 
     achievement_text = extract_section_text(text, "achievements")
     if achievement_text:
@@ -1359,6 +1359,8 @@ def _looks_like_contact(line):
     mistaken for the candidate's name."""
     return bool(_contact_line_re.search(line))
 
+_BULLET_PREFIX_RE = re.compile(r"^[-•*\u2022\u25CF]\s*")
+_DATE_HINT_RE = re.compile(r"\b(19|20)\d{2}\b|\bpresent\b|\bcurrent\b", re.IGNORECASE)
 
 def build_structured_resume(text):
     """
@@ -1722,21 +1724,19 @@ def build_structured_resume(text):
 
         if current_section == "projects":
 
-            value = re.sub(
-                r"^[-•*]\s*",
-                "",
-                line
-            ).strip()
+            is_bullet = bool(_BULLET_PREFIX_RE.match(line))
+            value = _BULLET_PREFIX_RE.sub("", line).strip()
 
             if not value:
                 continue
 
-            # Detect "Project | Technology"
-            parts = re.split(
-                r"\s*[|—–]\s*",
-                value,
-                maxsplit=1
-            )
+            last = resume["projects"][-1] if resume["projects"] else None
+
+            if is_bullet and last is not None:
+                last["bullets"].append(value)
+                continue
+
+            parts = re.split(r"\s*[|—–]\s*", value, maxsplit=1)
 
             project = {
                 "name": parts[0].strip(),
@@ -1745,22 +1745,12 @@ def build_structured_resume(text):
                 "bullets": [],
             }
 
-            if len(parts) == 2:
+            if len(parts) == 2 and parts[1].strip():
+                project["technologies"] = [
+                    x.strip() for x in parts[1].split(",") if x.strip()
+                ]
 
-                tech_part = parts[1].strip()
-
-                if tech_part:
-
-                    project["technologies"] = [
-                        x.strip()
-                        for x in tech_part.split(",")
-                        if x.strip()
-                    ]
-
-            resume["projects"].append(
-                project
-            )
-
+            resume["projects"].append(project)
             continue
 
         # -----------------------------------------------------
@@ -1769,40 +1759,27 @@ def build_structured_resume(text):
 
         if current_section == "education":
 
-            value = re.sub(
-                r"^[-•*]\s*",
-                "",
-                line
-            ).strip()
+            is_bullet = bool(_BULLET_PREFIX_RE.match(line))
+            value = _BULLET_PREFIX_RE.sub("", line).strip()
 
             if not value:
                 continue
 
-            parts = re.split(
-                r"\s*[|—–]\s*",
-                value
-            )
+            last = resume["education"][-1] if resume["education"] else None
 
-            item = {
-                "degree": parts[0].strip(),
-                "institution": (
-                    parts[1].strip()
-                    if len(parts) > 1
-                    else ""
-                ),
+            if is_bullet and last is not None:
+                last["details"].append(value)
+                continue
+
+            parts = [p.strip() for p in re.split(r"\s*\|\s*", value) if p.strip()]
+
+            resume["education"].append({
+                "degree": parts[0] if parts else value,
+                "institution": parts[1] if len(parts) > 1 else "",
                 "location": "",
-                "dates": (
-                    parts[2].strip()
-                    if len(parts) > 2
-                    else ""
-                ),
+                "dates": parts[2] if len(parts) > 2 else "",
                 "details": [],
-            }
-
-            resume["education"].append(
-                item
-            )
-
+            })
             continue
 
         # -----------------------------------------------------
@@ -1811,27 +1788,42 @@ def build_structured_resume(text):
 
         if current_section == "experience":
 
-            value = re.sub(
-                r"^[-•*]\s*",
-                "",
-                line
-            ).strip()
+            is_bullet = bool(_BULLET_PREFIX_RE.match(line))
+            value = _BULLET_PREFIX_RE.sub("", line).strip()
 
             if not value:
                 continue
 
-            item = {
-                "title": value,
-                "company": "",
+            last = resume["experience"][-1] if resume["experience"] else None
+
+            if is_bullet:
+                if last is None:
+                    resume["experience"].append({
+                        "title": "", "company": "", "location": "",
+                        "dates": "", "bullets": [value],
+                    })
+                else:
+                    last["bullets"].append(value)
+                continue
+
+            parts = [p.strip() for p in re.split(r"\s*\|\s*", value) if p.strip()]
+
+            # plain line right under a role header -> company or dates
+            if last is not None and not last["bullets"] and len(parts) == 1:
+                if not last["company"] and not _DATE_HINT_RE.search(value):
+                    last["company"] = value
+                    continue
+                if not last["dates"] and _DATE_HINT_RE.search(value):
+                    last["dates"] = value
+                    continue
+
+            resume["experience"].append({
+                "title": parts[0] if parts else value,
+                "company": parts[1] if len(parts) > 1 else "",
                 "location": "",
-                "dates": "",
+                "dates": parts[2] if len(parts) > 2 else "",
                 "bullets": [],
-            }
-
-            resume["experience"].append(
-                item
-            )
-
+            })
             continue
 
         # -----------------------------------------------------

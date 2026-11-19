@@ -64,19 +64,6 @@ def download_optimized_resume(request):
     document.save(response)
     return response
 
-
-def _clean_ai_json(value):
-    """Remove accidental markdown fences around Gemini JSON output."""
-    if not isinstance(value, str):
-        return value
-    value = value.strip()
-    if value.startswith('```'):
-        value = value.split('\n', 1)[1] if '\n' in value else value
-        if value.endswith('```'):
-            value = value[:-3]
-    return value.strip()
-
-
 def _as_list(value):
     if isinstance(value, list):
         return value
@@ -168,157 +155,131 @@ def _normalize_ai_resume(data):
 
     return result
 
+def _clean_notes(raw):
+    raw = raw if isinstance(raw, dict) else {}
 
-def _fallback_structured_resume(resume_text):
-    """Convert the existing parser output into the new structured editor shape."""
-    old = build_structured_resume(resume_text)
-    data = {
-        'name': old.get('name', ''),
-        'headline': old.get('headline', ''),
-        'contact': old.get('contact', []),
-        'summary': old.get('summary', ''),
-        'skills': old.get('skills', {}),
-        'experience': [], 'projects': [], 'education': [],
-        'certifications': [], 'achievements': [], 'languages': [],
+    def pick(key):
+        return [_clean_string(x) for x in _as_list(raw.get(key)) if _clean_string(x)][:8]
+
+    return {
+        "changes": pick("changes"),
+        "matched_skills": pick("matched_skills"),
+        "missing_skills": pick("missing_skills"),
+        "suggestions": pick("suggestions"),
     }
-    for item in old.get('experience', []):
-        data['experience'].append({'title': '', 'company': '', 'location': '', 'dates': '', 'bullets': [_clean_string(item)]})
-    for item in old.get('projects', []):
-        data['projects'].append({'name': _clean_string(item), 'technologies': [], 'description': '', 'bullets': []})
-    for item in old.get('education', []):
-        data['education'].append({'degree': _clean_string(item), 'institution': '', 'location': '', 'dates': '', 'details': []})
-    for key in ('certifications', 'achievements', 'languages'):
-        data[key] = [_clean_string(x) for x in old.get(key, []) if _clean_string(x)]
-    return data
 
 
-def improve_resume_with_ai(resume_text, jd_text=""):
+def _rule_based_notes(ats_result, jd_text):
+    notes = {"changes": [], "matched_skills": [], "missing_skills": [], "suggestions": []}
+    if jd_text and jd_text.strip():
+        notes["missing_skills"] = [g["keyword"] for g in (ats_result.get("jd_gaps") or [])][:8]
+        if notes["missing_skills"]:
+            notes["suggestions"].append(
+                "Add the missing job-description terms only where you genuinely have the skill."
+            )
+    notes["suggestions"].extend((ats_result.get("recommendations") or [])[:3])
+    return notes
 
-    fallback = build_structured_resume(resume_text)
+
+def improve_resume_with_ai(resume_text, jd_text="", ats_result=None):
+    """Returns (structured_resume, improvement_notes)."""
+    ats_result = ats_result or {}
+    notes = _rule_based_notes(ats_result, jd_text)
+    fallback = _normalize_ai_resume(build_structured_resume(resume_text))
 
     api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key or genai is None:
+        notes["suggestions"].insert(0, "AI tailoring is unavailable, so your resume was only reformatted.")
+        return fallback, notes
 
-    if not api_key:
-        return fallback
+    has_jd = bool(jd_text and jd_text.strip())
+    jd_block = jd_text.strip() if has_jd else "(none provided)"
 
     try:
-
-        client = genai.Client(
-            api_key=api_key
-        )
+        client = genai.Client(api_key=api_key)
 
         prompt = f"""
 You are ResumeIQ's professional resume improvement engine.
 
-Convert the source resume into a clean, professional,
-ATS-friendly editable resume.
+Convert the source resume into a clean, professional, ATS-friendly editable
+resume, tailored to the job description when one is provided.
 
-IMPORTANT:
+GENERAL RULES
 
 1. Restore missing spaces between words.
+   VISHAKHAPARESHKUMARPATEL -> Vishakha Pareshkumar Patel
+   AspiringSoftwareDeveloper -> Aspiring Software Developer
+   Final-yearMCAstudent -> Final-year MCA student
 
-Examples:
+2. NEVER mix contact information with the summary. Contact contains only
+   location, phone, email, LinkedIn, GitHub, portfolio and other profile links.
 
-VISHAKHAPARESHKUMARPATEL
--> Vishakha Pareshkumar Patel
-
-AspiringSoftwareDeveloper
--> Aspiring Software Developer
-
-Final-yearMCAstudent
--> Final-year MCA student
-
-ClinicManagementSystem
--> Clinic Management System
-
-2. NEVER mix contact information with the summary.
-
-Contact information must contain only:
-- location
-- phone
-- email
-- LinkedIn
-- GitHub
-- portfolio
-- other professional profile links
-
-3. PROFESSIONAL SUMMARY must contain only the candidate's
-professional summary.
+3. PROFESSIONAL SUMMARY contains only the candidate's professional summary.
 
 4. Preserve actual information from the source.
 
-5. NEVER invent:
-- company
-- job
-- degree
-- project
-- technology
-- certification
-- date
-- achievement
-- metric
-- URL
-- responsibility
+5. NEVER invent: company, job, degree, project, technology, certification,
+   date, achievement, metric, URL or responsibility.
 
-6. You may improve:
-- grammar
-- sentence structure
-- capitalization
-- readability
-- action verbs
-- bullet-point wording
+6. You may improve grammar, sentence structure, capitalization, readability,
+   action verbs and bullet wording.
 
-7. Do not add job-description skills unless the source resume
-actually supports them.
+7. Keep all real projects, education, certifications, skills and achievements.
 
-8. Keep all real projects, education, certifications,
-skills and achievements.
+TAILORING TO THE JOB DESCRIPTION (only when one is provided)
 
-Return ONLY valid JSON.
+a. Rewrite the headline and professional summary so they speak to the job
+   description's role. Use only skills and experience the source resume truly
+   shows. Emphasise transferable strengths that match the job description
+   (for example object-oriented programming, SQL, REST APIs, backend
+   frameworks, testing).
+b. Reorder skill groups, projects and bullets so the ones most relevant to the
+   job description come first. Use the job description's wording only when it
+   is an accurate synonym of something already in the resume.
+c. NEVER add a technology, tool or skill from the job description that the
+   resume does not already show. If the resume has Python but the job asks for
+   Java, do not claim Java anywhere. Do not use the job's title as the
+   headline if the candidate lacks the role's core skill; write a truthful
+   headline instead.
+d. Everything the job description needs that the resume does not show goes
+   into improvement_notes.missing_skills, never into the resume.
 
-JSON format:
+IMPROVEMENT NOTES
+
+- changes: 3 to 6 short sentences saying what you changed and why.
+- matched_skills: job-description requirements the resume genuinely satisfies.
+- missing_skills: job-description requirements the resume does not show.
+- suggestions: 2 to 4 honest, practical tips (for example build and list a real
+  project with the missing technology, or earn a certification).
+If no job description is provided, leave matched_skills and missing_skills
+empty and describe general improvements in changes and suggestions.
+
+Return ONLY valid JSON in this format:
 
 {{
     "name": "",
     "headline": "",
     "contact": [],
-
     "summary": "",
-
     "skills": {{}},
-
     "experience": [
-        {{
-            "title": "",
-            "company": "",
-            "location": "",
-            "dates": "",
-            "bullets": []
-        }}
+        {{"title": "", "company": "", "location": "", "dates": "", "bullets": []}}
     ],
-
     "projects": [
-        {{
-            "name": "",
-            "technologies": [],
-            "description": "",
-            "bullets": []
-        }}
+        {{"name": "", "technologies": [], "description": "", "bullets": []}}
     ],
-
     "education": [
-        {{
-            "degree": "",
-            "institution": "",
-            "location": "",
-            "dates": "",
-            "details": []
-        }}
+        {{"degree": "", "institution": "", "location": "", "dates": "", "details": []}}
     ],
-
     "certifications": [],
     "achievements": [],
-    "languages": []
+    "languages": [],
+    "improvement_notes": {{
+        "changes": [],
+        "matched_skills": [],
+        "missing_skills": [],
+        "suggestions": []
+    }}
 }}
 
 SOURCE RESUME:
@@ -327,290 +288,32 @@ SOURCE RESUME:
 
 JOB DESCRIPTION:
 
-{jd_text}
+{jd_block}
 """
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt,
-            config={
-                "temperature": 0.2,
-                "response_mime_type": "application/json",
-            }
+            config={"temperature": 0.3, "response_mime_type": "application/json"},
         )
 
-        result = json.loads(
-            response.text
-        )
+        result = json.loads(response.text)
+        if not isinstance(result, dict):
+            raise ValueError("AI returned a non-object response")
 
-        return normalize_ai_resume(result)
+        ai_notes = _clean_notes(result.pop("improvement_notes", None))
+        improved = _normalize_ai_resume(result)
+        if not improved:
+            raise ValueError("AI returned an invalid resume structure")
+
+        merged = {key: ai_notes[key] or notes[key] for key in notes}
+        return improved, merged
 
     except Exception as exc:
+        print("Resume AI improvement failed:", exc)
+        notes["suggestions"].insert(0, "AI tailoring failed this time, so your resume was only reformatted.")
+        return fallback, notes
 
-        print(
-            "Resume AI improvement failed:",
-            exc
-        )
-
-        return fallback
-
-def normalize_ai_resume(data):
-
-    if not isinstance(data, dict):
-        return {}
-
-    result = {
-        "name": str(
-            data.get("name", "")
-        ).strip(),
-
-        "headline": str(
-            data.get("headline", "")
-        ).strip(),
-
-        "contact": [],
-
-        "summary": str(
-            data.get("summary", "")
-        ).strip(),
-
-        "skills": {},
-
-        "experience": [],
-
-        "projects": [],
-
-        "education": [],
-
-        "certifications": [],
-
-        "achievements": [],
-
-        "languages": [],
-    }
-
-    # ---------------------------------------------------------
-    # CONTACT
-    # ---------------------------------------------------------
-
-    contact = data.get(
-        "contact",
-        []
-    )
-
-    if isinstance(contact, str):
-        contact = [
-            x.strip()
-            for x in contact.split("|")
-            if x.strip()
-        ]
-
-    if isinstance(contact, list):
-
-        result["contact"] = [
-            str(x).strip()
-            for x in contact
-            if str(x).strip()
-        ]
-
-    # ---------------------------------------------------------
-    # SKILLS
-    # ---------------------------------------------------------
-
-    skills = data.get(
-        "skills",
-        {}
-    )
-
-    if isinstance(skills, dict):
-
-        for category, values in skills.items():
-
-            if isinstance(values, str):
-
-                values = [
-                    x.strip()
-                    for x in values.split(",")
-                    if x.strip()
-                ]
-
-            if isinstance(values, list):
-
-                result["skills"][
-                    str(category).strip()
-                ] = [
-                    str(x).strip()
-                    for x in values
-                    if str(x).strip()
-                ]
-
-    # ---------------------------------------------------------
-    # EXPERIENCE
-    # ---------------------------------------------------------
-
-    for item in data.get(
-        "experience",
-        []
-    ):
-
-        if not isinstance(item, dict):
-            continue
-
-        result["experience"].append({
-
-            "title": str(
-                item.get("title", "")
-            ).strip(),
-
-            "company": str(
-                item.get("company", "")
-            ).strip(),
-
-            "location": str(
-                item.get("location", "")
-            ).strip(),
-
-            "dates": str(
-                item.get("dates", "")
-            ).strip(),
-
-            "bullets": [
-                str(x).strip()
-                for x in item.get(
-                    "bullets",
-                    []
-                )
-                if str(x).strip()
-            ],
-        })
-
-    # ---------------------------------------------------------
-    # PROJECTS
-    # ---------------------------------------------------------
-
-    for item in data.get(
-        "projects",
-        []
-    ):
-
-        if not isinstance(item, dict):
-            continue
-
-        technologies = item.get(
-            "technologies",
-            []
-        )
-
-        if isinstance(
-            technologies,
-            str
-        ):
-
-            technologies = [
-                x.strip()
-                for x in technologies.split(",")
-                if x.strip()
-            ]
-
-        result["projects"].append({
-
-            "name": str(
-                item.get("name", "")
-            ).strip(),
-
-            "technologies": [
-                str(x).strip()
-                for x in technologies
-                if str(x).strip()
-            ],
-
-            "description": str(
-                item.get(
-                    "description",
-                    ""
-                )
-            ).strip(),
-
-            "bullets": [
-                str(x).strip()
-                for x in item.get(
-                    "bullets",
-                    []
-                )
-                if str(x).strip()
-            ],
-        })
-
-    # ---------------------------------------------------------
-    # EDUCATION
-    # ---------------------------------------------------------
-
-    for item in data.get(
-        "education",
-        []
-    ):
-
-        if not isinstance(item, dict):
-            continue
-
-        result["education"].append({
-
-            "degree": str(
-                item.get("degree", "")
-            ).strip(),
-
-            "institution": str(
-                item.get("institution", "")
-            ).strip(),
-
-            "location": str(
-                item.get("location", "")
-            ).strip(),
-
-            "dates": str(
-                item.get("dates", "")
-            ).strip(),
-
-            "details": [
-                str(x).strip()
-                for x in item.get(
-                    "details",
-                    []
-                )
-                if str(x).strip()
-            ],
-        })
-
-    # ---------------------------------------------------------
-    # SIMPLE LIST SECTIONS
-    # ---------------------------------------------------------
-
-    for key in [
-        "certifications",
-        "achievements",
-        "languages",
-    ]:
-
-        values = data.get(
-            key,
-            []
-        )
-
-        if isinstance(
-            values,
-            str
-        ):
-            values = [
-                values
-            ]
-
-        result[key] = [
-            str(x).strip()
-            for x in values
-            if str(x).strip()
-        ]
-
-    return result
 
 @require_http_methods(['POST'])
 def analyze_resume(request):
@@ -713,6 +416,11 @@ def analyze_resume(request):
 
             saved = True
 
+    if result['image_based']:
+        optimized_resume, improvement_notes = None, None
+    else:
+        optimized_resume, improvement_notes = improve_resume_with_ai(resume_text, jd_text, result)
+
     return JsonResponse({
         'ats_score': result['ats_score'],
         'formatting_score': result['formatting_score'],
@@ -721,10 +429,11 @@ def analyze_resume(request):
         'missing_sections': result['missing_sections'],
         'missing_keywords': result['missing_keywords'],
         'jd_gaps': result.get('jd_gaps', []),
-        'optimized_resume': improve_resume_with_ai(resume_text, jd_text),
+        'optimized_resume': optimized_resume,
         'image_based': result['image_based'],
         'image_warnings': result['image_warnings'],
-        'saved': saved
+        'saved': saved,
+        'improvement_notes': improvement_notes,
     })
 
 @require_http_methods(['POST'])
@@ -904,25 +613,6 @@ def optimized_data_to_plain_text(data):
             lines.extend(f'• {x}' for x in data[key] if x)
 
     return '\n'.join(lines).strip()
-
-
-def _set_cell_margins(cell, top=80, start=80, bottom=80, end=80):
-    tc = cell._tc
-    tcPr = tc.get_or_add_tcPr()
-    tcMar = tcPr.first_child_found_in('w:tcMar')
-    if tcMar is None:
-        from docx.oxml import OxmlElement
-        tcMar = OxmlElement('w:tcMar')
-        tcPr.append(tcMar)
-    from docx.oxml.ns import qn
-    for m, v in [('top', top), ('start', start), ('bottom', bottom), ('end', end)]:
-        node = tcMar.find(qn(f'w:{m}'))
-        if node is None:
-            node = OxmlElement(f'w:{m}')
-            tcMar.append(node)
-        node.set(qn('w:w'), str(v))
-        node.set(qn('w:type'), 'dxa')
-
 
 def _add_resume_heading(document, text):
     from docx.shared import Pt
