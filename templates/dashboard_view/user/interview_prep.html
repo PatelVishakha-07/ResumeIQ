@@ -1,738 +1,729 @@
 {% extends "dashboard_view/base.html" %}
+{% load static %}
 
 {% block title %}Interview Prep — ResumeIQ{% endblock %}
-{% block page_title %}Interview prep{% endblock %}
-{% block page_desc %}Practice questions generated from your resume and job description — MCQs, behavioral, and technical.{% endblock %}
+{% block page_title %}Interview Prep{% endblock %}
 
-{% load static %}
+{% block page_desc %}
+Prepare for interviews using a topic or your resume.
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/interview_prep.css' %}">
 
 <style>
-  @keyframes ip-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
+[hidden] {
+    display: none !important;
+}
 
-  #startBtn .spin {
-    animation: ip-spin 0.8s linear infinite;
-    vertical-align: -2px;
-    margin-left: 6px;
-  }
+.source-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.source-option {
+    cursor: pointer;
+    padding: 18px;
+    border: 1px solid #d9dce5;
+    border-radius: 12px;
+    background: transparent;
+    text-align: left;
+    color: inherit;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.source-option.active {
+    border-color: #5267e8;
+    background: rgba(82, 103, 232, 0.08);
+}
+
+.source-option input,
+.chip input {
+    margin-right: 8px;
+}
+
+.source-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.source-desc {
+    display: block;
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.75;
+}
+
+.resume-select,
+.resume-file,
+.topic-field {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
+.resume-select {
+    padding: 12px;
+    border: 1px solid #d9dce5;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+}
+
+.resume-file {
+    padding: 12px;
+    border: 1px dashed #aeb5c5;
+    border-radius: 8px;
+}
+
+.source-section {
+    margin-top: 20px;
+}
+
+.section-help {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 8px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.error-message {
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #e5a4a4;
+    border-radius: 8px;
+    color: #b42318;
+}
+
+.chip {
+    cursor: pointer;
+}
+
+.resume-type-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.resume-type-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid #d9dce5;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.resume-type-option:has(input:checked) {
+    border-color: #5267e8;
+    background: rgba(82, 103, 232, 0.08);
+}
+
+.resume-type-option input {
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .source-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 {% endblock %}
 
 
 {% block content %}
+<form
+    method="POST"
+    action="{% url 'generate_question' %}"
+    enctype="multipart/form-data"
+    id="setupForm"
+>
+    {% csrf_token %}
 
-<form method="POST" action="{% url 'generate_question' %}" id="setupForm">
+    <div class="card" id="setupCard">
+        <div class="card-head">
+            <h3>Set up your interview practice</h3>
+            <p>Choose how you want to prepare.</p>
+        </div>
 
-  {% csrf_token %}
+        {% if error %}
+            <div class="error-message" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
 
-  <div class="card" id="setupCard">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
-    <div class="card-head">
-      <h3>Set up your practice session</h3>
-    </div>
+        <!-- PREPARATION SOURCE -->
+        <div class="setup-group source-section">
+            <div class="setup-label">Choose preparation method</div>
 
+            <div class="source-grid">
+                <button
+                    type="button"
+                    class="source-option active"
+                    data-source="topic"
+                    aria-pressed="true"
+                >
+                    <span class="source-title">
+                        <input
+                            type="radio"
+                            name="source"
+                            value="topic"
+                            checked
+                        >
+                        Prepare by Topic
+                    </span>
 
-    <!-- ========================= -->
-    <!-- SESSION TYPE -->
-    <!-- ========================= -->
+                    <span class="source-desc">
+                        Enter a programming language, technology,
+                        subject, or job description.
+                    </span>
+                </button>
 
-    <div class="setup-group" style="margin-bottom:20px;">
+                <button
+                    type="button"
+                    class="source-option"
+                    data-source="resume"
+                    aria-pressed="false"
+                >
+                    <span class="source-title">
+                        <input
+                            type="radio"
+                            name="source"
+                            value="resume"
+                        >
+                        Prepare by Resume
+                    </span>
 
-      <div class="setup-label"> Session type </div>
+                    <span class="source-desc">
+                        Generate personalized technical and
+                        behavioral questions from your resume.
+                    </span>
+                </button>
+            </div>
+        </div>
 
-      <div class="mode-grid">
+        <!-- TOPIC SECTION -->
+        <div
+            class="setup-group source-section"
+            id="topicSection"
+        >
+            <label class="field-label" for="topicInput">
+                Enter topic or job description
+            </label>
 
-        <!-- PRACTICE -->
+            <textarea
+                id="topicInput"
+                name="topic"
+                class="session-textarea topic-field"
+                rows="3"
+                placeholder="e.g. Python, Django, SQL, Java, Data Structures..."
+                required
+            ></textarea>
 
-        <button type="button" class="mode-option active" data-mode="practice" >
+            <div class="example-row">
+                <span class="example-label">Try:</span>
 
-          <div class="mode-icon">
+                <button type="button" class="chip" data-fill="Python">
+                    Python
+                </button>
 
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" >
-              <path d="M9 11l3 3L22 4" stroke="#14171F" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" />
+                <button type="button" class="chip" data-fill="Django">
+                    Django
+                </button>
 
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="#14171F"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+                <button type="button" class="chip" data-fill="Java">
+                    Java
+                </button>
 
-          </div>
+                <button type="button" class="chip" data-fill="SQL">
+                    SQL
+                </button>
 
-
-          <div>
-
-            <div class="mode-title">
-              MCQ / Q&amp;A practice
+                <button
+                    type="button"
+                    class="chip"
+                    data-fill="Data Structures"
+                >
+                    Data Structures
+                </button>
             </div>
 
-            <div class="mode-desc">
-              Untimed. See feedback right after each question.
+            <p class="section-help">
+                You'll be asked questions on this topic and can answer them one by one.
+            </p>
+        </div>
+
+        <!-- RESUME SECTION -->
+        <div
+            class="setup-group source-section"
+            id="resumeSection"
+            hidden
+        >
+            <label class="field-label" for="existingResume">
+                Select a previously uploaded resume
+            </label>
+
+            <select
+                id="existingResume"
+                name="existing_resume_id"
+                class="resume-select"
+                disabled
+            >
+                <option value="">Upload a new resume instead</option>
+
+                {% for resume in user_resumes %}
+                    <option value="{{ resume.resume_id }}">
+                        Resume #{{ resume.resume_id }}
+                        — {{ resume.file_type|upper }}
+                    </option>
+                {% empty %}
+                    <option value="" disabled>
+                        No previously uploaded resumes found
+                    </option>
+                {% endfor %}
+            </select>
+
+            <div class="source-section">
+                <label class="field-label" for="resumeFile">
+                    Or upload a new resume
+                </label>
+
+                <input
+                    type="file"
+                    id="resumeFile"
+                    name="resume_file"
+                    class="resume-file"
+                    accept=".pdf,.docx"
+                    disabled
+                >
+
+                <p class="section-help">
+                    Supported formats: PDF and DOCX.
+                    Your resume should contain readable text.
+                </p>
             </div>
 
-          </div>
+            <p class="section-help">
+                You'll be asked questions based on your resume's skills,
+                projects, education, and experience, and answer them one by one.
+            </p>
+        </div>
 
-        </button>
+        <!-- QUESTION TYPE FOR TOPIC MODE -->
+        <div
+            class="setup-group source-section"
+            id="questionTypeSection"
+        >
+            <div class="setup-label">Question type</div>
 
+            <p class="section-help">
+                Select one question type.
+            </p>
 
-        <!-- MOCK -->
+            <div class="chip-row">
+                <label class="chip active" data-type-label>
+                    <input
+                        type="radio"
+                        name="question_type"
+                        value="mcq"
+                        checked
+                    >
+                    MCQ
+                </label>
 
-        <button type="button" class="mode-option" data-mode="mock" >
+                <label class="chip" data-type-label>
+                    <input
+                        type="radio"
+                        name="question_type"
+                        value="technical"
+                    >
+                    Technical
+                </label>
 
-          <div class="mode-icon">
+                <label class="chip" data-type-label>
+                    <input
+                        type="radio"
+                        name="question_type"
+                        value="behavioral"
+                    >
+                    Behavioral (STAR)
+                </label>
+            </div>
+        </div>
 
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" >
-              <circle cx="12" cy="13" r="8" stroke="#14171F" stroke-width="2" />
-              <path d="M12 9v4l3 2" stroke="#14171F" stroke-width="2" stroke-linecap="round" />
-              <path d="M9 2h6M12 2v3" stroke="#14171F" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </div>
+        <!-- QUESTION TYPES FOR RESUME MODE -->
+        <div
+            class="setup-group source-section"
+            id="resumeQuestionTypeSection"
+            hidden
+        >
+            <div class="setup-label">Question types for your resume</div>
 
-          <div>
+            <p class="section-help">
+                Select Technical, Behavioral (STAR), or both.
+            </p>
 
-            <div class="mode-title">
-              Mock interview session
+            <div class="resume-type-options">
+                <label class="resume-type-option">
+                    <input
+                        type="checkbox"
+                        name="resume_question_types"
+                        value="technical"
+                        disabled
+                    >
+                    <span>Technical</span>
+                </label>
+
+                <label class="resume-type-option">
+                    <input
+                        type="checkbox"
+                        name="resume_question_types"
+                        value="behavioral"
+                        disabled
+                    >
+                    <span>Behavioral (STAR)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- DIFFICULTY -->
+        <div class="setup-group source-section">
+            <div class="setup-label">Difficulty level</div>
+
+            <div class="chip-row">
+                <button type="button" class="chip" data-level="easy">
+                    Easy
+                </button>
+
+                <button
+                    type="button"
+                    class="chip active"
+                    data-level="intermediate"
+                >
+                    Intermediate
+                </button>
+
+                <button type="button" class="chip" data-level="advanced">
+                    Advanced
+                </button>
+
+                <button type="button" class="chip" data-level="expert">
+                    Expert
+                </button>
             </div>
 
-            <div class="mode-desc">
-              Timed. Feedback is held until the end, like a real interview.
-            </div>
+            <input
+                type="hidden"
+                name="level"
+                id="levelInput"
+                value="intermediate"
+            >
+        </div>
 
-          </div>
+        <!-- NUMBER OF QUESTIONS -->
+        <div class="setup-group source-section">
+            <label class="field-label" for="questionCount">
+                Number of questions
+            </label>
 
-        </button>
+            <input
+                type="number"
+                id="questionCount"
+                name="questions_count"
+                class="count-input"
+                min="1"
+                max="30"
+                step="1"
+                value="10"
+                required
+            >
+        </div>
 
-      </div>
+        <!-- FOOTER -->
+        <div class="input-footer">
+            <p class="hint" id="setupHint">
+                10 questions · Intermediate
+            </p>
 
+            <button type="submit" id="startBtn" class="btn sm">
+                <span id="startBtnLabel">Start Practice</span>
+
+                <span id="startSpinner" hidden aria-hidden="true">
+                    ⏳
+                </span>
+            </button>
+        </div>
     </div>
-
-
-    <!-- ========================= -->
-    <!-- TOPIC -->
-    <!-- ========================= -->
-
-    <div
-      class="setup-group"
-      style="margin-bottom:20px;"
-    >
-
-      <div class="setup-label">
-        What's this session for?
-      </div>
-
-
-      <textarea
-        id="topicInput"
-        name="topic"
-        class="session-textarea"
-        rows="3"
-        placeholder="Paste a job description, or just type a topic or language — e.g. &quot;React&quot;, &quot;Python&quot;, &quot;System Design&quot;, &quot;Backend Engineer, Series B startup&quot;..."
-      ></textarea>
-
-
-      <div class="example-row">
-
-        <span class="example-label">
-          Try:
-        </span>
-
-        <button
-          type="button"
-          class="chip"
-          data-fill="React"
-        >
-          React
-        </button>
-
-        <button
-          type="button"
-          class="chip"
-          data-fill="Python"
-        >
-          Python
-        </button>
-
-        <button
-          type="button"
-          class="chip"
-          data-fill="System Design"
-        >
-          System Design
-        </button>
-
-        <button
-          type="button"
-          class="chip"
-          data-fill="SQL"
-        >
-          SQL
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- QUESTION TYPE -->
-    <!-- ========================= -->
-
-    <div class="setup-group">
-
-      <div class="setup-label">
-        Question type
-      </div>
-
-
-      <div class="chip-row">
-
-        <button
-          type="button"
-          class="chip active"
-          data-type="mcq"
-        >
-          MCQ
-        </button>
-
-
-        <button
-          type="button"
-          class="chip"
-          data-type="behavioral"
-        >
-          Behavioral (STAR)
-        </button>
-
-
-        <button
-          type="button"
-          class="chip"
-          data-type="technical"
-        >
-          Technical
-        </button>
-
-      </div>
-
-    </div> <br>
-
-
-    <!-- ========================= -->
-    <!-- LEVEL -->
-    <!-- ========================= -->
-
-    <div class="setup-group">
-      <div class="setup-label"> Level </div>
-      <div class="chip-row">
-        <button type="button" class="chip" data-level="easy" > Easy </button>
-        <button type="button" class="chip active" data-level="intermediate" > Intermediate </button>
-        <button type="button" class="chip" data-level="advanced" > Advanced </button>
-        <button type="button" class="chip" data-level="expert" > Expert </button>
-      </div>
-
-    </div>
-    <br>
-
-    <!-- ========================= -->
-    <!-- NUMBER OF QUESTIONS -->
-    <!-- ========================= -->
-
-    <div class="setup-group">
-
-      <div class="setup-label">
-        Number of questions
-      </div>
-
-
-      <input
-        type="number"
-        id="questionCount"
-        name="questions_count"
-        class="count-input"
-        min="1"
-        max="30"
-        step="1"
-        value="10"
-        inputmode="numeric"
-      >
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- HIDDEN INPUTS -->
-    <!-- ========================= -->
-
-    <div id="typeInputs"></div>
-
-
-    <input
-      type="hidden"
-      name="level"
-      id="levelInput"
-      value="intermediate"
-    >
-
-
-    <input
-      type="hidden"
-      name="mode"
-      id="modeInput"
-      value="practice"
-    >
-
-
-    <!-- ========================= -->
-    <!-- FOOTER -->
-    <!-- ========================= -->
-
-    <div class="input-footer">
-
-      <p
-        class="hint"
-        id="setupHint"
-      >
-        10 questions · Intermediate
-      </p>
-
-
-      <button
-        type="submit"
-        id="startBtn"
-        class="btn sm"
-        disabled
-      >
-
-        <span id="startBtnLabel">
-          Generate questions
-        </span>
-
-
-        <svg
-          class="spin"
-          style="display:none;"
-          width="14"
-          height="14"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
-
-          <circle
-            cx="8"
-            cy="8"
-            r="6.5"
-            stroke="#fff"
-            stroke-width="1.6"
-            opacity="0.3"
-          />
-
-          <path
-            d="M14.5 8A6.5 6.5 0 0 0 8 1.5"
-            stroke="#fff"
-            stroke-width="1.6"
-            stroke-linecap="round"
-          />
-
-        </svg>
-
-      </button>
-
-    </div>
-
-  </div>
-
 </form>
-
 {% endblock %}
 
 
 {% block extra_js %}
-
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("setupForm");
+    const topicSection = document.getElementById("topicSection");
+    const resumeSection = document.getElementById("resumeSection");
+    const questionTypeSection =
+        document.getElementById("questionTypeSection");
+    const resumeQuestionTypeSection =
+        document.getElementById("resumeQuestionTypeSection");
 
-document.addEventListener('DOMContentLoaded', function () {
+    const topicInput = document.getElementById("topicInput");
+    const existingResume = document.getElementById("existingResume");
+    const resumeFile = document.getElementById("resumeFile");
+    const questionCount = document.getElementById("questionCount");
+    const levelInput = document.getElementById("levelInput");
+    const startBtn = document.getElementById("startBtn");
+    const startBtnLabel = document.getElementById("startBtnLabel");
+    const startSpinner = document.getElementById("startSpinner");
 
-
-  /* =====================================================
-     ELEMENTS
-  ===================================================== */
-
-  const setupForm =
-    document.getElementById('setupForm');
-
-  const topicInput =
-    document.getElementById('topicInput');
-
-  const startBtn =
-    document.getElementById('startBtn');
-
-  const startBtnLabel =
-    document.getElementById('startBtnLabel');
-
-  const startBtnSpinner =
-    startBtn.querySelector('.spin');
-
-  const questionCountInput =
-    document.getElementById('questionCount');
-
-  const levelInput =
-    document.getElementById('levelInput');
-
-  const modeInput =
-    document.getElementById('modeInput');
-
-  const typeInputsContainer =
-    document.getElementById('typeInputs');
-
-
-  /* =====================================================
-     SESSION MODE
-  ===================================================== */
-
-  document
-    .querySelectorAll('.mode-option')
-    .forEach(function (option) {
-
-      option.addEventListener('click', function () {
-
-        document
-          .querySelectorAll('.mode-option')
-          .forEach(function (item) {
-
-            item.classList.remove('active');
-
-          });
-
-
-        option.classList.add('active');
-
-
-        modeInput.value =
-          option.dataset.mode;
-
-      });
-
-    });
-
-
-  /* =====================================================
-     TOPIC EXAMPLE CHIPS
-  ===================================================== */
-
-  document
-    .querySelectorAll('.chip[data-fill]')
-    .forEach(function (chip) {
-
-      chip.addEventListener('click', function () {
-
-        topicInput.value =
-          chip.dataset.fill;
-
-
-        topicInput.dispatchEvent(
-          new Event('input')
+    function getSource() {
+        const selected = document.querySelector(
+            'input[name="source"]:checked'
         );
 
-
-        topicInput.focus();
-
-      });
-
-    });
-
-
-  /* =====================================================
-     QUESTION TYPE
-     ONLY ONE CAN BE SELECTED
-  ===================================================== */
-
-  document
-    .querySelectorAll('.chip[data-type]')
-    .forEach(function (chip) {
-
-      chip.addEventListener('click', function () {
-
-
-        // Remove active from all question types
-
-        document
-          .querySelectorAll('.chip[data-type]')
-          .forEach(function (item) {
-
-            item.classList.remove('active');
-
-          });
-
-
-        // Select clicked type
-
-        chip.classList.add('active');
-
-
-        updateStartState();
-
-      });
-
-    });
-
-
-  /* =====================================================
-     LEVEL
-     ONLY ONE CAN BE SELECTED
-  ===================================================== */
-
-  document
-    .querySelectorAll('.chip[data-level]')
-    .forEach(function (chip) {
-
-      chip.addEventListener('click', function () {
-
-
-        document
-          .querySelectorAll('.chip[data-level]')
-          .forEach(function (item) {
-
-            item.classList.remove('active');
-
-          });
-
-
-        chip.classList.add('active');
-
-
-        levelInput.value =
-          chip.dataset.level;
-
-
-        updateSetupHint();
-
-      });
-
-    });
-
-
-  /* =====================================================
-     QUESTION COUNT
-  ===================================================== */
-
-  questionCountInput.addEventListener(
-    'input',
-    function () {
-
-      updateSetupHint();
-
-    }
-  );
-
-
-  /* =====================================================
-     GET SELECTED LEVEL
-  ===================================================== */
-
-  function getSelectedLevel() {
-
-    const selected =
-      document.querySelector(
-        '.chip[data-level].active'
-      );
-
-
-    return selected
-      ? selected.dataset.level
-      : 'intermediate';
-
-  }
-
-
-  /* =====================================================
-     GET QUESTION COUNT
-  ===================================================== */
-
-  function getSelectedCount() {
-
-    const number =
-      parseInt(
-        questionCountInput.value,
-        10
-      );
-
-
-    if (
-      Number.isFinite(number) &&
-      number >= 1 &&
-      number <= 30
-    ) {
-
-      return number;
-
+        return selected ? selected.value : "topic";
     }
 
+    function updateSource() {
+        const isTopic = getSource() === "topic";
+        const isResume = !isTopic;
 
-    return 10;
+        topicSection.hidden = !isTopic;
+        resumeSection.hidden = isTopic;
+        questionTypeSection.hidden = isResume;
+        resumeQuestionTypeSection.hidden = !isResume;
 
-  }
+        topicInput.required = isTopic;
+        topicInput.disabled = isResume;
 
+        existingResume.disabled = isTopic;
+        resumeFile.disabled = isTopic;
 
-  /* =====================================================
-     GET SELECTED QUESTION TYPE
-  ===================================================== */
+        // Topic mode uses the existing single-choice question type.
+        document.querySelectorAll(
+            'input[name="question_type"]'
+        ).forEach(function (input) {
+            input.disabled = isResume;
+        });
 
-  function getSelectedType() {
+        // Resume mode uses the new Technical/Behavioral checkboxes.
+        document.querySelectorAll(
+            'input[name="resume_question_types"]'
+        ).forEach(function (input) {
+            input.disabled = !isResume;
+        });
 
-    const selected =
-      document.querySelector(
-        '.chip[data-type].active'
-      );
+        document.querySelectorAll(".source-option").forEach(
+            function (option) {
+                const active = option.dataset.source === getSource();
 
-
-    return selected
-      ? selected.dataset.type
-      : '';
-
-  }
-
-
-  /* =====================================================
-     UPDATE HINT
-  ===================================================== */
-
-  function updateSetupHint() {
-
-    const count =
-      getSelectedCount();
-
-    const level =
-      getSelectedLevel();
-
-
-    document.getElementById(
-      'setupHint'
-    ).textContent =
-
-      count +
-      ' question' +
-      (count === 1 ? '' : 's') +
-      ' · ' +
-
-      level.charAt(0).toUpperCase() +
-      level.slice(1);
-
-  }
-
-
-  /* =====================================================
-     ENABLE / DISABLE GENERATE BUTTON
-  ===================================================== */
-
-  function updateStartState() {
-
-    const hasTopic =
-      topicInput.value.trim().length > 0;
-
-
-    const hasType =
-      getSelectedType().length > 0;
-
-
-    startBtn.disabled =
-      !(hasTopic && hasType);
-
-  }
-
-
-  /* =====================================================
-     TOPIC INPUT
-  ===================================================== */
-
-  topicInput.addEventListener(
-    'input',
-    updateStartState
-  );
-
-
-  /* =====================================================
-     FORM SUBMIT
-  ===================================================== */
-
-  setupForm.addEventListener(
-    'submit',
-    function () {
-
-
-      /*
-       * The question-type buttons are not real
-       * form inputs.
-       *
-       * Therefore create one hidden input
-       * before submitting.
-       */
-
-
-      typeInputsContainer.innerHTML = '';
-
-
-      const selectedType =
-        getSelectedType();
-
-
-      if (selectedType) {
-
-        const input =
-          document.createElement('input');
-
-
-        input.type =
-          'hidden';
-
-
-        input.name =
-          'question_type';
-
-
-        input.value =
-          selectedType;
-
-
-        typeInputsContainer.appendChild(
-          input
+                option.classList.toggle("active", active);
+                option.setAttribute("aria-pressed", String(active));
+            }
         );
 
-      }
+        updateHint();
+    }
 
+    // Switch between Topic and Resume modes.
+    document.querySelectorAll(".source-option").forEach(
+        function (option) {
+            option.addEventListener("click", function () {
+                const sourceRadio = option.querySelector(
+                    'input[name="source"]'
+                );
 
-      /* ============================
-         Button loading state
-      ============================ */
+                if (sourceRadio) {
+                    sourceRadio.checked = true;
+                }
 
-      startBtnLabel.textContent =
-        'Generating…';
+                updateSource();
+            });
+        }
+    );
 
+    // Topic example buttons.
+    document.querySelectorAll(".chip[data-fill]").forEach(
+        function (chip) {
+            chip.addEventListener("click", function () {
+                topicInput.value = chip.dataset.fill;
+                topicInput.dispatchEvent(new Event("input"));
+                topicInput.focus();
+            });
+        }
+    );
 
-      startBtnSpinner.style.display =
-        'inline-block';
+    // Difficulty selection.
+    document.querySelectorAll(".chip[data-level]").forEach(
+        function (chip) {
+            chip.addEventListener("click", function () {
+                document.querySelectorAll(".chip[data-level]").forEach(
+                    function (item) {
+                        item.classList.remove("active");
+                    }
+                );
 
+                chip.classList.add("active");
+                levelInput.value = chip.dataset.level;
+                updateHint();
+            });
+        }
+    );
 
-      startBtn.disabled =
-        true;
+    // Keep existing topic question type styling.
+    document.querySelectorAll(
+        'input[name="question_type"]'
+    ).forEach(function (radio) {
+        radio.addEventListener("change", function () {
+            document.querySelectorAll(
+                'input[name="question_type"]'
+            ).forEach(function (item) {
+                const label = item.closest("[data-type-label]");
 
+                if (label) {
+                    label.classList.toggle("active", item.checked);
+                }
+            });
+        });
     });
 
+    function updateHint() {
+        const count = parseInt(questionCount.value, 10);
 
-  /* =====================================================
-     INITIAL STATE
-  ===================================================== */
+        const safeCount =
+            Number.isInteger(count) && count >= 1 && count <= 30
+                ? count
+                : 10;
 
-  updateSetupHint();
+        const level = levelInput.value;
 
-  updateStartState();
+        document.getElementById("setupHint").textContent =
+            safeCount +
+            (safeCount === 1 ? " question" : " questions") +
+            " · " +
+            level.charAt(0).toUpperCase() +
+            level.slice(1);
+    }
 
+    topicInput.addEventListener("input", updateHint);
+    questionCount.addEventListener("input", updateHint);
+
+    // Only one resume source can be selected at a time.
+    existingResume.addEventListener("change", function () {
+        if (existingResume.value) {
+            resumeFile.value = "";
+        }
+    });
+
+    resumeFile.addEventListener("change", function () {
+        if (resumeFile.files.length > 0) {
+            existingResume.value = "";
+        }
+    });
+
+    // Validate form submission.
+    form.addEventListener("submit", function (event) {
+        const source = getSource();
+        const count = parseInt(questionCount.value, 10);
+
+        if (!Number.isInteger(count) || count < 1 || count > 30) {
+            event.preventDefault();
+            alert("Please select between 1 and 30 questions.");
+            questionCount.focus();
+            return;
+        }
+
+        if (source === "topic") {
+            if (topicInput.value.trim().length < 2) {
+                event.preventDefault();
+                alert("Please enter a topic.");
+                topicInput.focus();
+                return;
+            }
+
+            const selectedType = document.querySelector(
+                'input[name="question_type"]:checked'
+            );
+
+            if (!selectedType || selectedType.disabled) {
+                event.preventDefault();
+                alert("Please select a valid question type.");
+                return;
+            }
+        } else {
+            const hasExistingResume = Boolean(existingResume.value);
+            const hasNewResume = resumeFile.files.length > 0;
+
+            if (!hasExistingResume && !hasNewResume) {
+                event.preventDefault();
+                alert(
+                    "Please select an existing resume or upload a new resume."
+                );
+                return;
+            }
+
+            // Require at least one question type in resume mode.
+            const selectedResumeTypes = document.querySelectorAll(
+                'input[name="resume_question_types"]:checked'
+            );
+
+            if (selectedResumeTypes.length === 0) {
+                event.preventDefault();
+                alert(
+                    "Please select Technical, Behavioral (STAR), or both."
+                );
+                resumeQuestionTypeSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+                return;
+            }
+
+            if (hasNewResume) {
+                const fileName = resumeFile.files[0].name.toLowerCase();
+
+                if (
+                    !fileName.endsWith(".pdf") &&
+                    !fileName.endsWith(".docx")
+                ) {
+                    event.preventDefault();
+                    alert("Please upload a PDF or DOCX resume.");
+                    return;
+                }
+            }
+        }
+
+        // Keep submitting to the existing URL.
+        startBtn.disabled = true;
+        startBtnLabel.textContent = "Preparing your session...";
+        startSpinner.hidden = false;
+    });
+
+    updateSource();
+    updateHint();
 });
-
 </script>
-
 {% endblock %}
