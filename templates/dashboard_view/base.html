@@ -21,9 +21,16 @@
         <h1>{% block page_title %}{% endblock %}</h1>
         <div class="desc">{% block page_desc %}{% endblock %}</div>
       </div>
-      <div class="who">
-        <div class="avatar">{{ nav.avatar_initial }}</div>{{ nav.avatar_name }}
-      </div>
+        <div class="who">
+          {% if avatar_image_url %}
+            <img class="avatar avatar-img" src="{{ avatar_image_url }}" alt=""
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="avatar" style="display:none;">{{ nav.avatar_initial }}</div>
+          {% else %}
+            <div class="avatar">{{ nav.avatar_initial }}</div>
+          {% endif %}
+          <span class="who-name">{{ nav.avatar_name }}</span>
+        </div>
     </div>    
 
     {% block content %}
