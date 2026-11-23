@@ -1,6 +1,6 @@
 import json
 import os
-
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -31,6 +31,7 @@ from reportlab.pdfbase import pdfmetrics
 
 try:
     from google import genai
+    from google.genai import types
 except ImportError:
     genai = None
 
@@ -41,7 +42,10 @@ if genai is not None:
     api_key = os.getenv("GEMINI_API_KEY")
 
     if api_key:
-        gemini_client = genai.Client(api_key=api_key)
+            gemini_client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=90_000),  # milliseconds
+        )
 
 
 # ============================================================
@@ -69,6 +73,7 @@ ALLOWED_MODES = {
 MAX_QUESTIONS = 30
 WEAK_AREA_THRESHOLD = 70
 
+GEMINI_MODEL = getattr(settings, "GEMINI_MODEL", "gemini-3.8-flash")
 
 # ============================================================
 # INTERVIEW PREPARATION PAGE
@@ -407,7 +412,7 @@ Generate the questions now.
 """
 
             response = gemini_client.models.generate_content(
-                model="gemini-3.8-flash",
+                model=GEMINI_MODEL,
                 contents=[system_prompt, user_prompt],
                 config={
                     "temperature": 0.5,
@@ -1389,7 +1394,7 @@ FORMAT:
     try:
 
         response = gemini_client.models.generate_content(
-            model="gemini-3.8-flash",
+            model=GEMINI_MODEL,
             contents=prompt,
 
             config={

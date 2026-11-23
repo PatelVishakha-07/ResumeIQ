@@ -2287,6 +2287,12 @@ Generate personalized interview questions from your resume or practice a specifi
 
     updateHint();
 
+    window.addEventListener("pageshow", function(){
+        processing.classList.remove("show");
+        submit.disabled = false;
+        submit.textContent = "Generate questions";
+    });
+
 })();
 
 </script>

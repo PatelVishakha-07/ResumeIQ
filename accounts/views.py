@@ -482,7 +482,6 @@ def login_view(request):
         request.session["name"] = user.name
         request.session["role"] = user.role
 
-        messages.success(request, "Login Successfull")
         return redirect("dashboard")
     return render(request, "authentication/login.html")
 

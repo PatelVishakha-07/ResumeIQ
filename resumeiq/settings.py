@@ -32,7 +32,6 @@ GEMINI_FALLBACK_MODELS = [
     "models/gemini-3.5-flash",
     "models/gemini-3.1-flash-lite",
 ]
-GEMINI_MODEL = "gemini-2.5-flash" 
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
