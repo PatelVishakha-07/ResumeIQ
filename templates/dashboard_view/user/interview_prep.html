@@ -1,5 +1,5 @@
 {% extends "dashboard_view/base.html" %}
-{% load static %}
+{% load static resume_extras %}
 
 {% block title %}Interview Prep — ResumeIQ{% endblock %}
 {% block page_title %}Interview Prep{% endblock %}
@@ -294,14 +294,15 @@ Prepare for interviews using a topic or your resume.
 
                 {% for resume in user_resumes %}
                     <option value="{{ resume.resume_id }}">
-                        Resume #{{ resume.resume_id }}
-                        — {{ resume.file_type|upper }}
+                        {{ resume.file_path|file_name }}
+                        · {{ resume.updated_at|date:"d M Y" }}
                     </option>
                 {% empty %}
                     <option value="" disabled>
                         No previously uploaded resumes found
                     </option>
                 {% endfor %}
+                
             </select>
 
             <div class="source-section">
