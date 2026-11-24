@@ -1,0 +1,175 @@
+{% extends "dashboard_view/base.html" %}
+{% block content %}
+<div class="br-header">
+  <h1>Bullet point rewriter</h1>
+  <p class="muted">Pick a resume, edit the bullets if you like, and get stronger, results-focused versions.</p>
+</div>
+
+{% if messages %}
+  {% for m in messages %}<div class="alert alert-{{ m.tags }}">{{ m }}</div>{% endfor %}
+{% endif %}
+
+<div class="card br-card">
+  <form method="post" id="br-form">
+    {% csrf_token %}
+
+    <div class="br-field">
+      <label for="version_id">1. Choose a resume</label>
+      <select name="version_id" id="version_id" required
+              onchange="window.location='?version_id=' + this.value">
+        {% for o in version_options %}
+          <option value="{{ o.id }}" {% if selected_id == o.id|stringformat:"s" %}selected{% endif %}>{{ o.label }}</option>
+        {% empty %}
+          <option value="">No resumes yet. Upload one in Check ATS score first.</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="br-field">
+      <div class="br-label-row">
+        <label for="bullets">2. Review your bullet points</label>
+        <span class="br-counter" id="br-counter">0 / 10</span>
+      </div>
+      <textarea name="bullets" id="bullets" rows="8"
+        placeholder="One bullet per line. Edit, delete or add your own.">{{ bullets_text }}</textarea>
+      <div class="muted small">Pulled from your resume. Max 10 bullets per run.</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="br-submit" {% if not version_options %}disabled{% endif %}>
+      Rewrite bullets
+    </button>
+  </form>
+</div>
+
+{% if results %}
+<div class="card br-card">
+  <div class="br-label-row">
+    <h2>Before &amp; after</h2>
+    <button type="button" class="btn btn-sm" id="br-copy-all">Copy all improved</button>
+  </div>
+
+  {% for r in results %}
+    <div class="br-compare">
+      <div class="br-col br-before">
+        <div class="br-tag">Original</div>
+        <p>{{ r.original_text }}</p>
+      </div>
+      <div class="br-arrow">→</div>
+      <div class="br-col br-after">
+        <div class="br-tag">Improved</div>
+        <p class="br-improved" id="rw-{{ forloop.counter }}">{{ r.rewritten_text }}</p>
+        <button type="button" class="btn btn-sm" onclick="copyText('rw-{{ forloop.counter }}', this)">Copy</button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if history %}
+<details class="card br-card br-history">
+  <summary>Recent rewrites <span class="muted">({{ history|length }})</span></summary>
+
+  <div class="br-h-list">
+    {% for h in history %}
+      <div class="br-h-row">
+        <div class="br-h-cols">
+          <div class="br-h-col br-before"><span class="br-h-tag">Original</span>{{ h.original }}</div>
+          <div class="br-h-col br-after"><span class="br-h-tag">Improved</span>{{ h.rewritten }}</div>
+        </div>
+        <div class="br-h-meta">{{ h.file }} · {{ h.created_at|date:"d M Y, H:i" }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</details>
+{% endif %}
+
+<style>
+  .br-header { margin-bottom: 18px; }
+  .br-header h1 { margin: 0 0 4px; }
+  .br-card { padding: 20px; margin-bottom: 18px; }
+  .br-field { margin-bottom: 18px; }
+  .br-field label { display: block; font-weight: 600; margin-bottom: 6px; }
+  .br-label-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .br-label-row label, .br-label-row h2 { margin: 0 0 6px; }
+  .br-card textarea, .br-card select {
+    width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+    font: inherit; box-sizing: border-box; background: #fff;
+  }
+  .br-card textarea { resize: vertical; line-height: 1.5; }
+  .br-card textarea:focus, .br-card select:focus { outline: 2px solid #c7d2fe; border-color: #6366f1; }
+  .br-counter { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: #eef2ff; color: #4338ca; }
+  .br-counter.over { background: #fee2e2; color: #b91c1c; }
+
+  .br-compare { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 10px; align-items: stretch; margin-top: 12px; }
+  .br-col { padding: 12px 14px; border-radius: 10px; }
+  .br-col p { margin: 0 0 8px; line-height: 1.5; }
+  .br-before { background: #fef2f2; border: 1px solid #fecaca; }
+  .br-after  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .br-after .br-improved { font-weight: 500; }
+  .br-arrow { display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 18px; }
+  .br-tag { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; opacity: .7; }
+
+  .br-history summary { cursor: pointer; font-weight: 600; list-style-position: inside; }
+  .br-h-list { margin-top: 12px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+  .br-h-row { padding: 8px 0; border-top: 1px solid #f1f5f9; }
+  .br-h-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .br-h-col { padding: 6px 10px; border-radius: 6px; font-size: 12.5px; line-height: 1.4; }
+  .br-h-tag { display: block; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; opacity: .6; margin-bottom: 2px; }
+  .br-h-meta { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+
+  .br-before .br-tag, .br-before .br-h-tag { color: #b91c1c; opacity: 1; }
+  .br-after  .br-tag, .br-after  .br-h-tag { color: #15803d; opacity: 1; }
+
+  @media (max-width: 700px) {
+    .br-compare { grid-template-columns: 1fr; }
+    .br-arrow { transform: rotate(90deg); height: 20px; }
+    .br-h-cols { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+function copyText(id, btn) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  flash(btn, "Copied");
+}
+function flash(btn, text) {
+  var old = btn.dataset.label || btn.textContent;
+  btn.dataset.label = old;
+  btn.textContent = text;
+  setTimeout(function () { btn.textContent = old; }, 1500);
+}
+
+(function () {
+  var ta = document.getElementById("bullets");
+  var counter = document.getElementById("br-counter");
+  var submit = document.getElementById("br-submit");
+  var form = document.getElementById("br-form");
+  var hasResumes = {{ version_options|length }} > 0;
+
+  function update() {
+    var n = ta.value.split("\n").filter(function (l) { return l.trim(); }).length;
+    counter.textContent = n + " / 10";
+    counter.classList.toggle("over", n > 10);
+    submit.disabled = !hasResumes || n === 0 || n > 10;
+  }
+  ta.addEventListener("input", update);
+  update();
+
+  form.addEventListener("submit", function () {
+    setTimeout(function () { submit.disabled = true; submit.textContent = "Rewriting…"; }, 0);
+  });
+
+  var copyAll = document.getElementById("br-copy-all");
+  if (copyAll) {
+    copyAll.addEventListener("click", function () {
+      var lines = Array.prototype.map.call(
+        document.querySelectorAll(".br-improved"),
+        function (el) { return "• " + el.innerText.trim(); }
+      );
+      navigator.clipboard.writeText(lines.join("\n"));
+      flash(copyAll, "Copied");
+    });
+  }
+})();
+</script>
+{% endblock %}

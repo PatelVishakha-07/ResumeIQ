@@ -6,15 +6,18 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from docx import Document
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 
 from accounts.models import User
 from .ats_scoring import build_structured_resume, compute_ats_score, extract_text
+from .bullet_writer import rewrite_bullets, extract_bullets, BulletRewriteError
 
 try:
     from google import genai
 except ImportError:
     genai = None
-from .models import JDMatchResult, JobDescription, Resume, ResumeAnalysis, ResumeVersion
+from .models import JDMatchResult, JobDescription, Resume, ResumeAnalysis, ResumeVersion, BulletRewrite
 
 allowed_extensions = {
     'pdf': 'pdf', 'docx': 'docx', 'doc': 'docx',
@@ -871,3 +874,75 @@ def build_jd_gaps_from_result(result, jd_text):
         })
 
     return gaps
+
+def _file_label(resume):
+    """'resumes/5/My_CV.pdf' -> 'My_CV.pdf'"""
+    return os.path.basename(resume.file_path or "") or f"Resume {resume.resume_id}"
+
+def bullet_rewriter(request):
+    user_id = request.session['user_id']
+    versions = (ResumeVersion.objects
+                .filter(versions__user_id=user_id)
+                .select_related("versions")          # 'versions' is the Resume FK
+                .order_by("-created_at"))
+
+    version_options = []
+    for v in versions:
+        label = f"{_file_label(v.versions)} · {v.created_at:%d %b %Y}"
+        if v.version_number > 1:
+            label += f" (v{v.version_number})"
+        version_options.append({"id": v.version_id, "label": label})
+
+    results = []
+    bullets_text = ""
+    selected_id = request.POST.get("version_id") or request.GET.get("version_id") or ""
+
+    # Preselect the latest resume on first visit
+    if not selected_id and version_options:
+        selected_id = str(version_options[0]["id"])
+
+    if request.method == "GET" and selected_id:
+        chosen = versions.filter(pk=selected_id).first()
+        if chosen:
+            bullets_text = "\n".join(extract_bullets(chosen.content_snapshot))
+            if not bullets_text:
+                messages.info(request, "We couldn't detect bullet points in this resume. You can type them below.")
+
+    if request.method == "POST":
+        bullets_text = request.POST.get("bullets", "")
+        version = get_object_or_404(versions, pk=request.POST.get("version_id"))
+        bullets = [b.strip(" -•\t") for b in bullets_text.splitlines() if b.strip()]
+
+        if not bullets:
+            messages.error(request, "Please enter at least one bullet point.")
+        elif len(bullets) > 10:
+            messages.error(request, "Maximum 10 bullet points at a time.")
+        else:
+            try:
+                rewritten = rewrite_bullets(bullets)
+            except BulletRewriteError as e:
+                messages.error(request, str(e))
+            else:
+                results = BulletRewrite.objects.bulk_create([
+                    BulletRewrite(version=version, original_text=o, rewritten_text=r)
+                    for o, r in zip(bullets, rewritten)
+                ])
+
+    history_qs = (BulletRewrite.objects
+                  .filter(version__versions__user_id=user_id)
+                  .select_related("version__versions")[:])
+    history = [{
+        "original": h.original_text,
+        "rewritten": h.rewritten_text,
+        "file": _file_label(h.version.versions),
+        "created_at": h.created_at,
+    } for h in history_qs]
+
+    return render(request, "dashboard_view/user/bullet_rewriter.html", {
+        "version_options": version_options,
+        "results": results,
+        "history": history,
+        "bullets_text": bullets_text,
+        "selected_id": str(selected_id),
+    })
+

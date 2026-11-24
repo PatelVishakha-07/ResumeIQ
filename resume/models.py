@@ -107,3 +107,18 @@ class JDMatchResult(models.Model):
 
     def __str__(self):
         return f"Match #{self.match_id} ({self.search_type})"
+
+
+class BulletRewrite(models.Model):
+    rewrite_id = models.AutoField(primary_key=True)
+    version = models.ForeignKey(
+        "ResumeVersion", on_delete=models.CASCADE,
+        db_column="version_id", related_name="bullet_rewrites",
+    )
+    original_text = models.TextField()
+    rewritten_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "bullet_rewrites"
+        ordering = ["-created_at"]

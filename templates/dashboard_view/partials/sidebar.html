@@ -57,6 +57,11 @@
       <div class="navitem {% if request.resolver_match.url_name == 'ats_score_generator' %}active{% endif %}">
         <a href="{% url 'ats_score_generator' %}"><span class="dot"></span>Check ATS score</a>
       </div>
+
+      <div class="navitem {% if request.resolver_match.url_name == 'bullet_rewriter' %}active{% endif %}">
+        <a href="{% url 'bullet_rewriter' %}"><span class="dot"></span>Bullet rewriter</a>
+      </div>
+
       <div class="navitem {% if request.resolver_match.url_name == 'roadmap_generator' %}active{% endif %}">
         <a href="{% url 'roadmap_generator' %}"><span class="dot"></span>Generate Roadmap</a>
       </div>
