@@ -1111,22 +1111,34 @@ def normalize_keyword(keyword):
 
 def extract_keywords(text, top_n=30):
     words = re.findall(r"[A-Za-z][A-Za-z0-9+.#-]{1,}", text.lower())
-    words = [w.strip() for w in words if len(w) > 2 and w not in stopwords]
+    words = [w.strip().strip('.-') for w in words]
+    words = [w for w in words if len(w) > 2 and w not in stopwords]
     return [w for w, _ in Counter(words).most_common(top_n)]
 
 #JD keyword matching
+#JD keyword matching
+def _term_regex(term):
+    """Match `term` as a whole word/phrase, not inside another word.
+    'java' must not match 'javascript', 'dart' must not match 'dartmouth',
+    'c' must not match 'cloud'. Characters + and # count as part of a word
+    so 'c' does not match 'c++' / 'c#'. Terms of 3+ letters also accept a plural
+    's' ('api' matches 'apis')."""
+    plural = r'(?:s)?' if len(term) >= 3 else ''
+    return re.compile(
+        r'(?<![A-Za-z0-9+#])' + re.escape(term) + plural + r'(?![A-Za-z0-9+#])'
+    )
+
+
 def keyword_exists(keyword, text):
     normalized_text = text.lower()
     keyword = normalize_keyword(keyword)
 
-    if keyword in normalized_text:
-        return True
+    candidates = {keyword}
+    candidates.update(alias for alias, canonical in keyword_aliases.items() if canonical == keyword)
+    # a JD word like "apis" should still be found as "api" in the resume
+    candidates.update(c[:-1] for c in list(candidates) if len(c) > 3 and c.endswith('s'))
 
-    aliases = [alias for alias, canonical in keyword_aliases.items() if canonical == keyword]
-    for alias in aliases:
-        if alias in normalized_text:
-            return True
-    return False
+    return any(_term_regex(c).search(normalized_text) for c in candidates)
 
 def score_keyword_match(resume_text, jd_text):
     if not jd_text or not jd_text.strip():
@@ -1953,3 +1965,4 @@ def compute_ats_score(resume_text, jd_text=None, has_tables=False, content_meta=
         'jd_gaps': jd_gaps,
         "recommendations": recommendations
     }
+

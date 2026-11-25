@@ -25,8 +25,12 @@ class User(models.Model):
         return self.email
 
 
+ALLOWED_PROFILE_EXTS = {"jpg", "png", "webp"}
+
 def profile_image_path(instance, filename):
-    ext = filename.split('.')[-1]
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    if ext not in ALLOWED_PROFILE_EXTS:
+        ext = 'jpg'
     return f"profiles/user_{instance.user.user_id}.{ext}"
 
 class Profile(models.Model):

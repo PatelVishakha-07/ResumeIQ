@@ -151,6 +151,10 @@ def manageUsers(request):
 def toggleUserStatus(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
 
+    if user.user_id == request.app_user.user_id:
+        messages.error(request, "You can't deactivate your own account.")
+        return redirect('manageUser')
+
     user.status = not user.status
     user.save()
 

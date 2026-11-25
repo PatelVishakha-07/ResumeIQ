@@ -1,5 +1,5 @@
 from django.shortcuts import render
-import json
+import json, logging
 import os
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -12,6 +12,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from accounts.models import User
 from .ats_scoring import build_structured_resume, compute_ats_score, extract_text
 from .bullet_writer import rewrite_bullets, extract_bullets, BulletRewriteError
+
+logger = logging.getLogger(__name__)
 
 try:
     from google import genai
@@ -55,10 +57,9 @@ def download_optimized_resume(request):
 
     try:
         document = build_professional_resume_docx(data)
-    except Exception as exc:
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({'error': 'Could not create the DOCX resume.', 'details': str(exc)}, status=500)
+    except Exception:
+        logger.exception("Could not create the DOCX resume")
+        return JsonResponse({'error': 'Could not create the DOCX resume.'}, status=500)
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -312,10 +313,8 @@ JOB DESCRIPTION:
         merged = {key: ai_notes[key] or notes[key] for key in notes}
         return improved, merged
 
-    except Exception as exc:
-        print("Resume AI improvement failed:", exc)
-        notes["suggestions"].insert(0, "AI tailoring failed this time, so your resume was only reformatted.")
-        return fallback, notes
+    except Exception:
+        logger.exception("Resume AI improvement failed")
 
 
 @require_http_methods(['POST'])
@@ -350,18 +349,13 @@ def analyze_resume(request):
             file_type
         )
 
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-
+    except Exception:
+        logger.exception("Resume extraction failed")
         return JsonResponse(
-            {
-                "error": "Resume extraction failed.",
-                "details": str(e)
-            },
+            {"error": "We couldn't read that file. Try re-saving it and uploading again."},
             status=422
         )
-
+    
     resume_text = resume_text or ''
 
     # Empty text is no longer a hard error when the file contains images:
@@ -492,18 +486,10 @@ def recheck_optimized_resume(request):
             }
         )
 
-    except Exception as exc:
-        import traceback
-        traceback.print_exc()
-
-        return JsonResponse(
-            {
-                'error': 'Could not re-check the edited resume.',
-                'details': str(exc)
-            },
-            status=500
-        )
-
+    except Exception:
+        logger.exception("Could not re-check the edited resume")
+        return JsonResponse({'error': 'Could not re-check the edited resume.'}, status=500)
+    
     # ---------------------------------------------------------
     # Build actionable JD gaps
     # ---------------------------------------------------------
@@ -880,7 +866,10 @@ def _file_label(resume):
     return os.path.basename(resume.file_path or "") or f"Resume {resume.resume_id}"
 
 def bullet_rewriter(request):
-    user_id = request.session['user_id']
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, "Please sign in to continue.")
+        return redirect("login")
     versions = (ResumeVersion.objects
                 .filter(versions__user_id=user_id)
                 .select_related("versions")          # 'versions' is the Resume FK

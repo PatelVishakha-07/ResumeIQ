@@ -12,8 +12,28 @@ from django.db import IntegrityError
 from django.utils.crypto import constant_time_compare, salted_hmac
 from django.core.cache import cache
 from django.views.decorators.csrf import ensure_csrf_cookie
+from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
+
+IMAGE_FORMAT_EXT = {"JPEG": "jpg", "PNG": "png", "WEBP": "webp"}
+MAX_IMAGE_PIXELS = 25_000_000
+
+
+def validated_image_ext(uploaded):
+    """Return 'jpg'/'png'/'webp' if the upload really is such an image, else None."""
+    try:
+        img = Image.open(uploaded)
+        fmt = img.format
+        width, height = img.size
+        if width * height > MAX_IMAGE_PIXELS:
+            return None
+        img.verify()
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError, Image.DecompressionBombError):
+        return None
+    finally:
+        uploaded.seek(0)
+    return IMAGE_FORMAT_EXT.get(fmt)
 
 #Email Verification 
 otp_expiration_time = 10 * 60 #otp code expiration time: 10 minutes
@@ -78,8 +98,8 @@ def register_send_otp(request):
 
     name = str(body.get("name") or "").strip()
     email = str(body.get("email") or "").strip()
-    password = str(body.get("password") or "").strip()
-    confirm_password = str(body.get("confirm_password") or "").strip()
+    password = str(body.get("password") or "")
+    confirm_password = str(body.get("confirm_password") or "")
 
     if not name:
         return JsonResponse({"error": "Please enter your full name."}, status=400)
@@ -97,6 +117,9 @@ def register_send_otp(request):
 
     if len(password) < 8:
         return JsonResponse({"error": "Password must be at least 8 characters."}, status=400)
+
+    if len(password) > max_password_length:
+        return JsonResponse({"error": f"Password must be {max_password_length} characters or fewer."}, status=400)
 
     if password != confirm_password:
         return JsonResponse({"error": "Password and Confirm Password do not match."}, status=400)
@@ -120,6 +143,9 @@ def register_send_otp(request):
         request.session[pending_signup_key] = pending
 
         return JsonResponse({"ok": True, "email": email, "resend_in": wait})
+
+    if signup_rate_limited(request, email):
+        return JsonResponse({"error": "Too many verification requests. Please try again in an hour."}, status=429)
 
     pending = {"name": name, "email": email, "password": make_password(password)}
 
@@ -197,6 +223,9 @@ def register_resend_otp(request):
     if elapsed < otp_resend_time:
         wait = math.ceil(otp_resend_time - elapsed)
         return JsonResponse({"error": f"Please wait {wait}s before requesting another code.", "retry_after": wait},status=429, )
+
+    if signup_rate_limited(request, pending["email"]):
+        return JsonResponse({"error": "Too many verification requests. Please try again in an hour."}, status=429)
     
     try:
         _issue_otp(request, pending)
@@ -212,6 +241,13 @@ reset_email_hourly_limit = 5
 reset_ip_hourly_limit = 20
 reset_limit_window = 60*60
 max_password_length = 128
+
+signup_email_hourly_limit = 5
+signup_ip_hourly_limit = 20
+
+login_attempt_window = 15 * 60
+login_email_limit = 10
+login_ip_limit = 50
 
 def hash_reset_otp(otp):
     return salted_hmac("accounts.reset_otp", otp).hexdigest()
@@ -263,6 +299,25 @@ def reset_rate_limited(request, email):
         rate_limited(f"pwreset:email:{email_key}", reset_email_hourly_limit, reset_limit_window) or 
         rate_limited(f"pwreset:ip:{ip}", reset_ip_hourly_limit, reset_limit_window)
     )
+
+def _email_cache_key(email):
+    return hashlib.sha256(email.strip().lower().encode("utf-8")).hexdigest()
+
+def signup_rate_limited(request, email):
+    ip = request.META.get("REMOTE_ADDR", "unknown")
+    return (
+        rate_limited(f"signup:email:{_email_cache_key(email)}", signup_email_hourly_limit, reset_limit_window) or
+        rate_limited(f"signup:ip:{ip}", signup_ip_hourly_limit, reset_limit_window)
+    )
+
+def login_rate_limited(request, email):
+    ip = request.META.get("REMOTE_ADDR", "unknown")
+    return (
+        rate_limited(f"login:email:{_email_cache_key(email)}", login_email_limit, login_attempt_window) or
+        rate_limited(f"login:ip:{ip}", login_ip_limit, login_attempt_window)
+    )
+
+_DUMMY_PASSWORD_HASH = make_password("not-a-real-password")
 
 # Generate a fresh code and keep only its hash in the session. The email is only sent for a real,
 # active account (pending["eligible"]); for anything else the flow looks the same but no email goes out.
@@ -446,38 +501,35 @@ def forgot_password_reset(request):
 #login view
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        email = (request.POST.get("email") or "").strip()
+        password = request.POST.get("password") or ""
 
-        #validate email
         try:
             validate_email(email)
         except ValidationError:
             messages.error(request, "Enter valid email address.")
             return redirect("login")
 
-        #check if email exists or not
-        try:
-            user = User.objects.get(email = email)
-        except User.DoesNotExist:
-            messages.error(request, "Email id does not exists.")
+        if login_rate_limited(request, email):
+            messages.error(request, "Too many login attempts. Please try again in 15 minutes.")
             return redirect("login")
 
-        #check if user has login through google
-        if not user.password:
-            messages.error(request, "This account has no password set. Please use social login.")
+        user = User.objects.filter(email__iexact = email).first()
+
+        if not user or not user.password:
+            check_password(password, _DUMMY_PASSWORD_HASH)
+            messages.error(request, "Invalid email or password.")
             return redirect("login")
 
-        #check if email and password match
         if not check_password(password, user.password):
-            messages.error(request, "Invalid password.")
+            messages.error(request, "Invalid email or password.")
             return redirect("login")
 
-        #check if user is active
         if not user.status:
             messages.error(request, "Your account is inactive. Please contact support.")
             return redirect("login")
 
+        request.session.cycle_key()
         request.session["user_id"] = user.user_id
         request.session["name"] = user.name
         request.session["role"] = user.role
@@ -489,7 +541,7 @@ def login_view(request):
 def logout_view(request):
     request.session.flush()
     messages.success(request, "You have logged out.")
-    return redirect("home")
+    return redirect("login")
 
 
 # ---------------
@@ -602,10 +654,14 @@ def account_change_password(request):
 
         if not check_password(current_password, user.password):
             messages.error(request, "Current password is incorrect.")
-            return redirect("admin_change_password")
+            return redirect("account_change_password")
 
         if len(new_password) < 8:
             messages.error(request, "New password must be at least 8 characters.")
+            return redirect("account_change_password")
+
+        if len(new_password) > max_password_length:
+            messages.error(request, f"New password must be {max_password_length} characters or fewer.")
             return redirect("account_change_password")
 
         if new_password != confirm_password:
