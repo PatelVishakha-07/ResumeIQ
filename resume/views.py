@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import json, logging
-import os
+import os, re
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse, HttpResponse
@@ -12,6 +12,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from accounts.models import User
 from .ats_scoring import build_structured_resume, compute_ats_score, extract_text
 from .bullet_writer import rewrite_bullets, extract_bullets, BulletRewriteError
+from accounts.ratelimit import ai_rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -318,6 +319,7 @@ JOB DESCRIPTION:
 
 
 @require_http_methods(['POST'])
+@ai_rate_limit('analyze', user_limit=30, anon_limit=10)
 def analyze_resume(request):
 
     upload = request.FILES.get('resume')
@@ -377,12 +379,28 @@ def analyze_resume(request):
         if user:
             stored_path = default_storage.save(f'resumes/{user.user_id}/{upload.name}', ContentFile(raw_bytes))
 
-            resume = Resume.objects.create(
-                user=user,
-                file_type=file_type,
-                file_path=stored_path,
-                parsed_text=resume_text
-            )
+            # Re-uploading a file with the same name adds a new version to the
+            # existing resume (v2, v3, ...) instead of creating a separate resume.
+            # Django may have stored it as "<name>_<7 random chars>.<ext>" if the
+            # name was already taken, so match both spellings.
+            stem, _, ext_name = upload.name.rpartition('.')
+            prefix = f'resumes/{user.user_id}/{stem}'
+            same_file = re.compile(rf'^{re.escape(prefix)}(_[A-Za-z0-9]{{7}})?\.{re.escape(ext_name)}$')
+            candidates = Resume.objects.filter(user=user, file_path__startswith=prefix).order_by('-updated_at')
+            resume = next((r for r in candidates if same_file.match(r.file_path)), None)
+
+            if resume:
+                resume.file_type = file_type
+                resume.file_path = stored_path
+                resume.parsed_text = resume_text
+                resume.save()
+            else:
+                resume = Resume.objects.create(
+                    user=user,
+                    file_type=file_type,
+                    file_path=stored_path,
+                    parsed_text=resume_text
+                )
 
             next_version_number = (ResumeVersion.objects.filter(versions=resume).count()) + 1
 
@@ -413,7 +431,8 @@ def analyze_resume(request):
 
             saved = True
 
-    if result['image_based']:
+    # The AI rewrite costs money, so it is only run for signed-in users.
+    if result['image_based'] or not user_id:
         optimized_resume, improvement_notes = None, None
     else:
         optimized_resume, improvement_notes = improve_resume_with_ai(resume_text, jd_text, result)
@@ -434,6 +453,7 @@ def analyze_resume(request):
     })
 
 @require_http_methods(['POST'])
+@ai_rate_limit('recheck', user_limit=60, anon_limit=20)
 def recheck_optimized_resume(request):
     """
     Re-check the edited optimized resume against the job description.

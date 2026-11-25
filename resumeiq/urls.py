@@ -16,4 +16,9 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Only profile pictures are ever served directly from /media/.
+    # Resumes and exported documents are private and never exposed this way.
+    urlpatterns += static(
+        settings.MEDIA_URL + "profiles/",
+        document_root=settings.MEDIA_ROOT / "profiles",
+    )

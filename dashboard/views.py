@@ -22,6 +22,7 @@ from django.utils.text import slugify
 from feedback.models import Feedback
 from django.db.models import Avg
 from accounts.decorators import admin_required
+from accounts.ratelimit import ai_rate_limit
 
 try:
     from google import genai
@@ -906,7 +907,10 @@ def generate_with_gemini(query_text, regenerate=False):
 # ============================================================
 
 @require_http_methods(["POST"])
+@ai_rate_limit("roadmap", user_limit=20, anon_limit=5)
 def generate_roadmap(request):
+    if not request.session.get("user_id"):
+        return JsonResponse({"error": "Please sign in to generate a roadmap."}, status=401)
     query_text = (
         request.POST.get("query") or ""
     ).strip()

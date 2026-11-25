@@ -15,6 +15,7 @@ from django.views.decorators.http import require_http_methods
 from xhtml2pdf import pisa
 
 from accounts.models import User
+from accounts.ratelimit import ai_rate_limit
 from resume.models import ResumeVersion
 
 from .models import Export
@@ -419,6 +420,7 @@ def _ai_next_question(export_type, resume_text, qa_history):
 
 @require_http_methods(["POST"])
 @_api_login_required
+@ai_rate_limit("export_question", user_limit=60)
 def generate_next_question(request):
     export_type = request.POST.get("export_type")
     if export_type not in VALID_EXPORT_TYPES:
@@ -475,6 +477,7 @@ def _ai_generate_final_document(export_type, resume_text, qa_history):
 
 @require_http_methods(["POST"])
 @_api_login_required
+@ai_rate_limit("export_final", user_limit=20)
 def generate_final_document(request):
     export_type = request.POST.get("export_type")
     if export_type not in VALID_EXPORT_TYPES:
