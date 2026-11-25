@@ -602,20 +602,21 @@ def account_update_profile(request):
             profile.profile_image = None
 
         uploaded_image = request.FILES.get("profile_image")
+
         if uploaded_image:
-            allowed_types = ["image/jpeg", "image/png", "image/webp"]
-
-            if uploaded_image.content_type not in allowed_types:
-                messages.error(request, "Only JPG, PNG, or WEBP images are allowed.")
-                return redirect("account_update_profile")
-
             if uploaded_image.size > 2 * 1024 * 1024:
                 messages.error(request, "Image must be 2MB or smaller.")
+                return redirect("account_update_profile")
+
+            ext = validated_image_ext(uploaded_image)
+            if not ext:
+                messages.error(request, "Only valid JPG, PNG, or WEBP images are allowed.")
                 return redirect("account_update_profile")
 
             if profile.profile_image:
                 profile.profile_image.delete(save=False)
 
+            uploaded_image.name = f"avatar.{ext}"
             profile.profile_image = uploaded_image
 
         profile.save()
@@ -682,3 +683,4 @@ def account_change_password(request):
         },
     }
     return render(request, "dashboard_view/admin/admin_change_password.html", context)
+
