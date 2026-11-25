@@ -13,7 +13,7 @@ from io import BytesIO
 from xhtml2pdf import pisa
 from resume.ats_scoring import compute_ats_score
 from django.conf import settings
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods
 import json
 from typing import List
 from django.core.cache import cache
@@ -21,6 +21,7 @@ from pydantic import BaseModel
 from django.utils.text import slugify
 from feedback.models import Feedback
 from django.db.models import Avg
+from accounts.decorators import admin_required
 
 try:
     from google import genai
@@ -55,6 +56,8 @@ def dashboard_redirect(request):
 
 
 # Admin URL
+
+@admin_required
 def adminOverview(request):
     admin_id = request.session.get("user_id")
     if not admin_id:
@@ -128,7 +131,7 @@ def adminOverview(request):
     }
     return render(request, "dashboard_view/admin/overview.html", context)
 
-
+@admin_required
 def manageUsers(request):
     admin_id = request.session.get("user_id")
     admin_user = User.objects.get(user_id=admin_id)
@@ -143,6 +146,8 @@ def manageUsers(request):
             }
         })
 
+@admin_required
+@require_POST
 def toggleUserStatus(request, user_id):
     user = get_object_or_404(User, user_id=user_id)
 
@@ -151,6 +156,7 @@ def toggleUserStatus(request, user_id):
 
     return redirect('manageUser')
 
+@admin_required
 def userDetail(request, user_id):
     admin_id = request.session.get("user_id")
     admin_user = User.objects.get(user_id=admin_id)
@@ -194,6 +200,7 @@ def userDetail(request, user_id):
 }
     return render(request, "dashboard_view/admin/user_detail.html", context)
 
+@admin_required
 def manageStaffRole(request):
     admin_id = request.session.get("user_id")
     admin_user = User.objects.get(user_id=admin_id)
@@ -207,6 +214,7 @@ def manageStaffRole(request):
             }
         })
 
+@admin_required
 def feedback(request):
     admin_id = request.session.get("user_id")
     admin_user = User.objects.get(user_id=admin_id)
