@@ -20,16 +20,17 @@
     <p><strong>Joined:</strong> {{ detail_user.created_at }}</p>
 
     <div class="btn-row" style="margin-top:14px;">
-        
-        <form method="post" action="{% url 'toggle_user_status' user.user_id %}" style="display:inline;">
+
+        <form method="post" action="{% url 'toggle_user_status' detail_user.user_id %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="row-action-link"
                     style="background:none;border:0;padding:0;font:inherit;cursor:pointer;">
-                {% if user.status %}Deactivate{% else %}Activate{% endif %}
+                {% if detail_user.status %}Deactivate{% else %}Activate{% endif %}
             </button>
         </form>
 
     </div>
+
 </div>
 
 <div class="card" style="margin-top:20px;">

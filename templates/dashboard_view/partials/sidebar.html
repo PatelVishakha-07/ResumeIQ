@@ -18,9 +18,11 @@
       <div class="navitem {% if request.resolver_match.url_name == 'manageUser' %}active{% endif %}">
         <a href="{% url 'manageUser'%}"><span class="dot"></span>Manage Users</a>
       </div>
-      <div class="navitem {% if request.resolver_match.url_name == 'manageStaffRole' %}active{% endif %}">
+      
+      <!-- <div class="navitem {% if request.resolver_match.url_name == 'manageStaffRole' %}active{% endif %}">
         <a href="{% url 'manageStaffRole' %}"><span class="dot"></span>Admin/Staff Roles</a>
-      </div>
+      </div> -->
+      
       <div class="navitem {% if request.resolver_match.url_name == 'feedback' or request.resolver_match.url_name == 'feedback_detail' %}active{% endif %}">
         <a href="{% url 'feedback' %}"><span class="dot"></span>User Feedback</a>
       </div>
@@ -33,7 +35,9 @@
 
     <div class="navgroup">
       <div class="navlabel">Account</div>
-      <div class="navitem {% if request.resolver_match.url_name in 'user_settings,user_update_profile,user_change_password' %}active{% endif %}">
+      
+<div class="navitem {% if request.resolver_match.url_name == 'account_settings' or request.resolver_match.url_name == 'account_update_profile' or request.resolver_match.url_name == 'account_change_password' %}active{% endif %}">
+
         <a href="{% url 'account_settings' %}"><span class="dot"></span>Settings</a>
       </div>
 
